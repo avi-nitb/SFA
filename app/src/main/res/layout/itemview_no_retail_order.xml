@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <TextView
+        android:padding="@dimen/one_dp"
+        android:id="@+id/retailerName_TextView"
+        android:text="Retailer: Veera Maarthanda Patel"
+        android:textSize="15sp"
+        android:textColor="@color/pink500"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:padding="@dimen/one_dp"
+        android:id="@+id/retailerShopName_TextView"
+        android:text="Shop: Patel's Kitchenware"
+        android:textSize="15sp"
+        android:textColor="@color/pink500"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:padding="@dimen/one_dp"
+        android:id="@+id/whyNoOrder_TextView"
+        android:text="Comments: No customer demand for your products. Quality improvements need to be done."
+        android:textSize="15sp"
+        android:textColor="@color/pink500"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <View
+        android:background="@android:color/black"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+</LinearLayout>

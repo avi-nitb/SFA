@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="in.etaminepgg.sfa.Activities.PickRetailerActivity">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="@color/colorAccent" />
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/eight_dp"
+    tools:context="in.etaminepgg.sfa.Activities.PickRetailerActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/sixteen_dp"
+        android:text="Enter shop name of retailer below, for whom you want to create sales order "
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="@dimen/text_size_small"/>
+
+    <AutoCompleteTextView
+        android:id="@+id/shopName_AutoCompleteTextView"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="@dimen/sixteen_dp"
+        android:hint="Enter Shop Name Here"
+        android:textColor="@color/pink500"
+        android:textColorHint="@android:color/black"/>
+
+    <TextView
+        android:id="@+id/retailerName_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/eight_dp"
+        android:layout_marginTop="@dimen/sixteen_dp"
+        android:text="Name: "
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_small"/>
+
+    <TextView
+        android:id="@+id/retailerMobile_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/eight_dp"
+        android:text="Mobile: "
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_small"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/eight_dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/img_TextView"
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="@dimen/eight_dp"
+            android:text="Image: "
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_small"/>
+
+        <ImageView
+            android:id="@+id/retailerPhoto_ImageView"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:scaleType="fitXY"
+            android:background="@android:color/darker_gray"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/latitude_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/eight_dp"
+        android:text="Latitude: "
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_small"/>
+
+    <TextView
+        android:id="@+id/longitude_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/eight_dp"
+        android:text="Longitude: "
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_small"/>
+
+    <Button
+        android:id="@+id/selectOrderType_Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/eight_dp"
+        android:text="select order type"/>
+
+    <Button
+        android:id="@+id/updateRetailer_Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/eight_dp"
+        android:text="Update Retailer"/>
+
+</LinearLayout>
+</LinearLayout>
+
+    <!--<TextView
+          android:id="@+id/retailerShopAddress_TextView"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="@dimen/sixteen_dp"
+          android:text="Shop Address: "
+          android:textColor="@android:color/black"
+          android:textSize="@dimen/text_size_small"/>
+
+      <TextView
+          android:id="@+id/pincode_TextView"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="@dimen/sixteen_dp"
+          android:text="Pincode: "
+          android:textColor="@android:color/black"
+          android:textSize="@dimen/text_size_small"/>-->

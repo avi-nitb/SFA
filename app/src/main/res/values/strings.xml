@@ -1,0 +1,101 @@
+<resources>
+    <string name="app_name">SFA</string>
+
+    <!--tools:context="in.etaminepgg.sfa.Activities.DashboardActivity"-->
+    <string name="nav_item_new_retailer">New Retailer</string>
+    <string name="nav_item_new_sales_order">New Sales Order</string>
+    <string name="nav_item_pending_orders">Pending Orders</string>
+    <string name="nav_item_logout">Logout</string>
+    <string name="nav_item_my_sales_history">My Sales History</string>
+    <string name="nav_item_my_sales_orders">My Sales Orders</string>
+    <string name="nav_item_search_skus">Search SKUs</string>
+
+    <string name="open">open</string>
+    <string name="close">close</string>
+    <string name="you_made">You made</string>
+    <string name="retailer_visits_today">retailer visits today</string>
+    <string name="label_new_products">New Products</string>
+    <string name="label_promotional_products">Promotional Products</string>
+    <string name="label_frequently_ordered_products">Frequently Ordered Products</string>
+    <string name="label_all_products">All Products</string>
+
+    <string name="key_tab_to_show">TAB</string>
+
+    <!--tools:context="in.etaminepgg.sfa.Activities.LoginActivity"-->
+    <string name="label_login">Login</string>
+    <string name="input_hint_username">Enter Username</string>
+    <string name="input_hint_password">Enter Password</string>
+
+    <!--tools:contein.etaminepgg.sfa.Activities.Sameer_SalesSummaryActivityctivityvity"-->
+    <string name="label_retailer_visits_done">Retailer Visits Done&#160;</string>
+    <string name="label_sales_orders_from_retailer_visits">No. of Sales Orders&#160;</string>
+    <string name="label_sales_conversion">Sales Conversion&#160;</string>
+    <string name="label_sales_value_for_the_day">Sales Value for the Day&#160;</string>
+
+    <!--tools:context="in.etaminepgg.sfa.Activities.SelectSalesOrderTypeActivity"-->
+    <string name="label_sales_order_for">Sales Order For:&#160;</string>
+    <string name="label_select_order_type">Select Order Type :</string>
+    <string name="label_new_order">New Order</string>
+    <string name="label_new_regular_order">New Regular Order</string>
+    <string name="label_no_order">No Order, Visited Retailer</string>
+    <string name="label_submit_order_type">Submit Order Type</string>
+    <string name="label_why_enter_reason_below"> Why? Enter reason below:-</string>
+
+    <string name="key_selected_order_type">selected_order_type</string>
+
+    <!--tools:context="in.etaminepgg.sfa.Fragments.NewSKUsFragment"-->
+    <string name="label_set_this_order_as_regular_order">Set this order as Regular Order</string>
+    <string name="label_submit_sales_order">Submit Sales Order</string>
+
+    <!--Used in Adapters of SkuListByGenreActivity-->
+    <string name="tag_order_detail_id">orderDetailID</string>
+    <string name="tag_sku_id">skuId</string>
+    <string name="tag_sku_price">skuPrice</string>
+    <string name="tag_sku_name">skuName</string>
+    <string name="tag_order_id">orderID</string>
+
+    <string name="tag_retailer_id">retailerID</string>
+
+
+    <!--Sameer's Code Below-->
+    <string name="new_retailer">Create New Retailer</string>
+    <string name="retailer_name">Retailer Name </string>
+    <string name="shop_name">Shop Name </string>
+    <string name="shop_address">Shop Address </string>
+    <string name="mobile_number">Mobile Number </string>
+    <string name="email">Email (Optional)</string>
+    <string name="state">State </string>
+    <string name="district">District </string>
+    <string name="taluk">Taluk </string>
+    <string name="city">City </string>
+    <string name="village">Village </string>
+    <string name="area">Area </string>
+    <string name="photo">Photo </string>
+    <string name="done">Done</string>
+    <string name="back">Back</string>
+    <string name="capture">Capture Photo</string>
+    <string name="submit">Submit</string>
+    <string name="name">Name</string>
+    <string name="type">Type</string>
+    <string name="price">Price</string>
+    <string name="scheme">Scheme</string>
+    <string name="note_comment">Note / Comments</string>
+    <string name="item">Item Name</string>
+    <string name="oem_based">OEM Based</string>
+    <string name="usage_based">Usage Based</string>
+    <string name="material_based">Material Based</string>
+    <string name="pin">Pincode</string>
+    <string name="landmark">Landmark</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="item_hint">Select Item</string>
+    <string name="retailer_name_hint">Select Retailer</string>
+    <string name="temp_date">DD/MM/YYYY</string>
+    <string name="category">Item Category</string>
+    <string name="category_based">Category Based</string>
+    <string name="material">Material</string>
+    <string name="usage">Usage</string>
+    <string name="attribute">Attribute Name</string>
+    <string name="attrvals">Attribute Value</string>
+
+</resources>

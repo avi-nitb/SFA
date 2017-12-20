@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="one_dp">1dp</dimen>
+    <dimen name="two_dp">2dp</dimen>
+    <dimen name="four_dp">4dp</dimen>
+    <dimen name="eight_dp">8dp</dimen>
+    <dimen name="sixteen_dp">16dp</dimen>
+    <dimen name="thirty_two_dp">32dp</dimen>
+    <dimen name="sixty_four_dp">64dp</dimen>
+
+    <dimen name="text_size">15sp</dimen>
+    <dimen name="text_size_small">18sp</dimen>
+    <dimen name="text_size_medium">20sp</dimen>
+    <dimen name="text_size_large">25sp</dimen>
+
+    <dimen name="width_small">120dp</dimen>
+    <dimen name="width_medium">140dp</dimen>
+    <dimen name="width_large">160dp</dimen>
+
+    <dimen name="height_small">40dp</dimen>
+    <dimen name="height_medium">50dp</dimen>
+    <dimen name="height_large">60dp</dimen>
+
+    <dimen name="quadrant_height">100dp</dimen>
+    <dimen name="quadrant_width">120dp</dimen>
+
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+  <!--  <dimen name="text_size_large">25sp</dimen>
+    <dimen name="text_size_medium">18sp</dimen>
+    <dimen name="text_size_small">16sp</dimen>
+    <dimen name="button_width_large">160dp</dimen-->>
+    <dimen name="button_width_medium">140dp</dimen>
+    <dimen name="button_width_small">120dp</dimen>
+    <dimen name="button_height_large">60dp</dimen>
+    <dimen name="button_height_medium">50dp</dimen>
+    <dimen name="button_height_small">40dp</dimen>
+    <dimen name="spinner_height_medium">45dp</dimen>
+</resources>

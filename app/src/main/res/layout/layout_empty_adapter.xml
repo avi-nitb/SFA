@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/emptyAdapter_TextView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:text="Currently Nothing to Show"
+    android:textColor="@color/colorRed"
+    android:layout_marginTop="@dimen/sixty_four_dp"
+    android:textSize="@dimen/text_size_medium"
+    android:textStyle="bold"/>
+

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    android:background="@android:color/white"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/sixteen_dp"
+    android:orientation="vertical"
+    tools:context="in.etaminepgg.sfa.Activities.SelectSalesOrderTypeActivity">
+
+    <TextView
+        android:id="@+id/salesOrderFor_TextView"
+        android:layout_marginTop="@dimen/eight_dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/eight_dp"
+        android:text="@string/label_sales_order_for"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="@dimen/text_size_small"/>
+
+    <TextView
+        android:layout_marginTop="@dimen/eight_dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/eight_dp"
+        android:text="@string/label_select_order_type"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_medium"/>
+
+    <RadioGroup
+        android:id="@+id/orderTypes_RadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:checked="false"
+            android:id="@+id/newOrder_RadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/label_new_order"
+            android:textColor="@color/pink500"
+            android:textSize="@dimen/text_size_small"/>
+
+        <RadioButton
+            android:checked="false"
+            android:id="@+id/newRegularOrder_RadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/label_new_regular_order"
+            android:textColor="@color/pink500"
+            android:textSize="@dimen/text_size_small"/>
+
+        <RadioButton
+            android:checked="false"
+            android:id="@+id/noOrder_RadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/label_no_order"
+            android:textColor="@color/pink500"
+            android:textSize="@dimen/text_size_small"/>
+    </RadioGroup>
+
+    <LinearLayout
+        android:id="@+id/whyNoOrder_LinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/eight_dp"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/label_why_enter_reason_below"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_medium"/>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eight_dp">
+
+            <android.support.design.widget.TextInputEditText
+                android:paddingStart="@dimen/eight_dp"
+                android:paddingEnd="@dimen/eight_dp"
+                android:id="@+id/whyNoOrder_TextInputEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_rectangle"
+                android:textColor="@color/pink500"/>
+        </android.support.design.widget.TextInputLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/submitOrderType_Button"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/height_large"
+        android:layout_marginTop="@dimen/sixteen_dp"
+        android:text="@string/label_submit_order_type"/>
+
+</LinearLayout>

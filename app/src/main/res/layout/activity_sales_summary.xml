@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="in.etaminepgg.sfa.Activities.SalesSummaryActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="@color/colorAccent" />
+
+    <TextView
+        android:textStyle="bold"
+        android:layout_marginTop="15dp"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sales Summary"
+        android:textColor="@color/colorGreen"
+        android:textSize="@dimen/text_size_large" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_marginTop="@dimen/thirty_two_dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_marginBottom="20dp"
+            android:id="@+id/retailerVisitsDone_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_retailer_visits_done"
+            android:textColor="@color/colorGreen"
+            android:textSize="@dimen/text_size_medium" />
+
+        <TextView
+            android:layout_marginBottom="20dp"
+            android:id="@+id/salesFromRetailerVisits_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_sales_orders_from_retailer_visits"
+            android:textColor="@color/colorGreen"
+            android:textSize="@dimen/text_size_medium" />
+
+        <TextView
+            android:layout_marginBottom="20dp"
+            android:id="@+id/salesConversion_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_sales_conversion"
+            android:textColor="@color/colorGreen"
+            android:textSize="@dimen/text_size_medium" />
+
+        <TextView
+            android:id="@+id/salesValueForTheDay_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_sales_value_for_the_day"
+            android:textColor="@color/colorGreen"
+            android:textSize="@dimen/text_size_medium" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/four_dp"
+                android:layout_marginTop="@dimen/four_dp"
+                android:text="Today's No Orders:-"
+                android:textColor="#827717"
+                android:textSize="@dimen/text_size_medium" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/black" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/noRetailOrders_RecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

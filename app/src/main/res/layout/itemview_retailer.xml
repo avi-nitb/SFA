@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/retailerId_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Retailer Id: NA"
+        android:textColor="@android:color/holo_purple"
+        android:textSize="@dimen/text_size"/>
+
+    <TextView
+        android:id="@+id/retailerName_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Retailer Name: NA"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="@dimen/text_size"/>
+
+    <TextView
+        android:id="@+id/shopName_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Shop Name: NA"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="@dimen/text_size"/>
+
+    <TextView
+        android:id="@+id/mobileNumber_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Mobile Number: NA"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="@dimen/text_size"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/four_dp"
+        android:background="@android:color/black"/>
+</LinearLayout>

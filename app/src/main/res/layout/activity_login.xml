@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:paddingTop="@dimen/sixty_four_dp"
+    android:orientation="vertical">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="250dp"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/username_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/height_large"
+            android:hint="@string/input_hint_username"
+            android:inputType="textAutoComplete"
+            android:textColor="@android:color/black"
+            android:textColorHint="@android:color/black"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="250dp"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/password_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/height_large"
+            android:hint="@string/input_hint_password"
+            android:inputType="textPassword"
+            android:textColor="@android:color/black"
+            android:textColorHint="@android:color/black"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:id="@+id/login_Button"
+        android:layout_width="@dimen/width_large"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="@string/label_login"/>
+</LinearLayout>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="in.etaminepgg.sfa.Activities.SkuListByGenreActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white">
+
+        <!--<android.support.v7.widget.AppCompatAutoCompleteTextView
+            android:textColor="@color/pink500"
+            android:padding="@dimen/four_dp"
+            android:textColorHint="@color/pink500"
+            android:background="@drawable/shape_rectangle"
+            android:layout_margin="@dimen/four_dp"
+            android:hint="Search SKUs"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>-->
+
+        <android.support.design.widget.TabLayout
+            app:tabSelectedTextColor="@color/pink500"
+            app:tabTextColor="@android:color/black"
+            android:background="#00BCD4"
+            android:id="@+id/skuGenre_tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabGravity="center"
+            app:tabIndicatorColor="@color/pink500"
+            app:tabIndicatorHeight="@dimen/four_dp"
+            app:tabMode="scrollable"/>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.view.ViewPager
+        android:paddingTop="@dimen/eight_dp"
+        android:id="@+id/skuList_ViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -1,0 +1,63 @@
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true"
+    tools:context="in.etaminepgg.sfa.Fragments.NewSKUsFragment">
+
+    <LinearLayout
+        android:id="@+id/salesOrder_LinearLayout_outer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/salesOrder_LinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/salesOrder_RecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:context="in.etaminepgg.sfa.Fragments.NewSKUsFragment"/>
+
+            <TextView
+                android:id="@+id/orderSummary_TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eight_dp"
+                android:gravity="center_horizontal"
+                android:textColor="@color/colorGreen"
+                android:textSize="@dimen/text_size_small"
+                android:textStyle="bold"/>
+
+            <CheckBox
+                android:id="@+id/setOrderAsRegularOrder_CheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/sixteen_dp"
+                android:text="@string/label_set_this_order_as_regular_order"/>
+
+            <Button
+                android:id="@+id/submitSalesOrder_Button"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/sixteen_dp"
+                android:layout_marginTop="@dimen/sixteen_dp"
+                android:text="@string/label_submit_sales_order"/>
+
+        </LinearLayout>
+
+        <include
+            layout="@layout/layout_empty_adapter"/>
+
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>

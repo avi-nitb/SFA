@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/schemeName_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Name: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_small"/>
+
+    <TextView
+        android:id="@+id/schemeDescription_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Description: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_small"/>
+
+    <!--<TextView
+        android:id="@+id/schemeCreatedDate_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Created Date: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size"/>-->
+
+    <TextView
+        android:id="@+id/schemeStartDate_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Start Date: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_small"/>
+
+    <TextView
+        android:id="@+id/schemeEndDate_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="End Date: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_small"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/two_dp"
+        android:layout_marginTop="@dimen/two_dp"
+        android:background="@android:color/holo_green_light"/>
+
+</LinearLayout>

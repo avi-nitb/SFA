@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/skuDetails_ScrollView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:padding="@dimen/eight_dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/skuPhoto_ImageView"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:src="@drawable/ic_camera"/>
+
+        <TextView
+            android:id="@+id/skuName_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name: No SKU in DB"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/text_size_large"/>
+
+        <TextView
+            android:id="@+id/skuPrice_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="30dp"
+            android:text="Price: No SKU in DB"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/text_size_large"/>
+
+        <TextView
+            android:id="@+id/sku_SO_Attr_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Category: No SKU in DB"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/text_size_small"/>
+
+        <TextView
+            android:id="@+id/skuSubCategory_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sub Category: No SKU in DB"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/text_size_small"/>
+
+        <TextView
+            android:id="@+id/skuDescription_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Description: No SKU in DB"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/text_size_small"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:background="@android:color/black"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/four_dp"
+            android:text="Similar SKUs:-"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_large"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/similarSKUs_RecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+</LinearLayout>
+
+    <!-- skuName`
+     `sku_description`
+     `skuCategory` varchar(100)
+     `sku_sub_category` varchar(100)
+     `sku_uom` varchar(100)
+     `sku_photo
+      sku_introduced_on` date
+     `sku_created_on` datetime
+     `sku_created_by` varchar(40)
+     `sku_modified_on` datetime
+     `sku_modified_by`-->
+

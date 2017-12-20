@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<group android:checkableBehavior="single">
+    <item
+        android:id="@+id/navItem_NewRetailer"
+        android:title="@string/nav_item_new_retailer"/>
+    <item
+        android:id="@+id/navItem_NewSalesOrder"
+        android:title="@string/nav_item_new_sales_order"/>
+
+    <item
+        android:id="@+id/navItem_mySalesHistory"
+        android:title="@string/nav_item_my_sales_history"/>
+
+    <item
+        android:id="@+id/navItem_logout"
+        android:title="@string/nav_item_logout"/>
+
+    <!-- <item
+        android:id="@+id/navItem_pendingOrders"
+        android:title="@string/nav_item_pending_orders"/>-->
+</group>
+</menu>

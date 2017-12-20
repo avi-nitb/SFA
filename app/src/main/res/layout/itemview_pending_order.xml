@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/orderId_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Order Id: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size"/>
+
+    <TextView
+        android:id="@+id/retailerId_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Retailer Id: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/retailerName_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Retailer Name: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size"/>
+
+    <TextView
+        android:id="@+id/orderDate_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/one_dp"
+        android:text="Order Date: NA"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size"/>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/orderTotal_TextView"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/one_dp"
+            android:text="Order Total: NA"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size"/>
+
+        <TextView
+            android:id="@+id/itemCount_TextView"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/one_dp"
+            android:text="No. of SKUs: NA"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size"
+            app:layout_constraintLeft_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/orderTotal_TextView"/>
+
+        <ImageView
+            android:visibility="invisible"
+            android:id="@+id/deleteOrder_ImageView"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/ic_delete"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/four_dp"
+        android:background="@android:color/black"/>
+</LinearLayout>
