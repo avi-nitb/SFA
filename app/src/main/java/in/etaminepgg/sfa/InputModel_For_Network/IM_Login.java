@@ -1,4 +1,4 @@
-package in.etaminepgg.sfa.Models;
+package in.etaminepgg.sfa.InputModel_For_Network;
 
 /**
  * Created by Jaya on 20-12-2017.
