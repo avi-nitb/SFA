@@ -4,15 +4,9 @@ import android.util.Log;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
@@ -25,17 +19,19 @@ import java.net.URL;
 import java.net.URLDecoder;
 
 
-public class HttpRequestWorker {
+public class HttpRequestWorker
+{
 
 
-	public AsyncResponse delegate = null;
-	Header[] headers;
-	String[] value;
-	public HttpRequestWorker() {
-		super();
-	}
+    public AsyncResponse delegate = null;
+    Header[] headers;
+    String[] value;
+    String sessionKey;
 
-	String sessionKey;
+    public HttpRequestWorker()
+    {
+        super();
+    }
 
     /*
          * Method: GetRequest
@@ -44,18 +40,19 @@ public class HttpRequestWorker {
          *         isHeaderRequired	: Set dbName as Header for every request after Registration.
          */
 
-	public String GetRequest(String url_str,String token) {
+    public String GetRequest(String url_str, String token)
+    {
 
-		///old process//////
+        ///old process//////
 
 		/*try {
 
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpGet httpGet = new HttpGet(url_str);
 	*//*		httpGet.setHeader("device",   deviceId);
-			httpGet.setHeader("session",  session);
+            httpGet.setHeader("session",  session);
 			httpGet.setHeader("schoolId", schoolId);*//*
-		    HttpParams params = httpClient.getParams();
+            HttpParams params = httpClient.getParams();
 			HttpConnectionParams.setConnectionTimeout(params, 3000);
 			HttpConnectionParams.setSoTimeout(params, 3000);
 			ResponseHandler<String> responseHandler = new BasicResponseHandler();
@@ -68,59 +65,65 @@ public class HttpRequestWorker {
 		}*/
 
 
-		/////new async get process/////
+        /////new async get process/////
 
-		HttpURLConnection connection = null;
-		BufferedReader reader = null;
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
 
-		try
-		{
-			URL url = new URL(url_str);
-			connection = (HttpURLConnection) url.openConnection();
-			connection.connect();
+        try
+        {
+            URL url = new URL(url_str);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
 
-			InputStream stream = connection.getInputStream();
-			reader = new BufferedReader(new InputStreamReader(stream));
-			StringBuffer buffer = new StringBuffer();
-			String line = "";
-
-
-			while ((line = reader.readLine()) != null)
-			{
-				buffer.append(line + "\n");
-				Log.e("UTF_8_GET", line + ""); //here u ll get whole response...... :-)
-			}
-
-			return buffer.toString();
+            InputStream stream = connection.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(stream));
+            StringBuffer buffer = new StringBuffer();
+            String line = "";
 
 
-		} catch (MalformedURLException e) {
+            while((line = reader.readLine()) != null)
+            {
+                buffer.append(line + "\n");
+                Log.e("UTF_8_GET", line + ""); //here u ll get whole response...... :-)
+            }
 
-			e.printStackTrace();
+            return buffer.toString();
 
-		} catch (IOException e) {
 
-			e.printStackTrace();
-		}
-		finally {
-			if (connection != null)
-			{
-				connection.disconnect();
-			}
-			try
-			{
-				if (reader != null)
-				{
-					reader.close();
-				}
-			} catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		return null;
+        }
+        catch(MalformedURLException e)
+        {
 
-	}
+            e.printStackTrace();
+
+        }
+        catch(IOException e)
+        {
+
+            e.printStackTrace();
+        }
+        finally
+        {
+            if(connection != null)
+            {
+                connection.disconnect();
+            }
+            try
+            {
+                if(reader != null)
+                {
+                    reader.close();
+                }
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        return null;
+
+    }
 
     /*
      * Method: POSTRequest
@@ -129,36 +132,43 @@ public class HttpRequestWorker {
      *         content			: JSON Content to send,
      *         isHeaderRequired	: Set dbName as Header for every request after Registration.
      */
-	public String PostRequest(String url, String content, String requestNumber) {
-		try {
+    public String PostRequest(String url, String content, String requestNumber)
+    {
+        try
+        {
 
-			String mStatus = null;
-			DefaultHttpClient httpclient = new DefaultHttpClient();
-			HttpPost mHttpPost = new HttpPost(url);
+            String mStatus = null;
+            DefaultHttpClient httpclient = new DefaultHttpClient();
+            HttpPost mHttpPost = new HttpPost(url);
 				/*		httpGet.setHeader("device",   deviceId);
 			httpGet.setHeader("session",  session);
 			httpGet.setHeader("schoolId", schoolId);*/
-			StringEntity se = new StringEntity(content);
-			se.setContentType("application/json");
-			mHttpPost.setEntity(se);
+            StringEntity se = new StringEntity(content);
+            se.setContentType("application/json");
+            mHttpPost.setEntity(se);
 
-			HttpResponse httpresponse = httpclient.execute(mHttpPost);
-			mStatus = EntityUtils.toString(httpresponse.getEntity(), "utf-8");
+            HttpResponse httpresponse = httpclient.execute(mHttpPost);
+            mStatus = EntityUtils.toString(httpresponse.getEntity(), "utf-8");
 
-			try {
-				mStatus = URLDecoder.decode(mStatus, "UTF-8");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+            try
+            {
+                mStatus = URLDecoder.decode(mStatus, "UTF-8");
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
 
-			Log.e("UTF_8_POST", mStatus + "");
-			return mStatus;
+            Log.e("UTF_8_POST", mStatus + "");
+            return mStatus;
 
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return "Failed " + ex;
-		}
-	}
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+            return "Failed " + ex;
+        }
+    }
 }
 
 

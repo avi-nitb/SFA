@@ -50,15 +50,59 @@ import javax.crypto.spec.SecretKeySpec;
 import in.etaminepgg.sfa.Activities.LoginActivity;
 
 
-public class FileFunctions {
+public class FileFunctions
+{
 
-    private static String device_name = android.os.Build.MODEL;
     public static final String[] imageExtensions = {"jpg"};
+    // taken from http://stackoverflow.com/questions/3873496/how-to-get-image-path-from-images-stored-on-sd-card
+    public static FileFilter filterForImageFolders = new FileFilter()
+    {
+        public boolean accept(File folder)
+        {
+            try
+            {
+                //Checking only directories, since we are checking for files within
+                //a directory
+                if(folder.isDirectory())
+                {
+                    File[] listOfFiles = folder.listFiles();
 
-    public static void downloadFromUrl(String imageURL, String fileName) {  //this is the downloader method
+                    if(listOfFiles == null)
+                    {
+                        return false;
+                    }
+
+                    //For each file in the directory...
+                    for(File file : listOfFiles)
+                    {
+                        //Check if the extension is one of the supported filetypes
+                        //imageExtensions is a String[] containing image filetypes (e.g. "png")
+                        for(String ext : imageExtensions)
+                        {
+                            if(file.getName().endsWith("." + ext))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            catch(SecurityException e)
+            {
+                Log.v("debug", "Access Denied");
+                return false;
+            }
+        }
+    };
+    private static String device_name = android.os.Build.MODEL;
+
+    public static void downloadFromUrl(String imageURL, String fileName)
+    {  //this is the downloader method
         //MyUi.popUp( "url = " + imageURL + ", file = " + fileName);
 
-        try {
+        try
+        {
             URL url = new URL(imageURL); //you can write here any link
             URLConnection ucon = url.openConnection();
             InputStream is = ucon.getInputStream();
@@ -68,7 +112,8 @@ public class FileFunctions {
 
             ByteArrayBuffer baf = new ByteArrayBuffer(50);
             int current = 0;
-            while ((current = bis.read()) != -1) {
+            while((current = bis.read()) != -1)
+            {
                 baf.append((byte) current);
             }
             // Convert the Bytes read to a String.
@@ -77,7 +122,9 @@ public class FileFunctions {
             fos.close();
 
 
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             MyUi.popUp("No internet connection : " + e.toString());
         }
 
@@ -86,64 +133,81 @@ public class FileFunctions {
 
     }
 
-    public static void copy(File src, File dst) throws IOException {
+    public static void copy(File src, File dst) throws IOException
+    {
         InputStream in = new FileInputStream(src);
         OutputStream out = new FileOutputStream(dst);
 
         // Transfer bytes from in to out
         byte[] buf = new byte[1024];
         int len;
-        while ((len = in.read(buf)) > 0) {
+        while((len = in.read(buf)) > 0)
+        {
             out.write(buf, 0, len);
         }
         in.close();
         out.close();
     }
 
-    public static boolean move(String src, String dst) {
+    public static boolean move(String src, String dst)
+    {
         File ff = new File(src);
         File ft = new File(dst);
-        try {
+        try
+        {
             copy(ff, ft);
             ff.delete();
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             return (false);
         }
         return (true);
     }
 
-
     public static boolean deleteFile(String fileName) // fully qualified name
     {
-        if (!fileExists(fileName)) return (true);
-        try {
+        if(!fileExists(fileName))
+        {
+            return (true);
+        }
+        try
+        {
             File file = new File(fileName);
             boolean deleted = file.delete();
             return true;
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             MyUi.popUp("deleteFile : Unable to delete " + fileName);
             return (false);
         }
 
     }
 
-    public static boolean fileExists(String myPath) {
+    public static boolean fileExists(String myPath)
+    {
         //SQLiteDatabase checkdb = null;
         boolean checkdb = false;
-        try {
+        try
+        {
             File dbfile = new File(myPath);
             checkdb = dbfile.exists();
 
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             return (false);
         }
         return true;
     }
 
-    public static boolean writeTextFile(String s, String fileName) {
+    public static boolean writeTextFile(String s, String fileName)
+    {
         // Write the string s into the text file fileName
 
-        try {
+        try
+        {
             File myFile = new File(fileName);
             myFile.createNewFile();
             FileOutputStream fOut = new FileOutputStream(myFile);
@@ -153,7 +217,9 @@ public class FileFunctions {
             fOut.close();
 
             return (true);
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             MyUi.popUp("Unable to write file " + fileName + " : " + e.toString());
             //Toast.makeText(DiudamanMain.baseContext, "Unable to write file " + fileName + " : " + e.toString(),
             //		Toast.LENGTH_LONG).show();
@@ -161,10 +227,11 @@ public class FileFunctions {
         return (false);
     }
 
-
     // This function is not working - due to
-    public static boolean writeTextFile_defunct(String s, String fileName) {
-        try {
+    public static boolean writeTextFile_defunct(String s, String fileName)
+    {
+        try
+        {
             FileOutputStream fOut = LoginActivity.baseContext.openFileOutput(fileName,
                     Activity.MODE_WORLD_READABLE);
             OutputStreamWriter osw = new OutputStreamWriter(fOut);
@@ -173,20 +240,24 @@ public class FileFunctions {
             osw.write(s);
 
 			/* ensure that everything is
-			 * really written out and close */
+             * really written out and close */
             osw.flush();
             osw.close();
 
             return (true);
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             Toast.makeText(LoginActivity.baseContext, "Unable to write file " + fileName + " : " + e.toString(),
                     Toast.LENGTH_LONG).show();
         }
         return (false);
     }
 
-    public static boolean downloadDirectFile(String fileName, String destDir, String servUrl) {
-        try {
+    public static boolean downloadDirectFile(String fileName, String destDir, String servUrl)
+    {
+        try
+        {
 
             URL url = new URL(servUrl);
             HttpURLConnection c = (HttpURLConnection) url.openConnection();
@@ -203,14 +274,17 @@ public class FileFunctions {
 
             byte[] buffer = new byte[1024];
             int len1 = 0;
-            while ((len1 = in.read(buffer)) > 0) {
+            while((len1 = in.read(buffer)) > 0)
+            {
                 f.write(buffer, 0, len1);
             }
             f.close();
 
 
             return true;
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             e.printStackTrace();
 
             return false;
@@ -218,8 +292,10 @@ public class FileFunctions {
 
     }
 
-    public static boolean downloadBinaryFile(String fileName, String destDir, String servUrl) {
-        try {
+    public static boolean downloadBinaryFile(String fileName, String destDir, String servUrl)
+    {
+        try
+        {
 
             URL url = new URL(servUrl + fileName);
             HttpURLConnection c = (HttpURLConnection) url.openConnection();
@@ -234,20 +310,24 @@ public class FileFunctions {
 
             byte[] buffer = new byte[1024];
             int len1 = 0;
-            while ((len1 = in.read(buffer)) > 0) {
+            while((len1 = in.read(buffer)) > 0)
+            {
                 f.write(buffer, 0, len1);
             }
             f.close();
 
 
             return true;
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             return false;
         }
 
     }
 
-    public static boolean downloadFile(String fileName, String destDir, String servUrl) {
+    public static boolean downloadFile(String fileName, String destDir, String servUrl)
+    {
         String loc = servUrl + fileName;
         String destFileName = destDir + File.separator + fileName;
 
@@ -255,24 +335,32 @@ public class FileFunctions {
         //String loc = "http://www.google.com";
         HttpURLConnection urlConnection = null;
 
-        try {
+        try
+        {
             //URL url = new URL("http://180.92.161.131/irshousing/toMobile/irs_logins.csv" );
             URL url = new URL(loc);
             urlConnection = (HttpURLConnection) url.openConnection();
             InputStream in = new BufferedInputStream(urlConnection.getInputStream());
             String s = readStream(in);
-            if (s != null) {
+            if(s != null)
+            {
 
                 writeTextFile(s, destFileName);
-            } else {
+            }
+            else
+            {
                 Toast.makeText(LoginActivity.baseContext, "File NOT downloaded.",
                         Toast.LENGTH_LONG).show();
             }
             return (true);
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             MyUi.popUp("Failed - " + e.toString());
             //e.printStackTrace();
-        } finally {
+        }
+        finally
+        {
             urlConnection.disconnect();
 
         }
@@ -280,8 +368,10 @@ public class FileFunctions {
 
     }
 
-    public static String getUrlResponse(String servUrl) {
-        try {
+    public static String getUrlResponse(String servUrl)
+    {
+        try
+        {
             HttpClient httpclient = new DefaultHttpClient();
             httpclient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
 
@@ -292,12 +382,18 @@ public class FileFunctions {
             HttpEntity resEntity = response.getEntity();
             String Response = EntityUtils.toString(resEntity);
 
-            if (Response.equals("ERR") || Response.equals("-1")) {
+            if(Response.equals("ERR") || Response.equals("-1"))
+            {
                 return ("ERR");
-            } else
+            }
+            else
+            {
                 return (Response);
+            }
 
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             e.printStackTrace();
             return ("ERR");
         }
@@ -305,24 +401,28 @@ public class FileFunctions {
 
     }
 
-
-    public static String readStream(InputStream is) {
-        try {
+    public static String readStream(InputStream is)
+    {
+        try
+        {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
             int i = is.read();
-            while (i != -1) {
+            while(i != -1)
+            {
                 bo.write(i);
                 i = is.read();
             }
             return bo.toString();
-        } catch (IOException e) {
+        }
+        catch(IOException e)
+        {
             return "";
         }
     }
 
-
     // Reads an InputStream and converts it to a String.
-    public static String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
+    public static String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException
+    {
         Reader reader = null;
         reader = new InputStreamReader(stream, "UTF-8");
         char[] buffer = new char[len];
@@ -330,13 +430,15 @@ public class FileFunctions {
         return new String(buffer);
     }
 
-    public static String downloadUrl(String myurl) throws IOException {
+    public static String downloadUrl(String myurl) throws IOException
+    {
         InputStream is = null;
         // Only display the first 500 characters of the retrieved
         // web page content.
         int len = 500;
 
-        try {
+        try
+        {
             URL url = new URL(myurl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(10000 /* milliseconds */);
@@ -355,18 +457,22 @@ public class FileFunctions {
 
             // Makes sure that the InputStream is closed after the app is
             // finished using it.
-        } finally {
-            if (is != null) {
+        }
+        finally
+        {
+            if(is != null)
+            {
                 is.close();
             }
         }
     }
 
-
-    public static boolean downloadFile_defunct(String fileName, String destDir, String servUrl) {
+    public static boolean downloadFile_defunct(String fileName, String destDir, String servUrl)
+    {
         String loc = servUrl + fileName;
 
-        try {
+        try
+        {
             //URL url = new URL("http://180.92.161.131/irshousing/toMobile/irs_logins.csv" ); // loc );
 
             Toast.makeText(LoginActivity.baseContext, "accessing URL " + loc,
@@ -382,7 +488,8 @@ public class FileFunctions {
             byte data[] = new byte[1024];
             long total = 0;
             int count;
-            while ((count = input.read(data)) != -1) {
+            while((count = input.read(data)) != -1)
+            {
                 total += count;
                 // publishing the progress....
                 //publishProgress((int) (total * 100 / fileLength));
@@ -395,7 +502,9 @@ public class FileFunctions {
             //	            Toast.LENGTH_LONG).show();
 
             return (true);
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             e.printStackTrace();
         }
 
@@ -405,12 +514,15 @@ public class FileFunctions {
         return (false);
     }
 
-    public static boolean createDirIfNotExists(String path) {
+    public static boolean createDirIfNotExists(String path)
+    {
         boolean ret = true;
 
         File file = new File(Environment.getExternalStorageDirectory(), path);
-        if (!file.exists()) {
-            if (!file.mkdirs()) {
+        if(!file.exists())
+        {
+            if(!file.mkdirs())
+            {
                 Log.e("TravellerLog :: ", "Problem creating Image folder");
                 ret = false;
             }
@@ -418,8 +530,10 @@ public class FileFunctions {
         return ret;
     }
 
-    public static int uploadFile(String fileName, String toServUrl) throws ClientProtocolException, IOException {
-        try {
+    public static int uploadFile(String fileName, String toServUrl) throws ClientProtocolException, IOException
+    {
+        try
+        {
             HttpClient httpclient = new DefaultHttpClient();
             httpclient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
 
@@ -450,12 +564,18 @@ public class FileFunctions {
 
 //            Log.d("Response",Response);
 
-            if (Response.equals("ERR") || Response.equals("-1")) {
+            if(Response.equals("ERR") || Response.equals("-1"))
+            {
                 return (-1);
-            } else
+            }
+            else
+            {
                 return (Integer.parseInt((String) Response));
+            }
 
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             e.printStackTrace();
             return (-1);
         }
@@ -463,12 +583,13 @@ public class FileFunctions {
 
     }
 
-
-    public static String getPathFromFileName(String fname) {
+    public static String getPathFromFileName(String fname)
+    {
 
         Pattern p = Pattern.compile("^(.*)/([^/]+)$");
         Matcher m = p.matcher(fname);
-        if (m.find()) {
+        if(m.find())
+        {
             String path = m.group(1);
             //String name = m.group(2);
             return (path);
@@ -477,11 +598,13 @@ public class FileFunctions {
         return (fname);
     }
 
-    public static String getNameFromFileName(String fname) {
+    public static String getNameFromFileName(String fname)
+    {
 
         Pattern p = Pattern.compile("^(.*)/([^/]+)$");
         Matcher m = p.matcher(fname);
-        if (m.find()) {
+        if(m.find())
+        {
             //String path = m.group(1);
             String name = m.group(2);
             return (name);
@@ -490,13 +613,15 @@ public class FileFunctions {
         return (fname);
     }
 
-    public static boolean downloadFileIfNotPresent(String fname, String servUrl) {
+    public static boolean downloadFileIfNotPresent(String fname, String servUrl)
+    {
         // download the file if it is not there already
         java.io.File file = new java.io.File(fname);
         String n = FileFunctions.getNameFromFileName(fname);
         String p = FileFunctions.getPathFromFileName(fname);
         //MyUi.popUp( "path = " + p + " , " + " name = " + n);
-        if (file.length() == 0) {
+        if(file.length() == 0)
+        {
             boolean status = FileFunctions.downloadFile(n, p, servUrl);
             return (status);
         }
@@ -507,45 +632,22 @@ public class FileFunctions {
 
     }
 
-
-    // taken from http://stackoverflow.com/questions/3873496/how-to-get-image-path-from-images-stored-on-sd-card
-    public static FileFilter filterForImageFolders = new FileFilter() {
-        public boolean accept(File folder) {
-            try {
-                //Checking only directories, since we are checking for files within
-                //a directory
-                if (folder.isDirectory()) {
-                    File[] listOfFiles = folder.listFiles();
-
-                    if (listOfFiles == null) return false;
-
-                    //For each file in the directory...
-                    for (File file : listOfFiles) {
-                        //Check if the extension is one of the supported filetypes
-                        //imageExtensions is a String[] containing image filetypes (e.g. "png")
-                        for (String ext : imageExtensions) {
-                            if (file.getName().endsWith("." + ext)) return true;
-                        }
-                    }
-                }
-                return false;
-            } catch (SecurityException e) {
-                Log.v("debug", "Access Denied");
-                return false;
-            }
-        }
-    };
-
-    public static File findImageDir(File aFile, String sDir) {
-        if (aFile.isFile() && (!aFile.getName().startsWith(".")) &&
+    public static File findImageDir(File aFile, String sDir)
+    {
+        if(aFile.isFile() && (!aFile.getName().startsWith(".")) &&
                 aFile.getAbsolutePath().contains(sDir) &&
-                aFile.getName().endsWith(".jpg")) {
+                aFile.getName().endsWith(".jpg"))
+        {
             return aFile;
-        } else if (aFile.isDirectory() && (!aFile.getName().startsWith("."))) {
-            for (File child : aFile.listFiles()) {
+        }
+        else if(aFile.isDirectory() && (!aFile.getName().startsWith(".")))
+        {
+            for(File child : aFile.listFiles())
+            {
                 //MyUi.popUpQuick("seeing " + child + " in " + sDir );
                 File found = findImageDir(child, sDir);
-                if (found != null) {
+                if(found != null)
+                {
                     return found;
                 }//if
             }//for
@@ -554,27 +656,34 @@ public class FileFunctions {
     }//met
 
 
-    public static String getPhotoDir() {
+    public static String getPhotoDir()
+    {
 
-        if (device_name.equals("XOLO A700")) {
+        if(device_name.equals("XOLO A700"))
+        {
             return (Environment.getExternalStorageDirectory().getAbsolutePath() + "/DCIM/Camera");
         }
 
         String ret = null;
-        try {
+        try
+        {
             File extStore = Environment.getExternalStorageDirectory();
             File[] fileList = extStore.listFiles();
-            for (int i = 0; i < fileList.length; i++) {
-                if (fileList[i].isDirectory() && (!fileList[i].getName().startsWith("."))) {
+            for(int i = 0; i < fileList.length; i++)
+            {
+                if(fileList[i].isDirectory() && (!fileList[i].getName().startsWith(".")))
+                {
                     //MyUi.popUpQuick("Looking at " + fileList[i].getAbsolutePath());
                     File f = FileFunctions.findImageDir(fileList[i], extStore.getAbsolutePath());
-                    if (f != null) {
+                    if(f != null)
+                    {
                         //MyUi.popUp(" match : " + f.getAbsolutePath());
                         //if( f.getName().matches(".*\\d\\d\\d\\d\\.jpg") && f.getAbsolutePath().contains("DCIM" + File.separator) )
-                        if (f.getName().matches(".*\\d\\d\\d\\d.jpg") &&
+                        if(f.getName().matches(".*\\d\\d\\d\\d.jpg") &&
                                 f.getAbsolutePath().contains("DCIM") &&
                                 (f.getAbsolutePath().contains("100ANDRO") || f.getAbsolutePath().contains("Camera"))
-                                ) {
+                                )
+                        {
                             //MyUi.popUp("final match : " + f.getAbsolutePath());
                             ret = f.getParent();
                             break;
@@ -582,7 +691,9 @@ public class FileFunctions {
                     }
                 }
             }
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             MyUi.popUp("Unable to find photo directory : " + e.toString());
             return (null);
         }
@@ -591,7 +702,8 @@ public class FileFunctions {
     }
 
 
-    public static byte[] generateKey(String password) throws Exception {
+    public static byte[] generateKey(String password) throws Exception
+    {
         byte[] keyStart = password.getBytes("UTF-8");
 
         KeyGenerator kgen = KeyGenerator.getInstance("AES");
@@ -603,7 +715,8 @@ public class FileFunctions {
     }
 
 
-    public static byte[] encodeFile(String key, String dbFile, String fileName, String destDir) throws Exception {
+    public static byte[] encodeFile(String key, String dbFile, String fileName, String destDir) throws Exception
+    {
 
         byte[] keyStart = key.getBytes("UTF-8");
 
@@ -619,7 +732,8 @@ public class FileFunctions {
         File file = new File(dbFile);
 
         FileInputStream fin = null;
-        try {
+        try
+        {
             // create FileInputStream object
             fin = new FileInputStream(file);
 
@@ -639,9 +753,9 @@ public class FileFunctions {
 
             FileFunctions.deleteFile(dbFile);
 
-            FileOutputStream f = new FileOutputStream(new File(destDir,fileName));
+            FileOutputStream f = new FileOutputStream(new File(destDir, fileName));
 
-            f.write(encrypted,0,encrypted.length);
+            f.write(encrypted, 0, encrypted.length);
 
 
             f.close();
@@ -649,17 +763,27 @@ public class FileFunctions {
 
             return encrypted;
 
-        } catch (FileNotFoundException e) {
+        }
+        catch(FileNotFoundException e)
+        {
             System.out.println("File not found" + e);
-        } catch (IOException ioe) {
+        }
+        catch(IOException ioe)
+        {
             System.out.println("Exception while reading file " + ioe);
-        } finally {
+        }
+        finally
+        {
             // close the streams using close method
-            try {
-                if (fin != null) {
+            try
+            {
+                if(fin != null)
+                {
                     fin.close();
                 }
-            } catch (IOException ioe) {
+            }
+            catch(IOException ioe)
+            {
                 System.out.println("Error while closing stream: " + ioe);
             }
         }
@@ -669,7 +793,8 @@ public class FileFunctions {
     }
 
 
-    public static byte[] decodeFile(String key, String dbFile, String fileName, String destDir) throws Exception {
+    public static byte[] decodeFile(String key, String dbFile, String fileName, String destDir) throws Exception
+    {
 
 
         byte[] keyStart = key.getBytes("UTF-8");
@@ -686,7 +811,8 @@ public class FileFunctions {
         File file = new File(dbFile);
 
         FileInputStream fin = null;
-        try {
+        try
+        {
             // create FileInputStream object
             fin = new FileInputStream(file);
 
@@ -706,9 +832,9 @@ public class FileFunctions {
 
             FileFunctions.deleteFile(dbFile);
 
-            FileOutputStream f = new FileOutputStream(new File(destDir,fileName));
+            FileOutputStream f = new FileOutputStream(new File(destDir, fileName));
 
-            f.write(decrypted,0,decrypted.length);
+            f.write(decrypted, 0, decrypted.length);
 
 
             f.close();
@@ -716,17 +842,27 @@ public class FileFunctions {
 
             return decrypted;
 
-        } catch (FileNotFoundException e) {
+        }
+        catch(FileNotFoundException e)
+        {
             System.out.println("File not found" + e);
-        } catch (IOException ioe) {
+        }
+        catch(IOException ioe)
+        {
             System.out.println("Exception while reading file " + ioe);
-        } finally {
+        }
+        finally
+        {
             // close the streams using close method
-            try {
-                if (fin != null) {
+            try
+            {
+                if(fin != null)
+                {
                     fin.close();
                 }
-            } catch (IOException ioe) {
+            }
+            catch(IOException ioe)
+            {
                 System.out.println("Error while closing stream: " + ioe);
             }
         }
@@ -734,7 +870,6 @@ public class FileFunctions {
         return null;
 
     }
-
 
 
 }

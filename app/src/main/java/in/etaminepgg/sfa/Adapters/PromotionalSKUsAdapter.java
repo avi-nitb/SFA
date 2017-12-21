@@ -70,9 +70,9 @@ public class PromotionalSKUsAdapter extends RecyclerView.Adapter<PromotionalSKUs
             super(itemView);
             skuPhoto_ImageView = (ImageView) itemView.findViewById(R.id.skuPhoto_ImageView);
             addSkuToCart_ImageView = (ImageView) itemView.findViewById(R.id.addSkuToCart_ImageView);
-            skuName_TextView = (TextView)itemView.findViewById(R.id.skuName_TextView);
-            skuPrice_TextView = (TextView)itemView.findViewById(R.id.skuPrice_TextView);
-            skuCategory_TextView = (TextView)itemView.findViewById(R.id.sku_SO_Attr_TextView);
+            skuName_TextView = (TextView) itemView.findViewById(R.id.skuName_TextView);
+            skuPrice_TextView = (TextView) itemView.findViewById(R.id.skuPrice_TextView);
+            skuCategory_TextView = (TextView) itemView.findViewById(R.id.sku_SO_Attr_TextView);
 
             addSkuToCart_ImageView.setOnClickListener(new View.OnClickListener()
             {
@@ -82,7 +82,7 @@ public class PromotionalSKUsAdapter extends RecyclerView.Adapter<PromotionalSKUs
                     String skuID = itemView.getTag(R.string.tag_sku_id).toString();
                     String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
                     String skuName = itemView.getTag(R.string.tag_sku_name).toString();
-                   // new DbUtils().addToSalesOrderOrPickRetailer(skuID, skuName, skuPrice, itemView.getContext());
+                    // new DbUtils().addToSalesOrderOrPickRetailer(skuID, skuName, skuPrice, itemView.getContext());
 
                     new Utils().pickAttributeValuesOrSelectRetailer(skuID, skuName, skuPrice, itemView.getContext());
                 }

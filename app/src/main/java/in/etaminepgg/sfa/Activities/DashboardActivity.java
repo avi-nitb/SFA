@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -43,8 +42,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import in.etaminepgg.sfa.Models.AuthUserDetails;
 import in.etaminepgg.sfa.Models.AuthUser_Model;
@@ -58,10 +55,11 @@ import in.etaminepgg.sfa.Utilities.Utils;
 import in.etaminepgg.sfa.network_asynctask.AsyncResponse;
 import in.etaminepgg.sfa.network_asynctask.AsyncWorker;
 
+import static in.etaminepgg.sfa.Activities.LoginActivity.KEY_PASSWORD;
+import static in.etaminepgg.sfa.Activities.LoginActivity.KEY_USERNAME;
 import static in.etaminepgg.sfa.Activities.LoginActivity.baseContext;
-import static in.etaminepgg.sfa.Utilities.Constants.IMEI;
+import static in.etaminepgg.sfa.Utilities.Constants.REQUEST_FOR_AUTHKEY;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_EMPLOYEE;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_DETAILS;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.All_SKUs_TAB;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.FREQUENT_SKUs_TAB;
@@ -70,7 +68,8 @@ import static in.etaminepgg.sfa.Utilities.ConstantsA.PROMO_SKUs_TAB;
 import static in.etaminepgg.sfa.Utilities.SharedPreferenceSingleton.MY_PREF;
 import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 
-public class DashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncResponse {
+public class DashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncResponse
+{
     FrameLayout promoSchemes_FrameLayout;
     ImageView promoSchemesBell_ImageView;
     ProgressBar retailerVisits_ProgressBar;
@@ -83,7 +82,11 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
     int noOfRetailerVisits = 0;
     boolean wasShown = false;
-    MySharedPrefrencesData mySharedPrefrencesData=new MySharedPrefrencesData();
+    MySharedPrefrencesData mySharedPrefrencesData = new MySharedPrefrencesData();
+
+    SharedPreferences sharedPreferences;
+    String usernameInSharedPreferences;
+    String passwordInSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -96,7 +99,19 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
         setSupportActionBar(toolbar);
 
-        networkcall_for_getUserDetails();
+        mySharedPrefrencesData = new MySharedPrefrencesData();
+
+        sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
+        String spDefaultValue = "spDefaultValue"; //sp = shared preferences
+
+        usernameInSharedPreferences = sharedPreferences.getString(KEY_USERNAME, spDefaultValue);
+        passwordInSharedPreferences = sharedPreferences.getString(KEY_PASSWORD, spDefaultValue);
+
+
+        networkcall_for_ISValidAuthKey();
+
+        //   networkcall_for_getUserDetails();
+
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
@@ -116,28 +131,13 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         updateIMEI(loggedInUserID);
     }
 
-    private void networkcall_for_getUserDetails() {
-
-        AsyncWorker mWorker = new AsyncWorker(DashboardActivity.this);
-        mWorker.delegate = DashboardActivity.this;
-        JSONObject BroadcastObject = new JSONObject();
-        try {
-
-            BroadcastObject.put("authToken",new MySharedPrefrencesData().getEmployee_AuthKey(DashboardActivity.this) );
-            Log.d("inputbody_userdetails",BroadcastObject.toString());
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        mWorker.execute(ApiUrl.BASE_URL+ApiUrl.LOG_URL_GETUSERDETAILS, BroadcastObject.toString(), Constants.POST_REQUEST, Constants.REQUEST_FOR_USERDETAILS);
-    }
 
     @Override
     protected void onPostResume()
     {
         super.onPostResume();
 
-        if (loggedInUserID == null)
+        if(loggedInUserID == null)
         {
             throw new NullPointerException("loggedInUserID is null");
         }
@@ -149,7 +149,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             setColorsDependingOnRetailerVisits();
         }
 
-        if (noOfRetailerVisits >= 3 && !wasShown)
+        if(noOfRetailerVisits >= 3 && !wasShown)
         {
             showCongratulatoryMessage(noOfRetailerVisits);
             playJingle();
@@ -237,7 +237,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
     private void askUserToGrantPermissions()
     {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
             String[] permissionsArray = {"android.permission.CAMERA",
                     "android.permission.ACCESS_FINE_LOCATION",
@@ -246,7 +246,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                     "android.permission.WRITE_EXTERNAL_STORAGE"};
             try
             {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                         || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                         || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
                         || ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
@@ -255,7 +255,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                     ActivityCompat.requestPermissions(DashboardActivity.this, permissionsArray, 1);
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 ex.printStackTrace();
             }
@@ -267,7 +267,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     {
         String uf = "upcoming feature";
 
-        switch (menuItem.getItemId())
+        switch(menuItem.getItemId())
         {
             case R.id.navItem_NewRetailer:
                 //Utils.showToast(this, uf);
@@ -277,7 +277,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 Utils.launchActivity(this, PickRetailerActivity.class);
                 break;
             case R.id.navItem_mySalesHistory:
-               Utils.launchActivity(this, MySalesHistoryActivity.class);
+                Utils.launchActivity(this, MySalesHistoryActivity.class);
                 break;
            /* case R.id.navItem_pendingOrders:
                 Utils.launchActivity(this, PendingOrdersActivity.class);
@@ -293,10 +293,11 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 // Commit the edits!
                 editor.commit();
 
-                SharedPreferences sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);;
+                SharedPreferences sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
+                ;
                 SharedPreferences.Editor mEditor = sharedPreferences.edit();
-                mEditor.remove(LoginActivity.KEY_USERNAME);
-                mEditor.remove(LoginActivity.KEY_PASSWORD);
+                mEditor.remove(KEY_USERNAME);
+                mEditor.remove(KEY_PASSWORD);
                 mEditor.commit();
                 Utils.launchActivity(this, LoginActivity.class);
                 finish();
@@ -316,7 +317,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             retailerVisits_ProgressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
             noOfRetailerVisits_TextView.setTextColor(Color.RED);
         }
-        else if (noOfRetailerVisits >= 6 && noOfRetailerVisits <= 10)
+        else if(noOfRetailerVisits >= 6 && noOfRetailerVisits <= 10)
         {
             retailerVisits_ProgressBar.getProgressDrawable().setColorFilter(Color.CYAN, PorterDuff.Mode.SRC_IN);
             noOfRetailerVisits_TextView.setTextColor(Color.CYAN);
@@ -332,7 +333,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     {
         String imeiNumber = null;
 
-        if (ActivityCompat.checkSelfPermission(baseContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        if(ActivityCompat.checkSelfPermission(baseContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
         {
             TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             imeiNumber = telephonyManager.getDeviceId();
@@ -379,7 +380,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             mediaPlayer.setDataSource(jinglePath);
             mediaPlayer.prepare();
         }
-        catch (IOException e)
+        catch(IOException e)
         {
             e.printStackTrace();
         }
@@ -388,33 +389,157 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     }
 
     @Override
-    public void onRefresh() {
+    public void onRefresh()
+    {
 
     }
 
     @Override
-    public void ReceivedResponseFromServer(String output, String REQUEST_NUMBER) {
-        switch (REQUEST_NUMBER){
-            case Constants.REQUEST_FOR_USERDETAILS:
-                try {
-                    JSONObject jsonObject=new JSONObject(output);
-                    if(jsonObject.optInt("api_status")==1){
-                        AuthUserDetails authUserDetails=new Gson().fromJson(output,AuthUserDetails.class);
+    public void ReceivedResponseFromServer(String output, String REQUEST_NUMBER)
+    {
+        switch(REQUEST_NUMBER)
+        {
 
-                        AuthUserDetails.Data data=authUserDetails.getData();
 
-                        mySharedPrefrencesData.setUsername(DashboardActivity.this,data.getUsername());
-                        mySharedPrefrencesData.set_User_mobile(DashboardActivity.this,data.getMobile());
-                        mySharedPrefrencesData.setEmail(DashboardActivity.this,data.getEmail());
+            case Constants.REQUEST_FOR_ISVALIDAUTHKEY:
 
-                    }else {
-                        Utils.showToast(baseContext,"Unsuccessful api call");
+                try
+                {
+                    JSONObject jsonObject = new JSONObject(output);
+                    if(jsonObject.optInt("api_status") == 1)
+                    {
+
+
+                        mySharedPrefrencesData.setUsername(DashboardActivity.this, usernameInSharedPreferences);
+                        mySharedPrefrencesData.setUser_pwd(DashboardActivity.this, passwordInSharedPreferences);
+                        //networkcall_for_getUserDetails();
+
+
                     }
-                } catch (JSONException e) {
+                    else
+                    {
+                        networkcall_Login();
+                        Utils.showToast(baseContext, "invalid auth key");
+                    }
+                }
+                catch(JSONException e)
+                {
                     e.printStackTrace();
                 }
+                break;
+
+            case Constants.REQUEST_FOR_AUTHKEY:
+                try
+                {
+                    JSONObject jsonObject = new JSONObject(output);
+                    if(jsonObject.optInt("api_status") == 1)
+                    {
+                        AuthUser_Model authUser_model = new Gson().fromJson(output, AuthUser_Model.class);
+                        Log.e("auth_model", authUser_model.getAuthToken());
+                        mySharedPrefrencesData.setEmployee_AuthKey(DashboardActivity.this, authUser_model.getAuthToken());
+                        mySharedPrefrencesData.setAuthTokenExpiryDate(DashboardActivity.this, authUser_model.getAuthTokenExpiryDate());
+                        //  networkcall_for_getUserDetails();
+
+                    }
+                    else
+                    {
+                        Utils.showToast(DashboardActivity.this, "Unsuccessful api_login call");
+                    }
+                }
+                catch(JSONException e)
+                {
+                    e.printStackTrace();
+                }
+                break;
+
+            case Constants.REQUEST_FOR_USERDETAILS:
+                try
+                {
+                    JSONObject jsonObject = new JSONObject(output);
+                    if(jsonObject.optInt("api_status") == 1)
+                    {
+                        AuthUserDetails authUserDetails = new Gson().fromJson(output, AuthUserDetails.class);
+
+                        AuthUserDetails.Data data = authUserDetails.getData();
+
+                        mySharedPrefrencesData.setUsername(DashboardActivity.this, data.getUsername());
+                        mySharedPrefrencesData.set_User_mobile(DashboardActivity.this, data.getMobile());
+                        mySharedPrefrencesData.setEmail(DashboardActivity.this, data.getEmail());
+
+                    }
+                    else
+                    {
+                        Utils.showToast(DashboardActivity.this, "Unsuccessful api call for user details");
+                    }
+                }
+                catch(JSONException e)
+                {
+                    e.printStackTrace();
+                }
+                break;
+
 
         }
+    }
+
+    private void networkcall_for_ISValidAuthKey()
+    {
+
+        AsyncWorker mWorker = new AsyncWorker(DashboardActivity.this);
+        mWorker.delegate = DashboardActivity.this;
+        JSONObject BroadcastObject = new JSONObject();
+        try
+        {
+
+            BroadcastObject.put("authToken", new MySharedPrefrencesData().getEmployee_AuthKey(DashboardActivity.this));
+            Log.d("inputbody_userdetails", BroadcastObject.toString());
+
+        }
+        catch(JSONException e)
+        {
+            e.printStackTrace();
+        }
+        mWorker.execute(ApiUrl.BASE_URL + ApiUrl.LOG_URL_ISVALIDAUTHKEY, BroadcastObject.toString(), Constants.POST_REQUEST, Constants.REQUEST_FOR_ISVALIDAUTHKEY);
+    }
+
+    public void networkcall_Login()
+    {
+        AsyncWorker mWorker = new AsyncWorker(DashboardActivity.this);
+        mWorker.delegate = DashboardActivity.this;
+        JSONObject broadcastObject = new JSONObject();
+        try
+        {
+
+            broadcastObject.put("IMEI", Utils.getDeviceId(DashboardActivity.this));
+            broadcastObject.put("username", usernameInSharedPreferences);
+            broadcastObject.put("password", usernameInSharedPreferences);
+
+        }
+        catch(JSONException e)
+        {
+            e.printStackTrace();
+        }
+        mWorker.execute(ApiUrl.BASE_URL + ApiUrl.LOG_URL_AUTHUSER, broadcastObject.toString(), Constants.POST_REQUEST, REQUEST_FOR_AUTHKEY);
+    }
+
+    private void networkcall_for_getUserDetails()
+    {
+
+        AsyncWorker mWorker = new AsyncWorker(DashboardActivity.this);
+        mWorker.delegate = DashboardActivity.this;
+        JSONObject broadcastObject = new JSONObject();
+        try
+        {
+
+            broadcastObject.put("authToken", mySharedPrefrencesData.getEmployee_AuthKey(DashboardActivity.this));
+            Log.d("inputbody_userdetails", broadcastObject.toString());
+
+        }
+        catch(JSONException e)
+        {
+            e.printStackTrace();
+        }
+        mWorker.execute(ApiUrl.BASE_URL + ApiUrl.LOG_URL_GETUSERDETAILS, broadcastObject.toString(), Constants.POST_REQUEST, Constants.REQUEST_FOR_USERDETAILS);
     }
 }
 

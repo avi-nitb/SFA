@@ -39,7 +39,6 @@ public class Sku
     }
 
 
-
     public String getSkuId()
     {
         return skuId;

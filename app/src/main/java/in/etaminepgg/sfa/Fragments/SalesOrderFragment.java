@@ -4,16 +4,11 @@ import android.content.ContentValues;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,14 +18,11 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import in.etaminepgg.sfa.Adapters.PendingOrdersAdapter;
 import in.etaminepgg.sfa.Adapters.SalesOrderAdapter;
-import in.etaminepgg.sfa.Models.PendingOrder;
 import in.etaminepgg.sfa.Models.SalesOrderSku;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.DbUtils;
@@ -75,13 +67,13 @@ public class SalesOrderFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_retailer_sales_order, container, false);
-        salesOrder_LinearLayout = (LinearLayout)view.findViewById(R.id.salesOrder_LinearLayout);
-        salesOrder_LinearLayout_outer = (LinearLayout)view.findViewById(R.id.salesOrder_LinearLayout_outer);
+        salesOrder_LinearLayout = (LinearLayout) view.findViewById(R.id.salesOrder_LinearLayout);
+        salesOrder_LinearLayout_outer = (LinearLayout) view.findViewById(R.id.salesOrder_LinearLayout_outer);
         salesOrder_RecyclerView = (RecyclerView) view.findViewById(R.id.salesOrder_RecyclerView);
-        orderSummary_TextView = (TextView)view.findViewById(R.id.orderSummary_TextView);
+        orderSummary_TextView = (TextView) view.findViewById(R.id.orderSummary_TextView);
         setOrderAsRegularOrder_CheckBox = (CheckBox) view.findViewById(R.id.setOrderAsRegularOrder_CheckBox);
         submitSalesOrder_Button = (Button) view.findViewById(R.id.submitSalesOrder_Button);
-        emptyAdapter_TextView = (TextView)view.findViewById(R.id.emptyAdapter_TextView);
+        emptyAdapter_TextView = (TextView) view.findViewById(R.id.emptyAdapter_TextView);
 
         salesOrder_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         salesOrder_RecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -98,36 +90,36 @@ public class SalesOrderFragment extends Fragment
         List<SalesOrderSku> skuList;
 
         //if there is active Order
-        if (!activeOrderID.equals(NONE))
+        if(!activeOrderID.equals(NONE))
         {
             Resources resources = getResources();
             String intentExtraKey = resources.getString(R.string.key_selected_order_type);
             String selectedOrderType = getArguments().getString(intentExtraKey);
 
-            if (selectedOrderType.equals(NEW_ORDER))
+            if(selectedOrderType.equals(NEW_ORDER))
             {
                 //get sku list from active order and display
                 setSalesOrderAdapter(activeOrderID);
             }
-            else if (selectedOrderType.equals(REGULAR_ORDER))
+            else if(selectedOrderType.equals(REGULAR_ORDER))
             {
                 String retailerID = DbUtils.getRetailerID();
 
-                if (!retailerID.equals(NONE))
+                if(!retailerID.equals(NONE))
                 {
                     String regularOrderID = DbUtils.getRegularOrderIdFor(retailerID);
 
-                    if (!regularOrderID.equals(NONE))
+                    if(!regularOrderID.equals(NONE))
                     {
                         //get sku list from regular order
-                        String SQL_SELECT_SKUs_IN_REGULAR_ORDER = "SELECT order_detail_id, sku_id, sku_name, sku_price, sku_qty FROM " + TBL_SALES_ORDER_DETAILS +  " WHERE order_id = ?" + " ;";
+                        String SQL_SELECT_SKUs_IN_REGULAR_ORDER = "SELECT order_detail_id, sku_id, sku_name, sku_price, sku_qty FROM " + TBL_SALES_ORDER_DETAILS + " WHERE order_id = ?" + " ;";
                         String[] selectionArgs = new String[]{regularOrderID};
                         skuList = DbUtils.getSKUsInSalesOrder(SQL_SELECT_SKUs_IN_REGULAR_ORDER, selectionArgs);
 
-                        if( !isRegularOrderCopied )
+                        if(!isRegularOrderCopied)
                         {
                             //copy all SKUs in regular order to active order
-                            for (SalesOrderSku sku : skuList)
+                            for(SalesOrderSku sku : skuList)
                             {
                                 long orderDetailId = DbUtils.insertIntoSalesOrderDetailsTable(activeOrderID, sku.getSkuID(), sku.getSkuName(), sku.getSkuPrice(), sku.getSkuQty());
 
@@ -167,7 +159,7 @@ public class SalesOrderFragment extends Fragment
 
         List<SalesOrderSku> skuList = DbUtils.getSKUsInSalesOrder(SQL_SELECT_SKUs_IN_SALES_ORDER, selectionArgs);
 
-        if (skuList.size() < 1)
+        if(skuList.size() < 1)
         {
             emptyAdapter_TextView.setVisibility(View.VISIBLE);
             salesOrder_LinearLayout.setVisibility(View.GONE);
@@ -185,7 +177,7 @@ public class SalesOrderFragment extends Fragment
         }
     }
 
-    Map<Integer,String> getSalesOrderAttributesMapFor(long orderDetailID)
+    Map<Integer, String> getSalesOrderAttributesMapFor(long orderDetailID)
     {
         Map<Integer, String> soAttributesMap = new HashMap<>();
 
@@ -197,7 +189,7 @@ public class SalesOrderFragment extends Fragment
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_ORDER_ATTRIBUTES_SET, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             int attributeId = cursor.getInt(cursor.getColumnIndexOrThrow("attribute_id"));
 
@@ -211,19 +203,19 @@ public class SalesOrderFragment extends Fragment
         cursor.close();
         sqLiteDatabase.close();
 
-        Log.e("attributesOfSku",soAttributesMap.toString());
+        Log.e("attributesOfSku", soAttributesMap.toString());
 
         //CharSequence skuAttributesWithoutCommaAtTheEnd = attributesOfSku.subSequence(0, attributesOfSku.length()-2);
 
         return soAttributesMap;
     }
 
-    void insertIntoSalesOrderSkuAttributes(long salesOrderDetailID, Map<Integer,String> skuAttributesMap)
+    void insertIntoSalesOrderSkuAttributes(long salesOrderDetailID, Map<Integer, String> skuAttributesMap)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        for (Map.Entry<Integer, String> entry : skuAttributesMap.entrySet())
+        for(Map.Entry<Integer, String> entry : skuAttributesMap.entrySet())
         {
             ContentValues contentValues = new ContentValues();
             contentValues.put("order_detail_id", salesOrderDetailID);

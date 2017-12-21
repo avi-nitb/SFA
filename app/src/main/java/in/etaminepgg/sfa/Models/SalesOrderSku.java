@@ -1,7 +1,5 @@
 package in.etaminepgg.sfa.Models;
 
-import in.etaminepgg.sfa.Adapters.SalesOrderAdapter;
-
 /**
  * Created by etamine on 2/8/17.
  */

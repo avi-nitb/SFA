@@ -58,12 +58,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import in.etaminepgg.sfa.Activities.DashboardActivity;
 import in.etaminepgg.sfa.Activities.LoginActivity;
 import in.etaminepgg.sfa.Activities.PickRetailerActivity;
 import in.etaminepgg.sfa.R;
 
-import static in.etaminepgg.sfa.Activities.LoginActivity.baseContext;
 import static in.etaminepgg.sfa.Utilities.Constants.REQUEST_TURN_ON_LOCATION;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_GLOBAL_ATTRIBUTES;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_SKU_ATTRIBUTES;
@@ -191,7 +189,7 @@ public class Utils
         {
             Thread.sleep(milliSeconds);
         }
-        catch (InterruptedException e)
+        catch(InterruptedException e)
         {
             e.printStackTrace();
         }
@@ -228,14 +226,16 @@ public class Utils
     {
         String imeiNumber = null;
 
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
         {
-            TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             imeiNumber = telephonyManager.getDeviceId();
-        }else {
+        }
+        else
+        {
             String[] permissionsArray = {"android.permission.READ_PHONE_STATE"};
 
-            ActivityCompat.requestPermissions((Activity)context, permissionsArray, 1);
+            ActivityCompat.requestPermissions((Activity) context, permissionsArray, 1);
         }
 
         return imeiNumber;
@@ -264,12 +264,12 @@ public class Utils
         int bytesRead;
         long totalBytesRead = 0;
 
-        while ((bytesRead = inputStream.read(buffer)) != -1)
+        while((bytesRead = inputStream.read(buffer)) != -1)
         {
             totalBytesRead += bytesRead;
             outputStream.write(buffer, 0, bytesRead);
 
-            if (totalBytesRead > 1024 * 1024)
+            if(totalBytesRead > 1024 * 1024)
             {
                 totalBytesRead = 0;
                 outputStream.flush();
@@ -286,13 +286,13 @@ public class Utils
         int locationMode = 0;
         String locationProviders;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
         {
             try
             {
                 locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
             }
-            catch (Settings.SettingNotFoundException e)
+            catch(Settings.SettingNotFoundException e)
             {
                 e.printStackTrace();
                 return false;
@@ -323,14 +323,14 @@ public class Utils
             {
                 final Status status = settingsResult.getStatus();
 
-                switch (status.getStatusCode())
+                switch(status.getStatusCode())
                 {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try
                         {
                             status.startResolutionForResult(activity, REQUEST_TURN_ON_LOCATION);
                         }
-                        catch (IntentSender.SendIntentException e)
+                        catch(IntentSender.SendIntentException e)
                         {
                             e.printStackTrace();
                         }
@@ -338,6 +338,13 @@ public class Utils
                 }
             }
         });
+    }
+
+    public static boolean isNetworkConnected(Context context)
+    {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
     }
 
     public List<Integer> getAttributeIDs(String skuID)
@@ -352,7 +359,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ATTRIBUTE_LIST, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             int attributeID = cursor.getInt(cursor.getColumnIndexOrThrow("attribute_id"));
             attributeIDsList.add(attributeID);
@@ -376,7 +383,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ATTRIBUTE_NAME, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             attributeName = cursor.getString(cursor.getColumnIndexOrThrow("attribute_name"));
         }
@@ -399,7 +406,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ATTRIBUTE_VALUE_SET, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             attributeValueSet = cursor.getString(cursor.getColumnIndexOrThrow("attribute_value"));
         }
@@ -430,7 +437,7 @@ public class Utils
 
         List<Integer> attributeIDsList = getAttributeIDs(skuID);
 
-        for (final int attributeID : attributeIDsList)
+        for(final int attributeID : attributeIDsList)
         {
             TextView textView = new TextView(context);
             textView.setLayoutParams(lp2);
@@ -487,7 +494,7 @@ public class Utils
     {
         String salesOrderID = getActiveOrderID();
 
-        if (!salesOrderID.equals(NONE))
+        if(!salesOrderID.equals(NONE))
         {
             View alertDialogView = constructViewForAttributesDialog(skuID, context);
 
@@ -528,11 +535,11 @@ public class Utils
     void insertSkuOrIncreaseQuantity(String salesOrderID, String skuID, String skuName, String skuPrice)
     {
         //if Sku doesn't exists in the sales order details table, insert new row for that Sku
-        if (!isSkuPresent(skuID, salesOrderID))
+        if(!isSkuPresent(skuID, salesOrderID))
         {
             long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, "1");
 
-            if (rowID != -1L)
+            if(rowID != -1L)
             {
                 long salesOrderDetailID = rowID;
 
@@ -547,7 +554,7 @@ public class Utils
 
             long orderDetailIdWithSameAttributes = getOrderDetailIdWithSameAttributes(orderDetailIDsList);
 
-            if (orderDetailIdWithSameAttributes > 0)
+            if(orderDetailIdWithSameAttributes > 0)
             {
                 int currentSkuQuantity = getSkuQuantity(orderDetailIdWithSameAttributes);
                 int newSkuQuantity = currentSkuQuantity + 1;
@@ -555,11 +562,11 @@ public class Utils
 
                 Utils.showPopUp(LoginActivity.baseContext, "SKU quantity increased");
             }
-            else if (orderDetailIdWithSameAttributes == -1L)
+            else if(orderDetailIdWithSameAttributes == -1L)
             {
                 long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, "1");
 
-                if (rowID != -1L)
+                if(rowID != -1L)
                 {
                     long salesOrderDetailID = rowID;
 
@@ -579,7 +586,7 @@ public class Utils
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        for (Map.Entry<Integer, String> entry : selectedSkuAttributesMap.entrySet())
+        for(Map.Entry<Integer, String> entry : selectedSkuAttributesMap.entrySet())
         {
             ContentValues contentValues = new ContentValues();
             contentValues.put("order_detail_id", salesOrderDetailID);
@@ -593,7 +600,6 @@ public class Utils
         sqLiteDatabase.close();
     }
 
-
     List<Long> getOrderDetailIDsList(String salesOrderID, String skuID)
     {
         List<Long> orderDetailIDsList = new ArrayList<>();
@@ -606,7 +612,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ORDER_DETAIL_IDS, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             Long orderDetailId = cursor.getLong(cursor.getColumnIndexOrThrow("order_detail_id"));
 
@@ -631,7 +637,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_ORDER_ATTRIBUTES_SET, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             int attributeId = cursor.getInt(cursor.getColumnIndexOrThrow("attribute_id"));
             String attributeValue = cursor.getString(cursor.getColumnIndexOrThrow("attribute_value"));
@@ -647,23 +653,16 @@ public class Utils
 
     long getOrderDetailIdWithSameAttributes(List<Long> orderDetailIDsList)
     {
-        for (Long orderDetailID : orderDetailIDsList)
+        for(Long orderDetailID : orderDetailIDsList)
         {
             Map<Integer, String> salesOrderSkuAttributesMap = getSalesOrderSkuAttributesMap(orderDetailID);
 
-            if (selectedSkuAttributesMap.equals(salesOrderSkuAttributesMap))
+            if(selectedSkuAttributesMap.equals(salesOrderSkuAttributesMap))
             {
                 return orderDetailID;
             }
         }
 
         return -1L;
-    }
-
-
-    public static boolean isNetworkConnected(Context context) {
-        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        return cm.getActiveNetworkInfo() != null;
     }
 }

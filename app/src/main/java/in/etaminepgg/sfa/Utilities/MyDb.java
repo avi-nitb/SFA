@@ -13,8 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static in.etaminepgg.sfa.Activities.LoginActivity.uploadToURL;
-import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.Constants.appSpecificDirectoryPath;
+import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 
 public class MyDb
 {
@@ -43,7 +43,7 @@ public class MyDb
 
     public static boolean isEmpty(String s)
     {
-        if (s.trim().equals(""))
+        if(s.trim().equals(""))
         {
             return true;
         }
@@ -53,7 +53,7 @@ public class MyDb
 
     public static boolean isComment(String s)
     {
-        if (s.trim().matches("^\\s*#.*"))
+        if(s.trim().matches("^\\s*#.*"))
         {
             return true;
         }
@@ -62,7 +62,7 @@ public class MyDb
 
     public static boolean isValidTblName(String s)
     {
-        if (s.trim().matches("^[^`]+$"))
+        if(s.trim().matches("^[^`]+$"))
         {
             return true;
         }
@@ -71,14 +71,14 @@ public class MyDb
 
     public static boolean isValidTblColNames(String s)
     {
-        if (s.trim().matches("^[^`]+$"))
+        if(s.trim().matches("^[^`]+$"))
         {
             return true;
         }
         String[] ar = s.trim().split("`");
-        for (int i = 0; i < ar.length; i++)
+        for(int i = 0; i < ar.length; i++)
         {
-            if (ar[i].matches(".*\\s+.*"))
+            if(ar[i].matches(".*\\s+.*"))
             {
                 return false; // white spaces are not allowed in column names
             }
@@ -93,35 +93,48 @@ public class MyDb
     }
 
     // sqlite database
-    public static int openDatabase( String dbPath ) {
-        try {
-            if( nextDbId >= MAX_DBS) return( -1 );
+    public static int openDatabase(String dbPath)
+    {
+        try
+        {
+            if(nextDbId >= MAX_DBS)
+            {
+                return (-1);
+            }
             //dbHandles[nextDbId] = SQLiteDatabase.openOrCreateDatabase(dbPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READONLY);
-            dbHandles[nextDbId] = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READWRITE|SQLiteDatabase.CREATE_IF_NECESSARY);
+            dbHandles[nextDbId] = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS | SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY);
             nextDbId++;
-            return( nextDbId - 1 );
-        } catch (SQLException e) {
+            return (nextDbId - 1);
+        }
+        catch(SQLException e)
+        {
 
-            MyUi.popUp( "Unable to create " + dbPath + " : " + e.toString() );
+            MyUi.popUp("Unable to create " + dbPath + " : " + e.toString());
             //e.printStackTrace();
         }
-        return( ERROR );
+        return (ERROR);
     }
 
-    public static int closeDb(int dbh )
+    public static int closeDb(int dbh)
     {
-        if( dbh >= MAX_DBS) return( -1 );
-        if( dbHandles[dbh] == null ) return( -1);
+        if(dbh >= MAX_DBS)
+        {
+            return (-1);
+        }
+        if(dbHandles[dbh] == null)
+        {
+            return (-1);
+        }
         try
         {
             dbHandles[dbh].close();
-            return( 1 );
+            return (1);
         }
-        catch( Exception e)
+        catch(Exception e)
         {
-            MyUi.popUp( "Unable to close Db " + dbh);
+            MyUi.popUp("Unable to close Db " + dbh);
         }
-        return( -1 );
+        return (-1);
     }
 
     /*// sqlite database
@@ -203,11 +216,11 @@ public class MyDb
 
     public static int runQuery(int dbh, String q)
     {
-        if (dbh >= MAX_DBS)
+        if(dbh >= MAX_DBS)
         {
             return (-1);
         }
-        if (dbHandles[dbh] == null)
+        if(dbHandles[dbh] == null)
         {
             return (-1);
         }
@@ -216,7 +229,7 @@ public class MyDb
             dbHandles[dbh].execSQL(q);
             return (1);
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             MyUi.popUp("Unable to run query " + q + " on " + dbh);
         }
@@ -234,7 +247,7 @@ public class MyDb
         {
             br = new BufferedReader(new FileReader(fileName));
         }
-        catch (IOException e)
+        catch(IOException e)
         {
             MyUi.popUp("loadScopeDb : Unable to open file " + fileName + " : " + e.toString());
             return (ERROR);
@@ -249,17 +262,17 @@ public class MyDb
         try
         {
 
-            while ((line = br.readLine()) != null)
+            while((line = br.readLine()) != null)
             {
                 lineno++;
                 // skip comments
-                if (isComment(line) || isEmpty(line))
+                if(isComment(line) || isEmpty(line))
                 {
                     continue;
                 }
-                if (state == PARSER_OUTSIDE)
+                if(state == PARSER_OUTSIDE)
                 {
-                    if (!isValidTblName(line))
+                    if(!isValidTblName(line))
                     {
                         MyUi.popUp("Unexpected table head in line " + lineno + " : " + line);
                         closeDb(dbi);
@@ -275,9 +288,9 @@ public class MyDb
                     continue;
                 }
 
-                if (state == PARSER_TBLHEAD)
+                if(state == PARSER_TBLHEAD)
                 {
-                    if (!isValidTblColNames(line))
+                    if(!isValidTblColNames(line))
                     {
                         MyUi.popUp("Invalid field names specification on line " + lineno + " : " + line);
                         closeDb(dbi);
@@ -288,14 +301,14 @@ public class MyDb
                     curTblFields = line.split("`");
 
                     // Delete the table if needed
-                    if (overWriteFlag == 1)
+                    if(overWriteFlag == 1)
                     {
                         runQuery(dbi, "DROP TABLE IF EXISTS " + curTblName);
                         String query = "CREATE TABLE " + curTblName + " ( ";
-                        for (int i = 0; i < curTblFields.length; i++)
+                        for(int i = 0; i < curTblFields.length; i++)
                         {
                             query += curTblFields[i] + " TEXT";
-                            if (i != curTblFields.length - 1)
+                            if(i != curTblFields.length - 1)
                             {
                                 query += ", ";
                             }
@@ -309,10 +322,10 @@ public class MyDb
 //					MyUi.popUp("Fields = " + query);
                     continue;
                 }
-                if (state == PARSER_INSIDE)
+                if(state == PARSER_INSIDE)
                 {
 //					MyUi.popUpQuick("data line 0 = " + line);
-                    if (line.trim().compareTo(".") == 0)
+                    if(line.trim().compareTo(".") == 0)
                     {
                         state = PARSER_OUTSIDE;
                         curTblName = "";
@@ -323,7 +336,7 @@ public class MyDb
 //					MyUi.popUpQuick("data line 02 = " + line);
 
 //					MyUi.popUp("data line 1 = " + line);
-                    if (vals.length != curTblFields.length)
+                    if(vals.length != curTblFields.length)
                     {
                         MyUi.popUp("Column counts mismatch. Expected = " + curTblFields.length + ", seen = " + vals.length + " on line " + lineno);
                         closeDb(dbi);
@@ -333,20 +346,20 @@ public class MyDb
 //					MyUi.popUpQuick ("data line 2 = " + line);
                     String query = "INSERT INTO " + curTblName + "(";
 //					MyUi.popUpQuick(" one = " + query);
-                    for (int i = 0; i < curTblFields.length; i++)
+                    for(int i = 0; i < curTblFields.length; i++)
                     {
                         query += curTblFields[i];
-                        if (i != curTblFields.length - 1)
+                        if(i != curTblFields.length - 1)
                         {
                             query += ", ";
                         }
                     }
 
                     query += " ) VALUES (";
-                    for (int i = 0; i < vals.length; i++)
+                    for(int i = 0; i < vals.length; i++)
                     {
                         query += "\"" + escapeDoubleQuotes(vals[i]) + "\"";
-                        if (i != vals.length - 1)
+                        if(i != vals.length - 1)
                         {
                             query += ", ";
                         }
@@ -357,7 +370,7 @@ public class MyDb
                     {
                         runQuery(dbi, query);
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                         MyUi.popUp("Crash : " + query);
                     }
@@ -366,7 +379,7 @@ public class MyDb
 
             br.close();
         }
-        catch (IOException e)
+        catch(IOException e)
         {
             MyUi.popUp("Unable to read DB file " + fileName);
             //closeDb( DBI );
@@ -386,7 +399,7 @@ public class MyDb
         //if(FileFunctions.fileExists(fileName)) FileFunctions.deleteFile(fileName);
 
         // make sure the no. of DBs are less than max
-        if (curDbCount >= MAX_DB_COUNT)
+        if(curDbCount >= MAX_DB_COUNT)
         {
             return (ERROR);
         }
@@ -400,7 +413,7 @@ public class MyDb
         {
             br = new BufferedReader(new FileReader(fileName));
         }
-        catch (IOException e)
+        catch(IOException e)
         {
             MyUi.popUp("loadScopeDb : Unable to open file " + fileName + " : " + e.toString());
             return (ERROR);
@@ -421,17 +434,17 @@ public class MyDb
         try
         {
 
-            while ((line = br.readLine()) != null)
+            while((line = br.readLine()) != null)
             {
                 lineno++;
                 // skip comments
-                if (isComment(line) || isEmpty(line))
+                if(isComment(line) || isEmpty(line))
                 {
                     continue;
                 }
-                if (state == PARSER_OUTSIDE)
+                if(state == PARSER_OUTSIDE)
                 {
-                    if (!isValidTblName(line))
+                    if(!isValidTblName(line))
                     {
                         MyUi.popUp("Unexpected table head in line " + lineno + " : " + line);
                         closeDb(dbi);
@@ -447,9 +460,9 @@ public class MyDb
                     continue;
 
                 }
-                if (state == PARSER_TBLHEAD)
+                if(state == PARSER_TBLHEAD)
                 {
-                    if (!isValidTblColNames(line))
+                    if(!isValidTblColNames(line))
                     {
                         MyUi.popUp("Invalid field names specification on line " + lineno + " : " + line);
                         closeDb(dbi);
@@ -460,10 +473,10 @@ public class MyDb
                     curTblFields = line.split("`");
                     colNames[curDbIndex] = curTblFields;
                     String query = "CREATE TABLE " + curTblName + " ( ";
-                    for (int i = 0; i < curTblFields.length; i++)
+                    for(int i = 0; i < curTblFields.length; i++)
                     {
                         query += curTblFields[i] + " TEXT";
-                        if (i != curTblFields.length - 1)
+                        if(i != curTblFields.length - 1)
                         {
                             query += ", ";
                         }
@@ -475,10 +488,10 @@ public class MyDb
 //					MyUi.popUp("Fields = " + query);
                     continue;
                 }
-                if (state == PARSER_INSIDE)
+                if(state == PARSER_INSIDE)
                 {
 //					MyUi.popUpQuick("data line 0 = " + line);
-                    if (line.trim().compareTo(".") == 0)
+                    if(line.trim().compareTo(".") == 0)
                     {
                         state = PARSER_OUTSIDE;
                         curTblName = "";
@@ -489,7 +502,7 @@ public class MyDb
 //					MyUi.popUpQuick("data line 02 = " + line);
 
 //					MyUi.popUp("data line 1 = " + line);
-                    if (vals.length != curTblFields.length)
+                    if(vals.length != curTblFields.length)
                     {
                         MyUi.popUp("Column counts mismatch. Expected = " + curTblFields.length + ", seen = " + vals.length + " on line " + lineno);
                         closeDb(dbi);
@@ -499,20 +512,20 @@ public class MyDb
 //					MyUi.popUpQuick ("data line 2 = " + line);
                     String query = "INSERT INTO " + curTblName + "(";
 //					MyUi.popUpQuick(" one = " + query);
-                    for (int i = 0; i < curTblFields.length; i++)
+                    for(int i = 0; i < curTblFields.length; i++)
                     {
                         query += curTblFields[i];
-                        if (i != curTblFields.length - 1)
+                        if(i != curTblFields.length - 1)
                         {
                             query += ", ";
                         }
                     }
 
                     query += " ) VALUES (";
-                    for (int i = 0; i < vals.length; i++)
+                    for(int i = 0; i < vals.length; i++)
                     {
                         query += "\"" + vals[i] + "\"";
-                        if (i != vals.length - 1)
+                        if(i != vals.length - 1)
                         {
                             query += ", ";
                         }
@@ -525,7 +538,7 @@ public class MyDb
 
             br.close();
         }
-        catch (IOException e)
+        catch(IOException e)
         {
             MyUi.popUp("Unable to read text file " + fileName);
             closeDb(dbi);
@@ -631,19 +644,19 @@ public class MyDb
         SQLiteDatabase dbh = null;
         try
         {
-            if (!FileFunctions.fileExists(dbFile))
+            if(!FileFunctions.fileExists(dbFile))
             {
                 MyUi.popUp("db file " + dbFile + " does not exist !");
                 return (null);
             }
             dbh = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS | SQLiteDatabase.OPEN_READONLY);
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             MyUi.popUp("Unable to open plan database. Operation Aborted : " + e.toString());
             return (null);
         }
-        if (!dbh.isOpen())
+        if(!dbh.isOpen())
         {
             MyUi.popUp("Plan database not available.");
             return (null);
@@ -652,22 +665,22 @@ public class MyDb
     }
 
 
-	/*
-	public static int openDatabaseForReadingOld( String dbPath ) {
-		try {
-			if( nextDbId >= MAX_DBS) return( -1 );
-			//dbHandles[nextDbId] = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READONLY);
-			SQLiteDatabase nid =  SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READONLY);
-			dbHandles[nextDbId] = nid;
-			nextDbId++;
-			return( nextDbId - 1 );
+    /*
+    public static int openDatabaseForReadingOld( String dbPath ) {
+        try {
+            if( nextDbId >= MAX_DBS) return( -1 );
+            //dbHandles[nextDbId] = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READONLY);
+            SQLiteDatabase nid =  SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READONLY);
+            dbHandles[nextDbId] = nid;
+            nextDbId++;
+            return( nextDbId - 1 );
 
-		} catch (SQLException e) {
-			MyUi.popUp( "Unable to open " + dbPath + " : " + e.toString() );
-			e.printStackTrace();
-		}
-		return( -1 );
-	}
+        } catch (SQLException e) {
+            MyUi.popUp( "Unable to open " + dbPath + " : " + e.toString() );
+            e.printStackTrace();
+        }
+        return( -1 );
+    }
 */
     public static boolean uploadData(int dbh, String perId, String completeData)
     {
@@ -685,7 +698,7 @@ public class MyDb
 
             String newName1 = appSpecificDirectoryPath + File.separator + fprefix1 + ".reddb";
 
-            if (FileFunctions.fileExists(newName1))
+            if(FileFunctions.fileExists(newName1))
             {
                 FileFunctions.deleteFile(newName1);
             }
@@ -712,7 +725,7 @@ public class MyDb
 
                 Log.d("Both file Size :", "Original File : " + length + " New File : " + dest_file.length() + " Respnce : " + ret);
 
-                if (ret == length)
+                if(ret == length)
                 {
                     Log.i("Data Uploaded : ", "Data Uploaded Successfully and Replyed Lenght is : " + ret);
 
@@ -726,7 +739,7 @@ public class MyDb
                     return (false);
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
 //                    MyUi.popupOk("Unable to upload survey data : " + e.getMessage());
 
@@ -740,7 +753,7 @@ public class MyDb
 //            closeDb( DBH );
 //            return( false );
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             Log.i("Error on Data Upload : ", "" + e.getMessage());
 

@@ -9,12 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.List;
-
-import in.etaminepgg.sfa.Adapters.FrequentlyOrderedSKUsAdapter;
-import in.etaminepgg.sfa.Adapters.NewSKUsAdapter;
 import in.etaminepgg.sfa.Adapters.PreviouslyOrderedSKUsAdapter;
-import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 
@@ -27,7 +22,7 @@ import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 public class PreviouslyOrderedSKUsFragment extends Fragment
 {
     RecyclerView previouslyOrderedSKUs_RecyclerView;
-    
+
     public PreviouslyOrderedSKUsFragment()
     {
     }
@@ -43,8 +38,8 @@ public class PreviouslyOrderedSKUsFragment extends Fragment
 
         PreviouslyOrderedSKUsAdapter previouslyOrderedSKUsAdapter = new PreviouslyOrderedSKUsAdapter(DbUtils.getSkuList2(SQL_SELECT_PREVIOUSLY_ORDERED_SKUs, selectionArgs));
 
-        View layout =  inflater.inflate(R.layout.fragment_previously_ordered_skus, container, false);
-        previouslyOrderedSKUs_RecyclerView = (RecyclerView)layout.findViewById(R.id.previouslyOrderedSKUs_RecyclerView);
+        View layout = inflater.inflate(R.layout.fragment_previously_ordered_skus, container, false);
+        previouslyOrderedSKUs_RecyclerView = (RecyclerView) layout.findViewById(R.id.previouslyOrderedSKUs_RecyclerView);
         previouslyOrderedSKUs_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         previouslyOrderedSKUs_RecyclerView.setItemAnimator(new DefaultItemAnimator());
 

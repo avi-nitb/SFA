@@ -48,41 +48,31 @@ import in.etaminepgg.sfa.Utilities.Utils;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static in.etaminepgg.sfa.Utilities.Constants.REQUEST_TURN_ON_LOCATION;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_GLOBAL_ATTRIBUTES;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_RETAILER_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_RETAILER_NAME;
-import static in.etaminepgg.sfa.Utilities.ConstantsA.NONE;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NOT_PRESENT;
-import static in.etaminepgg.sfa.Utilities.Utils.getDateTime;
 import static in.etaminepgg.sfa.Utilities.Utils.getRandomNumber;
 import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 
 public class PickRetailerActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
+    private static final int REQUEST_IMAGE_CAPTURE = 100;
     static String SEPARATOR = ", ";
     static int THRESHOLD = 1;
-    private static final int REQUEST_IMAGE_CAPTURE = 100;
-
+    private final int REQUEST_CODE_ACCESS_FINE_LOCATION = 1000;
     File imageFile = null;
-
     String latitude = NOT_PRESENT;
     String longitude = NOT_PRESENT;
-
     Button selectOrderType_Button, updateRetailer_Button;
     AutoCompleteTextView shopName_AutoCompleteTextView;
     TextView retailerName_TextView, retailerMobile_TextView, img_TextView, latitude_TextView, longitude_TextView;
     ImageView retailerPhoto_ImageView;
-
     boolean isItemClicked = false;
     String retailerName;
     String retailerID;
-
-    private final int REQUEST_CODE_ACCESS_FINE_LOCATION = 1000;
     private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
-
     LocationListener locationListener = new LocationListener()
     {
         @Override
@@ -101,6 +91,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             //dismissProgressDialog();
         }
     };
+    private LocationRequest locationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -121,7 +112,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
         {
             Bitmap imageBitmap = BitmapFactory.decodeFile(getImagePath());
             retailerPhoto_ImageView.setImageBitmap(imageBitmap);
@@ -132,13 +123,13 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
             updateRetailerInDB(retailerID, latitude, longitude, getImagePath());
 
-            Utils.showSuccessDialog(PickRetailerActivity.this,"Retailer updated successfully.");
+            Utils.showSuccessDialog(PickRetailerActivity.this, "Retailer updated successfully.");
         }
-        else if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
+        else if(requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
         {
-          //  createNewRetailer();
+            //  createNewRetailer();
         }
-        else if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED)
+        else if(requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED)
         {
             Utils.showErrorDialog(this, "Updating Retailer failed. You must turn on GPS.");
         }
@@ -148,13 +139,13 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     {
         shopName_AutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.shopName_AutoCompleteTextView);
         retailerName_TextView = (TextView) findViewById(R.id.retailerName_TextView);
-        retailerMobile_TextView = (TextView)findViewById(R.id.retailerMobile_TextView);
+        retailerMobile_TextView = (TextView) findViewById(R.id.retailerMobile_TextView);
         img_TextView = (TextView) findViewById(R.id.img_TextView);
-        retailerPhoto_ImageView = (ImageView)findViewById(R.id.retailerPhoto_ImageView);
+        retailerPhoto_ImageView = (ImageView) findViewById(R.id.retailerPhoto_ImageView);
         latitude_TextView = (TextView) findViewById(R.id.latitude_TextView);
         longitude_TextView = (TextView) findViewById(R.id.longitude_TextView);
         selectOrderType_Button = (Button) findViewById(R.id.selectOrderType_Button);
-        updateRetailer_Button = (Button)findViewById(R.id.updateRetailer_Button);
+        updateRetailer_Button = (Button) findViewById(R.id.updateRetailer_Button);
     }
 
     private void setListenersToViews()
@@ -198,7 +189,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             @Override
             public void onClick(View v)
             {
-                if (isShopNameValid())
+                if(isShopNameValid())
                 {
                     launchSelectSalesOrderTypeActivity();
                 }
@@ -230,15 +221,15 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             @Override
             public void onClick(View v)
             {
-                if (!Utils.isGpsEnabled(PickRetailerActivity.this))
+                if(!Utils.isGpsEnabled(PickRetailerActivity.this))
                 {
                     Utils.enableGPS(googleApiClient, locationRequest, PickRetailerActivity.this);
                 }
                 else
                 {
-                    if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                    if(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
                     {
-                        if (isShopNameValid())
+                        if(isShopNameValid())
                         {
                             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
                         }
@@ -258,9 +249,9 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
     boolean isShopNameValid()
     {
-        if (isItemClicked)
+        if(isItemClicked)
         {
-            if (shopName_AutoCompleteTextView.getText().toString().trim().isEmpty())
+            if(shopName_AutoCompleteTextView.getText().toString().trim().isEmpty())
             {
                 return false;
             }
@@ -276,8 +267,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     }
 
 
-
-    private  void launchSelectSalesOrderTypeActivity()
+    private void launchSelectSalesOrderTypeActivity()
     {
         Intent intent = new Intent(this, SelectSalesOrderTypeActivity.class);
         intent.putExtra(INTENT_EXTRA_RETAILER_NAME, retailerName);
@@ -288,13 +278,13 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     List<String> getShopNames()
     {
         List<String> shopsInfoList = new ArrayList<>();
-        String SQL_SELECT_RETAILERS = "select retailer_id, shop_name from " + TBL_RETAILER ;
+        String SQL_SELECT_RETAILERS = "select retailer_id, shop_name from " + TBL_RETAILER;
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILERS, null);
         cursor.moveToFirst();
 
-        while (!cursor.isAfterLast())
+        while(!cursor.isAfterLast())
         {
             String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
             String shopName = cursor.getString(cursor.getColumnIndexOrThrow("shop_name"));
@@ -307,7 +297,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
     void showRetailerDetails(String retailerID)
     {
-        String SQL_SELECT_RETAILERS = "select * from " + TBL_RETAILER  + " where retailer_id=?";
+        String SQL_SELECT_RETAILERS = "select * from " + TBL_RETAILER + " where retailer_id=?";
         String[] selectionArgs = new String[]{retailerID};
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
@@ -326,7 +316,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             latitude_TextView.setText("Latitude: " + latitude);
             longitude_TextView.setText("Longitude: " + longitude);
 
-            if (!img_source.equals(NOT_PRESENT))
+            if(!img_source.equals(NOT_PRESENT))
             {
                 Bitmap imageBitmap = BitmapFactory.decodeFile(img_source);
                 retailerPhoto_ImageView.setImageBitmap(imageBitmap);
@@ -347,7 +337,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     String getImagePath()
     {
         //if photo is not captured or capturing failed
-        if (imageFile == null)
+        if(imageFile == null)
         {
             return NOT_PRESENT;
         }
@@ -365,7 +355,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
         Log.e("photoDir", photoDir.toString());
 
-        File image = File.createTempFile(imageFileName,".jpg", photoDir);
+        File image = File.createTempFile(imageFileName, ".jpg", photoDir);
 
         return image;
     }
@@ -380,14 +370,14 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
         {
             imageFile = createImageFile();
         }
-        catch (IOException ex)
+        catch(IOException ex)
         {
             ex.printStackTrace();
         }
 
-        if (imageFile != null)
+        if(imageFile != null)
         {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             {
                 photoURI = FileProvider.getUriForFile(PickRetailerActivity.this, BuildConfig.APPLICATION_ID + ".provider", imageFile);
             }
@@ -414,7 +404,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
         retailerValues.put("img_source", imgPath);
         retailerValues.put("modified_date", Utils.getDateTime());
 
-        sqLiteDatabase.update(TBL_RETAILER, retailerValues, "retailer_id = ?", new String[]{retailerID} );
+        sqLiteDatabase.update(TBL_RETAILER, retailerValues, "retailer_id = ?", new String[]{retailerID});
 
         sqLiteDatabase.close();
     }
@@ -464,7 +454,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
     private void connectGoogleApiClient()
     {
-        if (!googleApiClient.isConnected() || !googleApiClient.isConnecting())
+        if(!googleApiClient.isConnected() || !googleApiClient.isConnecting())
         {
             googleApiClient.connect();
         }
@@ -472,7 +462,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
     private void disConnectGoogleApiClient()
     {
-        if (googleApiClient.isConnected() || googleApiClient.isConnecting())
+        if(googleApiClient.isConnected() || googleApiClient.isConnecting())
         {
             googleApiClient.disconnect();
         }

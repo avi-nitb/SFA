@@ -1,7 +1,6 @@
 package in.etaminepgg.sfa.Activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -9,8 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -73,8 +70,6 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     SQLiteDatabase sqLiteDatabase;
 
     private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
-
     LocationListener locationListener = new LocationListener()
     {
         @Override
@@ -91,6 +86,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
             doActionDependingOnOrderType();
         }
     };
+    private LocationRequest locationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -106,7 +102,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         setListenersToViews();
 
         Intent intent = getIntent();
-        if (intent!=null)
+        if(intent != null)
         {
             retailerName = intent.getStringExtra(INTENT_EXTRA_RETAILER_NAME);
             retailerID = intent.getStringExtra(INTENT_EXTRA_RETAILER_ID);
@@ -132,7 +128,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     private void findViewsByIDs()
     {
-        salesOrderFor_TextView = (TextView)findViewById(R.id.salesOrderFor_TextView);
+        salesOrderFor_TextView = (TextView) findViewById(R.id.salesOrderFor_TextView);
         orderTypes_RadioGroup = (RadioGroup) findViewById(R.id.orderTypes_RadioGroup);
         newOrder_RadioButton = (RadioButton) findViewById(R.id.newOrder_RadioButton);
         newRegularOrder_RadioButton = (RadioButton) findViewById(R.id.newRegularOrder_RadioButton);
@@ -149,7 +145,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedRadioButtonId)
             {
-                switch (checkedRadioButtonId)
+                switch(checkedRadioButtonId)
                 {
                     case R.id.newOrder_RadioButton:
                         whyNoOrder_LinearLayout.setVisibility(View.INVISIBLE);
@@ -181,7 +177,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
                 //getGpsCoordinates();
 
-                if (!Utils.isGpsEnabled(SelectSalesOrderTypeActivity.this))
+                if(!Utils.isGpsEnabled(SelectSalesOrderTypeActivity.this))
                 {
                     Utils.enableGPS(googleApiClient, locationRequest, SelectSalesOrderTypeActivity.this);
                 }
@@ -196,11 +192,11 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
+        if(requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
         {
             getGpsCoordinates();
         }
-        else if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED)
+        else if(requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED)
         {
             Utils.showErrorDialog(this, "Visit & Order creation failed. Turn on GPS.");
         }
@@ -208,11 +204,12 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     void getGpsCoordinates()
     {
-        if(Utils.isNetworkConnected(SelectSalesOrderTypeActivity.this)){
+        if(Utils.isNetworkConnected(SelectSalesOrderTypeActivity.this))
+        {
 
-            if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            if(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             {
-                if (getOrderFlag().equals("1"))
+                if(getOrderFlag().equals("1"))
                 {
                     startProgressDialog();
                 }
@@ -225,8 +222,10 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ACCESS_FINE_LOCATION);
                 //LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
             }
-        }else {
-            Utils.showErrorDialog(SelectSalesOrderTypeActivity.this,"Please check your internet connection.");
+        }
+        else
+        {
+            Utils.showErrorDialog(SelectSalesOrderTypeActivity.this, "Please check your internet connection.");
         }
     }
 
@@ -235,7 +234,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         Resources resources = getResources();
         String intentExtraKey_selectedOrderType = resources.getString(R.string.key_selected_order_type);
 
-        switch (selectedOrderType)
+        switch(selectedOrderType)
         {
             case ORDER_TYPE_NEW_ORDER:
 
@@ -252,7 +251,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
                 break;
 
             case ORDER_TYPE_NO_ORDER:
-                if (whyNoOrder_TextInputEditText.getText().toString().trim().isEmpty())
+                if(whyNoOrder_TextInputEditText.getText().toString().trim().isEmpty())
                 {
                     Utils.showPopUp(getBaseContext(), "Reason can't be empty. Please enter the reason.");
                 }
@@ -300,7 +299,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     //retailerFeedback is explanation/reason by retailer, why there is no order from him
     private void makeEntriesIntoVisitAndOrderTables(String retailerFeedback)
     {
-        String visitID = "VISIT_"+getIST()+"_"+getRandomNumber();
+        String visitID = "VISIT_" + getIST() + "_" + getRandomNumber();
 
         insertIntoRetailerVisitTable(visitID, retailerFeedback);
         DbUtils.makeCurrentActiveOrderInactive();
@@ -325,7 +324,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     void insertIntoSalesOrderTable(String visitID)
     {
-        String orderID = "ORDER_"+getIST()+"_"+getRandomNumber();
+        String orderID = "ORDER_" + getIST() + "_" + getRandomNumber();
         ContentValues salesOrderValues = new ContentValues();
         salesOrderValues.put("order_id", orderID);
         salesOrderValues.put("visit_id", visitID);
@@ -340,7 +339,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         //we are adding new SKUs against active sales order
         //so if there is no order, we shouldn't make that order as active order
         //if we do, new SKUs get added against the order_id where there is no sales order
-        if (getOrderFlag().equals("1"))
+        if(getOrderFlag().equals("1"))
         {
             salesOrderValues.put("is_active", "1");
         }
@@ -354,11 +353,11 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     private String getOrderFlag()
     {
-        if (selectedOrderType == ORDER_TYPE_NO_ORDER)
+        if(selectedOrderType == ORDER_TYPE_NO_ORDER)
         {
             return "0";
         }
-        else if (selectedOrderType == ORDER_TYPE_NEW_ORDER || selectedOrderType == ORDER_TYPE_NEW_REGULAR_ORDER)
+        else if(selectedOrderType == ORDER_TYPE_NEW_ORDER || selectedOrderType == ORDER_TYPE_NEW_REGULAR_ORDER)
         {
             return "1";
         }
@@ -371,14 +370,14 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
     {
-        switch (requestCode)
+        switch(requestCode)
         {
             case REQUEST_CODE_ACCESS_FINE_LOCATION:
             {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 {
-                    if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                    if(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
                     {
                         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
                     }
@@ -414,7 +413,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     private void dismissProgressDialog()
     {
-        if (progressDialog!=null)
+        if(progressDialog != null)
         {
             progressDialog.dismiss();
         }
@@ -464,7 +463,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     private void connectGoogleApiClient()
     {
-        if (!googleApiClient.isConnected() || !googleApiClient.isConnecting())
+        if(!googleApiClient.isConnected() || !googleApiClient.isConnecting())
         {
             googleApiClient.connect();
         }
@@ -472,7 +471,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     private void disConnectGoogleApiClient()
     {
-        if (googleApiClient.isConnected() || googleApiClient.isConnecting())
+        if(googleApiClient.isConnected() || googleApiClient.isConnecting())
         {
             googleApiClient.disconnect();
         }

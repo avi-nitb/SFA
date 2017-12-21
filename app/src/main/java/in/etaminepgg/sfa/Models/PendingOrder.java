@@ -1,7 +1,5 @@
 package in.etaminepgg.sfa.Models;
 
-import java.util.List;
-
 /**
  * Created by etamine on 16/8/17.
  */

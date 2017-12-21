@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import in.etaminepgg.sfa.Adapters.NewSKUsAdapter;
 import in.etaminepgg.sfa.R;
 
 /**
@@ -19,7 +18,7 @@ import in.etaminepgg.sfa.R;
 public class RetailerRegularOrderFragment extends Fragment
 {
     RecyclerView retailerRegularOrder_RecyclerView;
-    
+
     public RetailerRegularOrderFragment()
     {
     }
@@ -28,8 +27,8 @@ public class RetailerRegularOrderFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        View layout =  inflater.inflate(R.layout.fragment_retailer_regular_order, container, false);
-        retailerRegularOrder_RecyclerView = (RecyclerView)layout.findViewById(R.id.retailerRegularOrder_RecyclerView);
+        View layout = inflater.inflate(R.layout.fragment_retailer_regular_order, container, false);
+        retailerRegularOrder_RecyclerView = (RecyclerView) layout.findViewById(R.id.retailerRegularOrder_RecyclerView);
         retailerRegularOrder_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         retailerRegularOrder_RecyclerView.setItemAnimator(new DefaultItemAnimator());
         //retailerRegularOrder_RecyclerView.setAdapter(new NewSKUsAdapter());

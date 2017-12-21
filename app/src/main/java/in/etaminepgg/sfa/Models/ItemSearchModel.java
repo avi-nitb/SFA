@@ -4,7 +4,8 @@ package in.etaminepgg.sfa.Models;
  * Created by sameer on 23/6/17.
  */
 
-public class ItemSearchModel {
+public class ItemSearchModel
+{
 
     String itemName;
     String itemCategory;
@@ -29,52 +30,64 @@ public class ItemSearchModel {
 
     }
 
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
-    }
-
-    public void setItemCategory(String itemCategory) {
-        this.itemCategory = itemCategory;
-    }
-
-    public void setItemId(String itemId) {
-        this.itemId = itemId;
-    }
-
-    public void setItemMaterial(String itemMaterial) {
-        this.itemMaterial = itemMaterial;
-    }
-
-    public void setItemUsage(String itemUsage) {
-        this.itemUsage = itemUsage;
-    }
-
-    public void setItemPrice(String itemPrice) {
-        this.itemPrice = itemPrice;
-    }
-
-    public String getItemName() {
+    public String getItemName()
+    {
         return itemName;
     }
 
-    public String getItemCategory() {
+    public void setItemName(String itemName)
+    {
+        this.itemName = itemName;
+    }
+
+    public String getItemCategory()
+    {
         return itemCategory;
     }
 
-    public String getItemId() {
+    public void setItemCategory(String itemCategory)
+    {
+        this.itemCategory = itemCategory;
+    }
+
+    public String getItemId()
+    {
         return itemId;
     }
 
-    public String getItemMaterial() {
+    public void setItemId(String itemId)
+    {
+        this.itemId = itemId;
+    }
+
+    public String getItemMaterial()
+    {
         return itemMaterial;
     }
 
-    public String getItemUsage() {
+    public void setItemMaterial(String itemMaterial)
+    {
+        this.itemMaterial = itemMaterial;
+    }
+
+    public String getItemUsage()
+    {
         return itemUsage;
     }
 
-    public String getItemPrice() {
+    public void setItemUsage(String itemUsage)
+    {
+        this.itemUsage = itemUsage;
+    }
+
+    public String getItemPrice()
+    {
         return itemPrice;
+    }
+
+    public void setItemPrice(String itemPrice)
+    {
+        this.itemPrice = itemPrice;
     }
 
 }

@@ -70,10 +70,10 @@ public class SchemesAdapter extends RecyclerView.Adapter<SchemesAdapter.SchemeIn
         {
             super(itemView);
 
-            schemeName_TextView = (TextView)itemView.findViewById(R.id.schemeName_TextView);
-            schemeDescription_TextView = (TextView)itemView.findViewById(R.id.schemeDescription_TextView);
-            schemeStartDate_TextView = (TextView)itemView.findViewById(R.id.schemeStartDate_TextView);
-            schemeEndDate_TextView = (TextView)itemView.findViewById(R.id.schemeEndDate_TextView);
+            schemeName_TextView = (TextView) itemView.findViewById(R.id.schemeName_TextView);
+            schemeDescription_TextView = (TextView) itemView.findViewById(R.id.schemeDescription_TextView);
+            schemeStartDate_TextView = (TextView) itemView.findViewById(R.id.schemeStartDate_TextView);
+            schemeEndDate_TextView = (TextView) itemView.findViewById(R.id.schemeEndDate_TextView);
 
             itemView.setOnClickListener(new View.OnClickListener()
             {

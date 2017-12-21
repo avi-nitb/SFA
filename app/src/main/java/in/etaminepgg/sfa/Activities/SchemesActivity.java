@@ -2,8 +2,8 @@ package in.etaminepgg.sfa.Activities;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,10 +18,8 @@ import in.etaminepgg.sfa.Models.Scheme;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.MyDb;
 
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_DETAILS;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SCHEME;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
-import static in.etaminepgg.sfa.Utilities.Utils.getDateTime;
 import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 
 public class SchemesActivity extends AppCompatActivity
@@ -35,15 +33,15 @@ public class SchemesActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schemes);
 
-        emptyAdapter_TextView = (TextView)findViewById(R.id.emptyAdapter_TextView);
-        schemes_RecyclerView = (RecyclerView)findViewById(R.id.schemes_RecyclerView);
+        emptyAdapter_TextView = (TextView) findViewById(R.id.emptyAdapter_TextView);
+        schemes_RecyclerView = (RecyclerView) findViewById(R.id.schemes_RecyclerView);
 
         schemes_RecyclerView.setLayoutManager(new LinearLayoutManager(this));
         schemes_RecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         List<Scheme> schemeList = getSchemesList();
 
-        if (schemeList.size() < 1)
+        if(schemeList.size() < 1)
         {
             emptyAdapter_TextView.setVisibility(View.VISIBLE);
             schemes_RecyclerView.setVisibility(View.GONE);
@@ -70,7 +68,7 @@ public class SchemesActivity extends AppCompatActivity
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SCHEMES, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String schemeID = cursor.getString(cursor.getColumnIndex("scheme_id"));
             String schemeName = cursor.getString(cursor.getColumnIndex("scheme_name"));

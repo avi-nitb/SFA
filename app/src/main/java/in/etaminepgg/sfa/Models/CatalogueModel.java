@@ -4,7 +4,8 @@ package in.etaminepgg.sfa.Models;
  * Created by sameer on 24/6/17.
  */
 
-public class CatalogueModel {
+public class CatalogueModel
+{
 
     String item_id, item_name, item_category, item_price, scheme_name, img_path;
 
@@ -23,52 +24,64 @@ public class CatalogueModel {
         this.img_path = img_path;
     }
 
-    public void setItem_id(String item_id) {
-        this.item_id = item_id;
-    }
-
-    public void setItem_name(String item_name) {
-        this.item_name = item_name;
-    }
-
-    public void setItem_category(String item_category) {
-        this.item_category = item_category;
-    }
-
-    public void setItem_price(String item_price) {
-        this.item_price = item_price;
-    }
-
-    public void setScheme_name(String scheme_name) {
-        this.scheme_name = scheme_name;
-    }
-
-    public void setImg_path(String img_path) {
-        this.img_path = img_path;
-    }
-
-    public String getItem_id() {
+    public String getItem_id()
+    {
         return item_id;
     }
 
-    public String getItem_name() {
+    public void setItem_id(String item_id)
+    {
+        this.item_id = item_id;
+    }
+
+    public String getItem_name()
+    {
         return item_name;
     }
 
-    public String getItem_category() {
+    public void setItem_name(String item_name)
+    {
+        this.item_name = item_name;
+    }
+
+    public String getItem_category()
+    {
         return item_category;
     }
 
-    public String getItem_price() {
+    public void setItem_category(String item_category)
+    {
+        this.item_category = item_category;
+    }
+
+    public String getItem_price()
+    {
         return item_price;
     }
 
-    public String getScheme_name() {
+    public void setItem_price(String item_price)
+    {
+        this.item_price = item_price;
+    }
+
+    public String getScheme_name()
+    {
         return scheme_name;
     }
 
-    public String getImg_path() {
+    public void setScheme_name(String scheme_name)
+    {
+        this.scheme_name = scheme_name;
+    }
+
+    public String getImg_path()
+    {
         return img_path;
+    }
+
+    public void setImg_path(String img_path)
+    {
+        this.img_path = img_path;
     }
 
 }

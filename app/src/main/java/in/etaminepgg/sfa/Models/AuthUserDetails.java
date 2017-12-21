@@ -2,32 +2,38 @@ package in.etaminepgg.sfa.Models;
 
 
 @SuppressWarnings("all")
-public class AuthUserDetails {
+public class AuthUserDetails
+{
     private final int apiStatus;
 
     private final String authToken;
 
     private final Data data;
 
-    public AuthUserDetails(int apiStatus, String authToken, Data data) {
+    public AuthUserDetails(int apiStatus, String authToken, Data data)
+    {
         this.apiStatus = apiStatus;
         this.authToken = authToken;
         this.data = data;
     }
 
-    public int getApiStatus() {
+    public int getApiStatus()
+    {
         return apiStatus;
     }
 
-    public String getAuthToken() {
+    public String getAuthToken()
+    {
         return authToken;
     }
 
-    public Data getData() {
+    public Data getData()
+    {
         return data;
     }
 
-    public static class Data {
+    public static class Data
+    {
         private final String username;
 
         private final String mobile;
@@ -41,7 +47,8 @@ public class AuthUserDetails {
         private final String companyId;
 
         public Data(String username, String mobile, String email, String role, String locationId,
-                    String companyId) {
+                    String companyId)
+        {
             this.username = username;
             this.mobile = mobile;
             this.email = email;
@@ -50,27 +57,33 @@ public class AuthUserDetails {
             this.companyId = companyId;
         }
 
-        public String getUsername() {
+        public String getUsername()
+        {
             return username;
         }
 
-        public String getMobile() {
+        public String getMobile()
+        {
             return mobile;
         }
 
-        public String getEmail() {
+        public String getEmail()
+        {
             return email;
         }
 
-        public String getRole() {
+        public String getRole()
+        {
             return role;
         }
 
-        public String getLocationId() {
+        public String getLocationId()
+        {
             return locationId;
         }
 
-        public String getCompanyId() {
+        public String getCompanyId()
+        {
             return companyId;
         }
     }

@@ -59,32 +59,25 @@ import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 
 public class CreateRetailerActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
+    private static final String ADD_NEW_AREA = "add new area";
+    private static final int REQUEST_IMAGE_CAPTURE = 111;
+    private final int REQUEST_CODE_ACCESS_FINE_LOCATION = 11;
     EditText etRetailerName, etShopName, etShopAddress, etPincode, etMobNo, etEmail;
     Spinner spnState, spnDistrict, spnTaluk, spnArea;
     Button btnPhotoCapt, btnCreateNewRetailer;
-
-    private String retailerName, shopName, shopAddress, pincode, mobileNumber, email = "";
-    private String stateName, districtName, talukName, areaName;
-    private String stateID, districtID, talukID, areaID;
-
-    private static final String ADD_NEW_AREA = "add new area";
     EditText enterNewArea_EditText;
-
     ArrayList<String> arrState;
     ArrayList<String> arrDist;
     ArrayList<String> arrCity;
     ArrayList<String> arrArea;
-
-    private static final int REQUEST_IMAGE_CAPTURE = 111;
     ImageView ivPhotoPreview;
     File imageFile = null;
-
     ProgressDialog progressDialog = null;
-    private final int REQUEST_CODE_ACCESS_FINE_LOCATION = 11;
     String lat, lng;
+    private String retailerName, shopName, shopAddress, pincode, mobileNumber, email = "";
+    private String stateName, districtName, talukName, areaName;
+    private String stateID, districtID, talukID, areaID;
     private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
-
     LocationListener locationListener = new LocationListener()
     {
         @Override
@@ -100,9 +93,10 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
             dismissProgressDialog();
 
-            Utils.showSuccessDialog(CreateRetailerActivity.this,"Retailer creation successful.");
+            Utils.showSuccessDialog(CreateRetailerActivity.this, "Retailer creation successful.");
         }
     };
+    private LocationRequest locationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -126,9 +120,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         spnTaluk = (Spinner) findViewById(R.id.spnTaluk);
         spnArea = (Spinner) findViewById(R.id.spnArea);
 
-        btnPhotoCapt = (Button)findViewById(R.id.btnPhotoCapt);
+        btnPhotoCapt = (Button) findViewById(R.id.btnPhotoCapt);
         ivPhotoPreview = (ImageView) findViewById(R.id.ivPhotoPreview);
-        btnCreateNewRetailer = (Button)findViewById(R.id.btnCreateNewRetailer);
+        btnCreateNewRetailer = (Button) findViewById(R.id.btnCreateNewRetailer);
 
         arrState = new ArrayList<>();
         arrDist = new ArrayList<>();
@@ -203,7 +197,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 areaName = spnArea.getSelectedItem().toString();
                 areaID = getLocationID(areaName);
 
-                if (areaName.equals(ADD_NEW_AREA))
+                if(areaName.equals(ADD_NEW_AREA))
                 {
                     showAddNewAreaDialog();
                 }
@@ -230,7 +224,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             @Override
             public void onClick(View v)
             {
-                if (!Utils.isGpsEnabled(CreateRetailerActivity.this))
+                if(!Utils.isGpsEnabled(CreateRetailerActivity.this))
                 {
                     Utils.enableGPS(googleApiClient, locationRequest, CreateRetailerActivity.this);
                 }
@@ -245,16 +239,16 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
         {
             Bitmap imageBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
             ivPhotoPreview.setImageBitmap(imageBitmap);
         }
-        else if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
+        else if(requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
         {
             createNewRetailer();
         }
-        else if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED)
+        else if(requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED)
         {
             Utils.showErrorDialog(this, "Retailer creation failed. You must turn on GPS.");
         }
@@ -264,9 +258,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     {
         captureFormData();
 
-        if (hasEnteredValidData())
+        if(hasEnteredValidData())
         {
-            if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            if(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             {
                 startProgressDialog();
                 LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
@@ -287,7 +281,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     String getImagePath()
     {
         //if photo is not captured
-        if (imageFile == null)
+        if(imageFile == null)
         {
             return "";
         }
@@ -314,7 +308,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             {
                 String areaEntered = enterNewArea_EditText.getText().toString().trim();
 
-                if (areaEntered.isEmpty())
+                if(areaEntered.isEmpty())
                 {
                     Utils.showToast(getBaseContext(), "Area name can't be empty. Please enter valid area");
                 }
@@ -356,14 +350,14 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         {
             imageFile = createImageFile();
         }
-        catch (IOException ex)
+        catch(IOException ex)
         {
             ex.printStackTrace();
         }
 
-        if (imageFile != null)
+        if(imageFile != null)
         {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             {
                 photoURI = FileProvider.getUriForFile(CreateRetailerActivity.this, BuildConfig.APPLICATION_ID + ".provider", imageFile);
             }
@@ -386,7 +380,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         Log.e("photoDir", photoDir.toString());
 
-        File image = File.createTempFile(imageFileName,".jpg", photoDir);
+        File image = File.createTempFile(imageFileName, ".jpg", photoDir);
 
         return image;
     }
@@ -422,34 +416,34 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         String msgInvalidEntries = "Invalid Entry Here. Please Enter Valid Data";
         int inValidEntriesCount = 0;
 
-        if (retailerName.isEmpty())
+        if(retailerName.isEmpty())
         {
             etRetailerName.setError(msgInvalidEntries);
             inValidEntriesCount++;
         }
-        if (shopName.isEmpty())
+        if(shopName.isEmpty())
         {
             etShopName.setError(msgInvalidEntries);
             inValidEntriesCount++;
         }
-        if (shopAddress.isEmpty())
+        if(shopAddress.isEmpty())
         {
             etShopAddress.setError(msgInvalidEntries);
             inValidEntriesCount++;
         }
-        if (pincode.isEmpty() || !pincode.matches("^[1-9][0-9]{5}$"))
+        if(pincode.isEmpty() || !pincode.matches("^[1-9][0-9]{5}$"))
         {
             etPincode.setError(msgInvalidEntries);
             inValidEntriesCount++;
         }
-        if (mobileNumber.isEmpty() || !mobileNumber.matches("^[7-9][0-9]{9}$"))
+        if(mobileNumber.isEmpty() || !mobileNumber.matches("^[7-9][0-9]{9}$"))
         {
             etMobNo.setError(msgInvalidEntries);
             inValidEntriesCount++;
         }
 
         //entering email is optional.
-        if (!email.isEmpty())
+        if(!email.isEmpty())
         {
             if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
             {
@@ -458,13 +452,13 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             }
         }
 
-        if (areaName.equals(ADD_NEW_AREA))
+        if(areaName.equals(ADD_NEW_AREA))
         {
             Utils.showPopUp(this, "Error: Select Valid Area");
             inValidEntriesCount++;
         }
 
-        return  inValidEntriesCount == 0;
+        return inValidEntriesCount == 0;
     }
 
     private void startProgressDialog()
@@ -483,7 +477,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
     private void dismissProgressDialog()
     {
-        if (progressDialog!=null)
+        if(progressDialog != null)
         {
             progressDialog.dismiss();
         }
@@ -534,7 +528,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
     private void connectGoogleApiClient()
     {
-        if (!googleApiClient.isConnected() || !googleApiClient.isConnecting())
+        if(!googleApiClient.isConnected() || !googleApiClient.isConnecting())
         {
             googleApiClient.connect();
         }
@@ -542,7 +536,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
     private void disConnectGoogleApiClient()
     {
-        if (googleApiClient.isConnected() || googleApiClient.isConnecting())
+        if(googleApiClient.isConnected() || googleApiClient.isConnecting())
         {
             googleApiClient.disconnect();
         }
@@ -560,7 +554,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_STATES, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
             statesList.add(stateName);
@@ -584,7 +578,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_DISTRICTS, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
             districtsList.add(stateName);
@@ -608,7 +602,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_TALUKS, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
             taluksList.add(stateName);
@@ -632,7 +626,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_AREAS, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
             areasList.add(stateName);
@@ -658,7 +652,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_LOCATION_ID, selectionArgs);
 
-        if (cursor.moveToFirst())
+        if(cursor.moveToFirst())
         {
             locationID = cursor.getString(cursor.getColumnIndexOrThrow("loc_id"));
         }

@@ -62,13 +62,13 @@ public class SkuListByGenreActivity extends AppCompatActivity
             @Override
             public void onTabSelected(TabLayout.Tab tab)
             {
-                if (tab.getPosition() == 0)
+                if(tab.getPosition() == 0)
                 {
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.skuList_ViewPager + ":" + skuList_ViewPager.getCurrentItem());
 
-                    if (skuList_ViewPager.getCurrentItem() == 0 && fragment != null)
+                    if(skuList_ViewPager.getCurrentItem() == 0 && fragment != null)
                     {
-                        ((SalesOrderFragment)fragment).showCorrectSalesOrder();
+                        ((SalesOrderFragment) fragment).showCorrectSalesOrder();
                     }
                 }
                 else
@@ -95,19 +95,19 @@ public class SkuListByGenreActivity extends AppCompatActivity
     {
         Intent intent = getIntent();
 
-        if (intent != null)
+        if(intent != null)
         {
             String intentExtraKey_TabToShow = resources.getString(R.string.key_tab_to_show);
             String intentExtraKey_selectedOrderType = resources.getString(R.string.key_selected_order_type);
 
             //when launching from Dashboard Activity
-            if (intent.hasExtra(intentExtraKey_TabToShow))
+            if(intent.hasExtra(intentExtraKey_TabToShow))
             {
                 String tabToShow = intent.getStringExtra(intentExtraKey_TabToShow);
                 return tabToShow;
             }
             //when launching from SelectSalesOrderType Activity
-            else if (intent.hasExtra(intentExtraKey_selectedOrderType))
+            else if(intent.hasExtra(intentExtraKey_selectedOrderType))
             {
                 String selectedOrderType = intent.getStringExtra(intentExtraKey_selectedOrderType);
                 return selectedOrderType;
@@ -136,7 +136,7 @@ public class SkuListByGenreActivity extends AppCompatActivity
 
     private void showRelevantTab(String intentExtraValue)
     {
-        switch (intentExtraValue)
+        switch(intentExtraValue)
         {
             case NEW_SKUs_TAB:
                 skuGenre_tabLayout.scrollTo(1, 0);

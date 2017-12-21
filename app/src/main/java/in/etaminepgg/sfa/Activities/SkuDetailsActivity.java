@@ -43,10 +43,10 @@ public class SkuDetailsActivity extends AppCompatActivity
 
         Intent intent = getIntent();
 
-        if (intent != null)
+        if(intent != null)
         {
             skuID = getIntent().getStringExtra(KEY_SKU_ID);
-            if (skuID != null)
+            if(skuID != null)
             {
                 getDataAndBind(skuID);
 
@@ -76,7 +76,7 @@ public class SkuDetailsActivity extends AppCompatActivity
         String[] selectionArgs = new String[]{skuID};
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SKU_DATA, selectionArgs);
 
-        if (cursor.moveToFirst())
+        if(cursor.moveToFirst())
         {
             //skuPhoto_ImageView = (ImageView) findViewById(R.id.skuPhoto_ImageView);
             skuCategory = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));

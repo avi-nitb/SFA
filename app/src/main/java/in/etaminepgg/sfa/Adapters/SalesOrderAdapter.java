@@ -5,17 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,9 +28,7 @@ import java.util.List;
 
 import in.etaminepgg.sfa.Activities.LoginActivity;
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
-import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
 import in.etaminepgg.sfa.Models.SalesOrderSku;
-import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
@@ -65,8 +59,8 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
     public SalesOrderAdapter(List<SalesOrderSku> skuList, LinearLayout salesOrder_LinearLayout_outer, CheckBox setOrderAsRegularOrder_CheckBox)
     {
         this.skuList = skuList;
-        this.salesOrder_LinearLayout_outer=salesOrder_LinearLayout_outer;
-        this.salesOrder_LinearLayout = (LinearLayout)salesOrder_LinearLayout_outer.findViewById(R.id.salesOrder_LinearLayout);
+        this.salesOrder_LinearLayout_outer = salesOrder_LinearLayout_outer;
+        this.salesOrder_LinearLayout = (LinearLayout) salesOrder_LinearLayout_outer.findViewById(R.id.salesOrder_LinearLayout);
         this.setOrderAsRegularOrder_CheckBox = setOrderAsRegularOrder_CheckBox;
         this.submitSalesOrder_Button = (Button) salesOrder_LinearLayout.findViewById(R.id.submitSalesOrder_Button);
         this.orderSummary_TextView = (TextView) salesOrder_LinearLayout.findViewById(R.id.orderSummary_TextView);
@@ -89,7 +83,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
 
         String listString = "NONE";
 
-        for (SalesOrderSku s : skuList)
+        for(SalesOrderSku s : skuList)
         {
             listString = "";
             listString += s.getOrderDetailId() + "\t" + s.getSkuID() + "\t";
@@ -97,7 +91,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
 
         Log.e("skuList", listString);
 
-        Log.e("orderDetailID",String.valueOf(orderDetailID));
+        Log.e("orderDetailID", String.valueOf(orderDetailID));
 
         SpannableString salesOrderSkuAttributes = getSalesOrderAttributesFor(String.valueOf(orderDetailID));
 
@@ -116,7 +110,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
 
         skuInfoViewHolder.sku_SO_Attr_TextView.setText(salesOrderSkuAttributes);
 
-        Log.e("attributeSet",String.valueOf(salesOrderSkuAttributes));
+        Log.e("attributeSet", String.valueOf(salesOrderSkuAttributes));
 
     }
 
@@ -138,7 +132,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_ORDER_ATTRIBUTES_SET, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             int attributeId = cursor.getInt(cursor.getColumnIndexOrThrow("attribute_id"));
 
@@ -160,7 +154,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
         cursor.close();
         sqLiteDatabase.close();
 
-        Log.e("attributesOfSku",attributesOfSku.toString());
+        Log.e("attributesOfSku", attributesOfSku.toString());
 
         //CharSequence skuAttributesWithoutCommaAtTheEnd = attributesOfSku.subSequence(0, attributesOfSku.length()-2);
 
@@ -205,7 +199,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
                     String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
                     String skuQty = editable.toString().trim();
 
-                    if (!skuQty.isEmpty())
+                    if(!skuQty.isEmpty())
                     {
                         updateSkuQtyInSalesOrder(skuID, skuPrice, skuQty);
                     }
@@ -231,7 +225,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
                     String orderDetailID = itemView.getTag(R.string.tag_order_detail_id).toString();
                     String skuID = itemView.getTag(R.string.tag_sku_id).toString();
 
-                    if (deleteSkuInSalesOrderDetailsTable(orderDetailID, skuID) == 1)
+                    if(deleteSkuInSalesOrderDetailsTable(orderDetailID, skuID) == 1)
                     {
                         deleteEntriesInSalesOrderSkuAttributes(orderDetailID);
 
@@ -243,11 +237,13 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
                         String orderSummary = DbUtils.getItemCount(activeOrderID) + " items \n" + "Total:  Rs. " + getOrderTotal(activeOrderID);
                         orderSummary_TextView.setText(orderSummary);
 
-                        if (skuList.size() <= 0)
+                        if(skuList.size() <= 0)
                         {
                             salesOrder_LinearLayout.setVisibility(View.GONE);
                             salesOrder_LinearLayout_outer.findViewById(R.id.emptyAdapter_TextView).setVisibility(View.VISIBLE);
-                        }else {
+                        }
+                        else
+                        {
                             salesOrder_LinearLayout.setVisibility(View.VISIBLE);
                             salesOrder_LinearLayout_outer.findViewById(R.id.emptyAdapter_TextView).setVisibility(View.GONE);
                         }
@@ -268,9 +264,9 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
                     String retailerID = DbUtils.getRetailerID();
 
                     //TODO: notifyDataSetChanged()
-                    if (setOrderAsRegularOrder_CheckBox.isChecked())
+                    if(setOrderAsRegularOrder_CheckBox.isChecked())
                     {
-                        if (!retailerID.equals(NONE))
+                        if(!retailerID.equals(NONE))
                         {
                             eraseCurrentRegularOrderFor(retailerID);
                             setRegularOrderFor(retailerID);
@@ -378,7 +374,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
 
             int noOfRowsUpdated = sqLiteDatabase.update(TBL_SALES_ORDER, salesOrderValues, "is_active = ?", new String[]{"1"});
 
-            if (noOfRowsUpdated == 1)
+            if(noOfRowsUpdated == 1)
             {
                 skuList = new ArrayList<>();
 
@@ -388,7 +384,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
                 Utils.showSuccessDialog(context, "Success. Order Placed");
 
             }
-            else if (noOfRowsUpdated > 1)
+            else if(noOfRowsUpdated > 1)
             {
                 Utils.showToast(context, "ERROR! 2 or more rows updated");
             }

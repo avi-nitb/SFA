@@ -21,7 +21,7 @@ import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 public class FrequentlyOrderedSKUsFragment extends Fragment
 {
     RecyclerView frequentlyOrderedSKUs_RecyclerView;
-    
+
     public FrequentlyOrderedSKUsFragment()
     {
     }
@@ -49,8 +49,8 @@ public class FrequentlyOrderedSKUsFragment extends Fragment
 
         FrequentlyOrderedSKUsAdapter frequentlyOrderedSKUsAdapter = new FrequentlyOrderedSKUsAdapter(DbUtils.getSkuList2(SQL_SELECT_FREQUENT_SKUs, selectionArgs));
 
-        View layout =  inflater.inflate(R.layout.fragment_frequently_ordered_skus, container, false);
-        frequentlyOrderedSKUs_RecyclerView = (RecyclerView)layout.findViewById(R.id.frequentlyOrderedSKUs_RecyclerView);
+        View layout = inflater.inflate(R.layout.fragment_frequently_ordered_skus, container, false);
+        frequentlyOrderedSKUs_RecyclerView = (RecyclerView) layout.findViewById(R.id.frequentlyOrderedSKUs_RecyclerView);
         frequentlyOrderedSKUs_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         frequentlyOrderedSKUs_RecyclerView.setItemAnimator(new DefaultItemAnimator());
 

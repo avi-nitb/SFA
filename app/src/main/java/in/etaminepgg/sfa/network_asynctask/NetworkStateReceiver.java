@@ -9,51 +9,72 @@ import android.net.NetworkInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetworkStateReceiver extends BroadcastReceiver {
+public class NetworkStateReceiver extends BroadcastReceiver
+{
 
     private ConnectivityManager mManager;
     private List<NetworkStateReceiverListener> mListeners;
     private boolean mConnected;
 
-    public NetworkStateReceiver(Context context) {
+    public NetworkStateReceiver(Context context)
+    {
         mListeners = new ArrayList<>();
         mManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         checkStateChanged();
     }
 
-    public void onReceive(Context context, Intent intent) {
-        if (intent == null || intent.getExtras() == null)
+    public void onReceive(Context context, Intent intent)
+    {
+        if(intent == null || intent.getExtras() == null)
+        {
             return;
+        }
 
-        if (checkStateChanged()) notifyStateToAll();
+        if(checkStateChanged())
+        {
+            notifyStateToAll();
+        }
     }
 
-    private boolean checkStateChanged() {
+    private boolean checkStateChanged()
+    {
         boolean prev = mConnected;
         NetworkInfo activeNetwork = mManager.getActiveNetworkInfo();
         mConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         return prev != mConnected;
     }
 
-    private void notifyStateToAll() {
-        for (NetworkStateReceiverListener listener : mListeners) {
+    private void notifyStateToAll()
+    {
+        for(NetworkStateReceiverListener listener : mListeners)
+        {
             notifyState(listener);
         }
     }
 
-    private void notifyState(NetworkStateReceiverListener listener) {
-        if (listener != null) {
-            if (mConnected) listener.onNetworkAvailable();
-            else listener.onNetworkUnavailable();
+    private void notifyState(NetworkStateReceiverListener listener)
+    {
+        if(listener != null)
+        {
+            if(mConnected)
+            {
+                listener.onNetworkAvailable();
+            }
+            else
+            {
+                listener.onNetworkUnavailable();
+            }
         }
     }
 
-    public void addListener(NetworkStateReceiverListener l) {
+    public void addListener(NetworkStateReceiverListener l)
+    {
         mListeners.add(l);
         notifyState(l);
     }
 
-    public interface NetworkStateReceiverListener {
+    public interface NetworkStateReceiverListener
+    {
         void onNetworkAvailable();
 
         void onNetworkUnavailable();

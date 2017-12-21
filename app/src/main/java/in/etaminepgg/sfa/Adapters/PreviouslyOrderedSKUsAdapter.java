@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
@@ -22,7 +21,6 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
-import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 
 /**
  * Created by etamine on 6/6/17.
@@ -62,8 +60,9 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
         //skuInfoViewHolder.sku_SO_Attr_TextView.setVisibility(View.GONE);
     }
 
-    private String  getSKU_category(String skuID) {
-        String sku_category=null;
+    private String getSKU_category(String skuID)
+    {
+        String sku_category = null;
 
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
@@ -73,9 +72,9 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
 
         Cursor cursor = sqLiteDatabase.rawQuery(SKU_CATEGORY_QUERY, selectionArgs);
 
-        if (cursor.moveToFirst())
+        if(cursor.moveToFirst())
         {
-             sku_category = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
+            sku_category = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
         }
 
         cursor.close();

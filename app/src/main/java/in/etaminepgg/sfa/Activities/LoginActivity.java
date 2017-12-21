@@ -1,23 +1,25 @@
 package in.etaminepgg.sfa.Activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 
 import com.google.gson.Gson;
 
@@ -25,24 +27,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import in.etaminepgg.sfa.Models.AuthUser_Model;
+import in.etaminepgg.sfa.Models.BasicConfigModel;
+import in.etaminepgg.sfa.Models.LoginInput_Model;
 import in.etaminepgg.sfa.Network.API_Call_Retrofit;
 import in.etaminepgg.sfa.Network.ApiUrl;
 import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.Constants;
 import in.etaminepgg.sfa.Utilities.ConstantsA;
-import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.MySharedPrefrencesData;
-import in.etaminepgg.sfa.Utilities.MyUi;
-import in.etaminepgg.sfa.Utilities.SharedPreferenceSingleton;
 import in.etaminepgg.sfa.Utilities.Utils;
 import in.etaminepgg.sfa.network_asynctask.AsyncResponse;
 import in.etaminepgg.sfa.network_asynctask.AsyncWorker;
@@ -52,54 +49,74 @@ import retrofit2.Response;
 
 import static in.etaminepgg.sfa.Utilities.Constants.JINGLE_FILE_NAME;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_CONFIG;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_EMPLOYEE;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_GLOBAL_ATTRIBUTES;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_LOCATION_HIERARCHY;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_SKU_ATTRIBUTES;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_ATTRIBUTE_MAPPING;
-import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
-import static in.etaminepgg.sfa.Utilities.Constants.appSpecificDirectoryPath;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_EMPLOYEE;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_ITEM_SCHEME_RELATION;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_AREA;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER_VISIT;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_DETAILS;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_SKU_ATTRIBUTES;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SCHEME;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_ATTRIBUTE_MAPPING;
+import static in.etaminepgg.sfa.Utilities.Constants.appSpecificDirectoryPath;
+import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NOT_PRESENT;
 import static in.etaminepgg.sfa.Utilities.SharedPreferenceSingleton.MY_PREF;
-import static in.etaminepgg.sfa.Utilities.Utils.getDeviceId;
 import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserName;
-import static in.etaminepgg.sfa.Utilities.Utils.makeThreadSleepFor;
 
 
 public class LoginActivity extends AppCompatActivity implements AsyncResponse
 {
-    public static String DbFileName = "sfaDb.ma7";
     public static final String uploadToURL = "http://etaminepgg.com/sfa/fromMobile_gfjsdfkhweriusfgkjsdhsakjsdfhgsfdkjsflksfd324435.php";
     public static final String downloadFromURL = "http://etaminepgg.com/sfa/toMobile_giuwer4598wekhhwiergfhj3t49gjhgfkjewr.php?file=";
     public static final String lastModifiedDbDateURL = "http://etaminepgg.in/aaaaabbjeroidgkdflkfdrhfkjgrdflkjdfgfdjg/incometax/checkDataDt.php";
+    public static String DbFileName = "sfaDb.ma7";
     //appSpecificDirectoryPath, dbFileFullPath
     public static Context baseContext;
-
+    public static String KEY_USERNAME = "username";
+    public static String KEY_PASSWORD = "password";
     Button login_Button;
     EditText username_EditText, password_EditText;
     int valueFromOpenDatabase;
     SQLiteDatabase sqLiteDatabase;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor sharedPreferencesEditor;
-
     String usernameEntered = "usernameEntered";
     String passwordEntered = "passwordEntered";
-
-    public static String KEY_USERNAME = "username";
-    public static String KEY_PASSWORD = "password";
     String imei;
 
     MySharedPrefrencesData mySharedPrefrencesData;
+
+
+    boolean configflag = false;
+    boolean authflag = false;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        if(requestCode == 1)
+        {
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                if(ActivityCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+                {
+                    TelephonyManager telephonyManager = (TelephonyManager) LoginActivity.this.getSystemService(Context.TELEPHONY_SERVICE);
+                    imei = telephonyManager.getDeviceId();
+
+                    launchDashboardIfLoggedIn();
+                }
+            }
+            else if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED)
+            {
+                String[] permissionsArray = {"android.permission.READ_PHONE_STATE"};
+                ActivityCompat.requestPermissions(LoginActivity.this, permissionsArray, 1);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -108,7 +125,7 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         setContentView(R.layout.activity_login);
 
         baseContext = getBaseContext();
-        mySharedPrefrencesData=new MySharedPrefrencesData();
+        mySharedPrefrencesData = new MySharedPrefrencesData();
         //appSpecificDirectoryPath = baseContext.getExternalFilesDir(null);
         // appSpecificDirectoryPath = Environment.getExternalStorageDirectory().toString();
 
@@ -117,8 +134,8 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
 
         downloadDatabaseIfNotExists();
 
-        makeThreadSleepFor(1000);
-        imei=Utils.getDeviceId(LoginActivity.this);
+        // makeThreadSleepFor(1000);
+        imei = Utils.getDeviceId(LoginActivity.this);
 
         findViewsByIDs();
         setListenersToViews();
@@ -128,13 +145,25 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
             AssetManager assetManager = getAssets();
             Utils.copyFile(assetManager, appSpecificDirectoryPath, JINGLE_FILE_NAME);
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
 
+        if(ActivityCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        {
+            TelephonyManager telephonyManager = (TelephonyManager) LoginActivity.this.getSystemService(Context.TELEPHONY_SERVICE);
+            imei = telephonyManager.getDeviceId();
 
-        launchDashboardIfLoggedIn();
+            launchDashboardIfLoggedIn();
+        }
+        else
+        {
+            String[] permissionsArray = {"android.permission.READ_PHONE_STATE"};
+            ActivityCompat.requestPermissions(LoginActivity.this, permissionsArray, 1);
+        }
+
+
     }
 
     @Override
@@ -144,20 +173,14 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         super.onDestroy();
     }
 
-    /* @Override
-    public void onBackPressed()
-    {
-        moveTaskToBack(true);
-    }*/
-
     private void findViewsByIDs()
     {
         login_Button = (Button) findViewById(R.id.login_Button);
-        username_EditText = (EditText)findViewById(R.id.username_EditText);
-        password_EditText = (EditText)findViewById(R.id.password_EditText);
+        username_EditText = (EditText) findViewById(R.id.username_EditText);
+        password_EditText = (EditText) findViewById(R.id.password_EditText);
 
-        username_EditText.setText("surya");
-        password_EditText.setText("surya");
+        username_EditText.setText("eta");
+        password_EditText.setText("eta");
     }
 
     private void setListenersToViews()
@@ -170,8 +193,7 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
                 usernameEntered = username_EditText.getText().toString().trim();
                 passwordEntered = password_EditText.getText().toString().trim();
 
-                //!usernameEntered.isEmpty() && !passwordEntered.isEmpty()
-                if (isValidUser(usernameEntered, passwordEntered))
+                if(isValidUser(usernameEntered, passwordEntered))
                 {
                     sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
                     sharedPreferencesEditor = sharedPreferences.edit();
@@ -191,10 +213,9 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
                    /* Utils.launchActivity(getBaseContext(), DashboardActivity.class);
                     finish();*/
 
-                   //networkcall_for_authtoken(getDeviceId(LoginActivity.this),usernameEntered,passwordEntered);
+                    //networkcall_for_authtoken(getDeviceId(LoginActivity.this),usernameEntered,passwordEntered);
 
-                    networkAsync();
-
+                    callWebApi();
                 }
                 else
                 {
@@ -204,6 +225,18 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         });
     }
 
+    private void callWebApi()
+    {
+        if(imei.equalsIgnoreCase(null) || imei.trim().length() <= 0)
+        {
+            Utils.showSuccessDialog(getBaseContext(), "You can not login as you denied permission.");
+        }
+        else
+        {
+            network_call_for_basicconfig();
+            networkAsync();
+        }
+    }
 
     private void launchDashboardIfLoggedIn()
     {
@@ -222,23 +255,24 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         Log.e("usernameInSharedPref", usernameInSharedPreferences);
         Log.e("passwordInSharedPref", passwordInSharedPreferences);
 
-        if (isValidUser(usernameInSharedPreferences, passwordInSharedPreferences))
+        if(isValidUser(usernameInSharedPreferences, passwordInSharedPreferences))
         {
             loggedInUserID = getEmployeeIdFor(loggedInUserName);
-            SimpleDateFormat sdf=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
 
             SharedPreferences settings = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, 0);
             //Get "hasLoggedIn" value. If the value doesn't exist yet false is returned
             boolean hasLoggedIn = settings.getBoolean("hasLoggedIn", false);
-            if(hasLoggedIn){
+            if(hasLoggedIn)
+            {
 
                 Utils.launchActivity(getBaseContext(), DashboardActivity.class);
                 finish();
-            }else {
-
-                networkAsync();
+            }
+            else
+            {
+                callWebApi();
             }
 
                /* String authkey_expirydate_frm_sp=mySharedPrefrencesData.getAuthTokenExpiryDate(LoginActivity.this);
@@ -261,91 +295,11 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         }
     }
 
-    @Override
-    public void onRefresh() {
-
-    }
-
-    @Override
-    public void ReceivedResponseFromServer(String output, String REQUEST_NUMBER) {
-        switch (REQUEST_NUMBER){
-            case Constants.REQUEST_FOR_AUTHKEY:
-                try {
-                    JSONObject jsonObject=new JSONObject(output);
-                    if(jsonObject.optInt("api_status")==1){
-                        AuthUser_Model authUser_model=new Gson().fromJson(output,AuthUser_Model.class);
-                        Log.e("auth_model",authUser_model.getAuthToken());
-                        mySharedPrefrencesData.setEmployee_AuthKey(LoginActivity.this,authUser_model.getAuthToken());
-                        mySharedPrefrencesData.setAuthTokenExpiryDate(LoginActivity.this,authUser_model.getAuthTokenExpiryDate());
-                        SharedPreferences settings = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, 0); // 0 - for private mode
-                        SharedPreferences.Editor editor = settings.edit();
-
-                        //Set "hasLoggedIn" to true
-                        editor.putBoolean("hasLoggedIn", true);
-                        // Commit the edits!
-                        editor.commit();
-
-                        Utils.launchActivity(getBaseContext(), DashboardActivity.class);
-                        finish();
-
-                    }else {
-                        Utils.showToast(baseContext,"Unsuccessful api call");
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-        }
-    }
-
-    private class setUpDatabaseAsyncTask extends AsyncTask<Void, Void, String>
-    {
-        ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
-
-        @Override
-        protected void onPreExecute()
-        {
-            //super.onPreExecute();
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.setTitle("Downloading Database. Please wait");
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCancelable(false);
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.setProgressNumberFormat(null);
-            progressDialog.setProgressPercentFormat(null);
-            progressDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(Void... params)
-        {
-            try
-            {
-                createTables();
-
-                insertDummyData();
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return "not applicable";
-        }
-
-        @Override
-        protected void onPostExecute(String s)
-        {
-            //super.onPostExecute(s);
-            progressDialog.dismiss();
-        }
-    }
-
     private void downloadDatabaseIfNotExists()
     {
         File f = new File(appSpecificDirectoryPath, DbFileName);
 
-        if (!f.exists())
+        if(!f.exists())
         {
             Log.d("File Status", "Not Exist");
             new setUpDatabaseAsyncTask().execute();
@@ -367,39 +321,43 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         return isUserFound;
     }
 
-
-
-    private void networkcall_for_authtoken(String imei,String username,String password) {
+    private void networkcall_for_authtoken(String imei, String username, String password)
+    {
 
         Apimethods methods = API_Call_Retrofit.getretrofit(this).create(Apimethods.class);
-        JSONObject jsonObject=new JSONObject();
-        try {
-            jsonObject.put("IMEI","erdddddddddddasdasdasdasdasdasdw10");
+        JSONObject jsonObject = new JSONObject();
+       /* try {
+            jsonObject.put("IMEI",imei);
             jsonObject.put("username",username);
             jsonObject.put("password",password);
 
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
 
-        Call<AuthUser_Model> call =methods.getUserAuthKey(jsonObject);
-        Log.d("url","url="+call.request().url().toString());
+        LoginInput_Model loginInput_model = new LoginInput_Model(imei, username, password);
 
-        call.enqueue(new Callback<AuthUser_Model>() {
+        Call<AuthUser_Model> call = methods.getUserAuthKey(loginInput_model);
+        Log.d("url", "url=" + call.request().url().toString());
+
+        call.enqueue(new Callback<AuthUser_Model>()
+        {
             @Override
-            public void onResponse(Call<AuthUser_Model> call, Response<AuthUser_Model> response) {
+            public void onResponse(Call<AuthUser_Model> call, Response<AuthUser_Model> response)
+            {
                 int statusCode = response.code();
-                Log.d("Response",""+statusCode);
-                Log.d("respones",""+response);
-                AuthUser_Model authUser_model=response.body();
-                if(authUser_model.getApiStatus()==1)
+                Log.d("Response", "" + statusCode);
+                Log.d("respones", "" + response);
+                AuthUser_Model authUser_model = response.body();
+                if(authUser_model.getApiStatus() == 1)
                 {
-                   Utils.showToast(baseContext,authUser_model.getAuthToken());
-                   Utils.launchActivity(getBaseContext(), DashboardActivity.class);
-                   finish();
-                }else
+                    Utils.showToast(baseContext, authUser_model.getAuthToken());
+                    Utils.launchActivity(getBaseContext(), DashboardActivity.class);
+                    finish();
+                }
+                else
                 {
-                    Utils.showToast(baseContext,authUser_model.getMessage());
+                    Utils.showToast(baseContext, authUser_model.getMessage());
                 }
                 Utils.launchActivity(getBaseContext(), DashboardActivity.class);
                 finish();
@@ -407,7 +365,8 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
             }
 
             @Override
-            public void onFailure(Call<AuthUser_Model> call, Throwable t) {
+            public void onFailure(Call<AuthUser_Model> call, Throwable t)
+            {
 
                 Utils.showToast(baseContext, ConstantsA.NO_INTERNET_CONNECTION);
 
@@ -598,17 +557,30 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
     {
         insertDummyLocationData();
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("emp_id", "id_surya");
-        contentValues.put("imei",Utils.getDeviceId(LoginActivity.this));
-        contentValues.put("reports_to", "abhinav");
-        contentValues.put("emp_name", "Surya");
-        contentValues.put("emp_username", "surya");
-        contentValues.put("emp_password", "surya");
-        contentValues.put("created_date",  getTodayDate());
-        contentValues.put("modified_date",  getTodayDate());
-        contentValues.put("upload_status", 0);
-        sqLiteDatabase.insert(TBL_EMPLOYEE, null, contentValues);
+        ContentValues etaValues = new ContentValues();
+        etaValues.put("emp_id", "id_etamine");
+        etaValues.put("imei", Utils.getDeviceId(LoginActivity.this));
+        etaValues.put("reports_to", "Ramesh");
+        etaValues.put("emp_name", "etamine");
+        etaValues.put("emp_username", "eta");
+        etaValues.put("emp_password", "eta");
+        etaValues.put("created_date", getTodayDate());
+        etaValues.put("modified_date", getTodayDate());
+        etaValues.put("upload_status", 0);
+        sqLiteDatabase.insert(TBL_EMPLOYEE, null, etaValues);
+
+
+       /* ContentValues suryaValues = new ContentValues();
+        suryaValues.put("emp_id", "id_surya");
+        suryaValues.put("imei", Utils.getDeviceId(LoginActivity.this));
+        suryaValues.put("reports_to", "abhinav");
+        suryaValues.put("emp_name", "Surya");
+        suryaValues.put("emp_username", "surya");
+        suryaValues.put("emp_password", "surya");
+        suryaValues.put("created_date", getTodayDate());
+        suryaValues.put("modified_date", getTodayDate());
+        suryaValues.put("upload_status", 0);
+        sqLiteDatabase.insert(TBL_EMPLOYEE, null, suryaValues);*/
 
 
         ContentValues managerValues = new ContentValues();
@@ -618,12 +590,12 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         managerValues.put("emp_name", "emp_name0");
         managerValues.put("emp_username", "u0");
         managerValues.put("emp_password", "p0");
-        managerValues.put("created_date",  getTodayDate());
-        managerValues.put("modified_date",  getTodayDate());
+        managerValues.put("created_date", getTodayDate());
+        managerValues.put("modified_date", getTodayDate());
         managerValues.put("upload_status", 0);
         sqLiteDatabase.insert(TBL_EMPLOYEE, null, managerValues);
 
-        for (int i = 1; i <= 9; i++)
+        for(int i = 1; i <= 9; i++)
         {
             ContentValues employeeValues = new ContentValues();
             employeeValues.put("emp_id", "emp_id" + i);
@@ -672,12 +644,12 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
             sqLiteDatabase.insert(TBL_SCHEME, null, schemeValues);
         }
 
-        for (int i = 1; i <= 10; i++)
+        for(int i = 1; i <= 10; i++)
         {
             ContentValues skuValues = new ContentValues();
             skuValues.put("sku_id", "sku_id" + i);
             skuValues.put("sku_name", "sku_name" + i);
-            skuValues.put("sku_price",  + i);
+            skuValues.put("sku_price", +i);
             skuValues.put("description", "description" + i);
             skuValues.put("sku_category", "sku_category" + i);
             skuValues.put("sku_sub_category", "sku_sub_category" + i);
@@ -695,14 +667,14 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         }
 
         //To display similar SKUs - SKUs with same cat, sub_cat as above
-        for (int catAndSubCat = 1; catAndSubCat <= 10; catAndSubCat++)
+        for(int catAndSubCat = 1; catAndSubCat <= 10; catAndSubCat++)
         {
-            int j = catAndSubCat+10;
+            int j = catAndSubCat + 10;
 
             ContentValues skuValues = new ContentValues();
             skuValues.put("sku_id", "sku_id" + j);
             skuValues.put("sku_name", "sku_name" + j);
-            skuValues.put("sku_price", + j);
+            skuValues.put("sku_price", +j);
             skuValues.put("description", "description" + j);
             skuValues.put("sku_category", "sku_category" + catAndSubCat);
             skuValues.put("sku_sub_category", "sku_sub_category" + catAndSubCat);
@@ -719,25 +691,25 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
             sqLiteDatabase.insert(TBL_SKU, null, skuValues);
         }
 
-        insertIntoGlobalAttrTable("color","colorSet1", "any`red`green`blue");
-        insertIntoGlobalAttrTable("color","colorSet2", "any`pink`cyan`black");
-        insertIntoGlobalAttrTable("size","sizeSet1", "any`tiny`xlarge`medium");
-        insertIntoGlobalAttrTable("size","sizeSet2", "any`large`small`xxlarge");
-        insertIntoGlobalAttrTable("shape","shapeSet1", "any`circular`oval");
-        insertIntoGlobalAttrTable("shape","shapeSet2", "any`square`rectangle");
+        insertIntoGlobalAttrTable("color", "colorSet1", "any`red`green`blue");
+        insertIntoGlobalAttrTable("color", "colorSet2", "any`pink`cyan`black");
+        insertIntoGlobalAttrTable("size", "sizeSet1", "any`tiny`xlarge`medium");
+        insertIntoGlobalAttrTable("size", "sizeSet2", "any`large`small`xxlarge");
+        insertIntoGlobalAttrTable("shape", "shapeSet1", "any`circular`oval");
+        insertIntoGlobalAttrTable("shape", "shapeSet2", "any`square`rectangle");
 
-        for (int i = 1; i<=20; i++)
+        for(int i = 1; i <= 20; i++)
         {
-            if ((i%2) == 0)
+            if((i % 2) == 0)
             {
-                insetIntoSkuAttrMappingTable(i,2);
-                insetIntoSkuAttrMappingTable(i,4);
-                insetIntoSkuAttrMappingTable(i,6);
+                insetIntoSkuAttrMappingTable(i, 2);
+                insetIntoSkuAttrMappingTable(i, 4);
+                insetIntoSkuAttrMappingTable(i, 6);
             }
             else
             {
-                insetIntoSkuAttrMappingTable(i,1);
-                insetIntoSkuAttrMappingTable(i,3);
+                insetIntoSkuAttrMappingTable(i, 1);
+                insetIntoSkuAttrMappingTable(i, 3);
                 //insetIntoSkuAttrMappingTable(i,5);
             }
         }
@@ -766,47 +738,47 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         String districtID;
         String talukID;
 
-        for (int state=1; state<=3; state++)
+        for(int state = 1; state <= 3; state++)
         {
             ContentValues stateValues = new ContentValues();
             stateValues.put("loc_id", state);
-            stateValues.put("loc_name", "state"+state);
+            stateValues.put("loc_name", "state" + state);
             stateValues.put("hier_level", "1");
             stateValues.put("parent_loc_id", "0");
             stateValues.put("upload_status", 0);
             sqLiteDatabase.insert(TBL_LOCATION_HIERARCHY, null, stateValues);
 
-            for (int district=1; district<=3; district++)
+            for(int district = 1; district <= 3; district++)
             {
                 districtID = String.valueOf(state) + String.valueOf(district);
 
                 ContentValues districtValues = new ContentValues();
                 districtValues.put("loc_id", districtID);
-                districtValues.put("loc_name", "district"+districtID);
+                districtValues.put("loc_name", "district" + districtID);
                 districtValues.put("hier_level", "2");
                 districtValues.put("parent_loc_id", state);
                 districtValues.put("upload_status", 0);
                 sqLiteDatabase.insert(TBL_LOCATION_HIERARCHY, null, districtValues);
 
-                for (int taluk=1; taluk<=3; taluk++)
+                for(int taluk = 1; taluk <= 3; taluk++)
                 {
                     talukID = String.valueOf(state) + String.valueOf(district) + String.valueOf(taluk);
 
                     ContentValues talukValues = new ContentValues();
                     talukValues.put("loc_id", talukID);
-                    talukValues.put("loc_name", "taluk"+talukID);
+                    talukValues.put("loc_name", "taluk" + talukID);
                     talukValues.put("hier_level", "3");
                     talukValues.put("parent_loc_id", districtID);
                     talukValues.put("upload_status", 0);
                     sqLiteDatabase.insert(TBL_LOCATION_HIERARCHY, null, talukValues);
 
-                    for (int area=1; area<=3; area++)
+                    for(int area = 1; area <= 3; area++)
                     {
                         String areaID = String.valueOf(state) + String.valueOf(district) + String.valueOf(taluk) + String.valueOf(area);
 
                         ContentValues areaValues = new ContentValues();
                         areaValues.put("loc_id", areaID);
-                        areaValues.put("loc_name", "area"+areaID);
+                        areaValues.put("loc_name", "area" + areaID);
                         areaValues.put("hier_level", "4");
                         areaValues.put("parent_loc_id", talukID);
                         areaValues.put("upload_status", 0);
@@ -820,7 +792,7 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
     void insetIntoSkuAttrMappingTable(int skuIdNumber, int attributeID)
     {
         ContentValues skuAttrMappingValues = new ContentValues();
-        skuAttrMappingValues.put("sku_id", "sku_id"+skuIdNumber);
+        skuAttrMappingValues.put("sku_id", "sku_id" + skuIdNumber);
         skuAttrMappingValues.put("attribute_id", attributeID);
         skuAttrMappingValues.put("upload_status", 0);
         sqLiteDatabase.insert(TBL_SKU_ATTRIBUTE_MAPPING, null, skuAttrMappingValues);
@@ -836,22 +808,188 @@ public class LoginActivity extends AppCompatActivity implements AsyncResponse
         sqLiteDatabase.insert(TBL_GLOBAL_ATTRIBUTES, null, globalAttributeValues);
     }
 
-
-    public void networkAsync(){
+    public void networkAsync()
+    {
         AsyncWorker mWorker = new AsyncWorker(LoginActivity.this);
         mWorker.delegate = LoginActivity.this;
         JSONObject BroadcastObject = new JSONObject();
-        try {
+        try
+        {
 
 
-            BroadcastObject.put("IMEI",imei );
+            BroadcastObject.put("IMEI", imei);
             BroadcastObject.put("username", usernameEntered);
             BroadcastObject.put("password", passwordEntered);
-            Log.e("deviceid",imei);
+            Log.e("deviceid", imei);
 
-        } catch (JSONException e) {
+        }
+        catch(JSONException e)
+        {
             e.printStackTrace();
         }
-        mWorker.execute(ApiUrl.BASE_URL+ApiUrl.LOG_URL_AUTHUSER, BroadcastObject.toString(), Constants.POST_REQUEST, Constants.REQUEST_FOR_AUTHKEY);
+        mWorker.execute(ApiUrl.BASE_URL + ApiUrl.LOG_URL_AUTHUSER, BroadcastObject.toString(), Constants.POST_REQUEST, Constants.REQUEST_FOR_AUTHKEY);
+    }
+
+    private void network_call_for_basicconfig()
+    {
+        AsyncWorker mWorker = new AsyncWorker(LoginActivity.this);
+        mWorker.delegate = LoginActivity.this;
+        JSONObject BroadcastObject = new JSONObject();
+        // String mobile_app_version=BuildConfig.VERSION_NAME;
+        String mobile_app_version = "0.0.1";
+
+        try
+        {
+
+            BroadcastObject.put("IMEI", imei);
+            BroadcastObject.put("mobile_app_version", mobile_app_version);
+
+            Log.e("deviceid", imei);
+
+        }
+        catch(JSONException e)
+        {
+            e.printStackTrace();
+        }
+        mWorker.execute(ApiUrl.BASE_URL + ApiUrl.LOG_URL_GETBASICCONFIG, BroadcastObject.toString(), Constants.POST_REQUEST, Constants.REQUEST_FOR_GETBASICCONFIG);
+    }
+
+    @Override
+    public void onRefresh()
+    {
+
+    }
+
+    @Override
+    public void ReceivedResponseFromServer(String output, String REQUEST_NUMBER)
+    {
+        switch(REQUEST_NUMBER)
+        {
+            case Constants.REQUEST_FOR_AUTHKEY:
+                try
+                {
+                    JSONObject jsonObject = new JSONObject(output);
+                    if(jsonObject.optInt("api_status") == 1)
+                    {
+                        AuthUser_Model authUser_model = new Gson().fromJson(output, AuthUser_Model.class);
+                        Log.e("auth_model", authUser_model.getAuthToken());
+                        mySharedPrefrencesData.setEmployee_AuthKey(LoginActivity.this, authUser_model.getAuthToken());
+                        mySharedPrefrencesData.setAuthTokenExpiryDate(LoginActivity.this, authUser_model.getAuthTokenExpiryDate());
+                        SharedPreferences settings = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, 0); // 0 - for private mode
+                        SharedPreferences.Editor editor = settings.edit();
+
+                        //Set "hasLoggedIn" to true
+                        editor.putBoolean("hasLoggedIn", true);
+                        // Commit the edits!
+                        editor.commit();
+
+                        authflag = true;
+
+                        launchDashBoardActivity(configflag, authflag);
+
+                    }
+                    else
+                    {
+                        Utils.showToast(baseContext, "Unsuccessful api call");
+                    }
+                }
+                catch(JSONException e)
+                {
+                    e.printStackTrace();
+                }
+                break;
+            case Constants.REQUEST_FOR_GETBASICCONFIG:
+                try
+                {
+                    JSONObject jsonObject = new JSONObject(output);
+                    if(jsonObject.optInt("api_status") == 1)
+                    {
+                        BasicConfigModel basicConfigModel = new Gson().fromJson(output, BasicConfigModel.class);
+                        valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+                        sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+                        for(int i = 0; i < basicConfigModel.getApp_data().size(); i++)
+                        {
+
+                            ContentValues configValues = new ContentValues();
+                            configValues.put("config_for", basicConfigModel.getApp_data().get(i).getPropname());
+                            configValues.put("config_value", basicConfigModel.getApp_data().get(i).getPropval());
+                            configValues.put("upload_status", 0);
+                            sqLiteDatabase.insert(TBL_CONFIG, null, configValues);
+
+                        }
+
+                        configflag = true;
+                        launchDashBoardActivity(configflag, authflag);
+
+
+                    }
+                    else
+                    {
+                        Utils.showToast(baseContext, "Unsuccessful api call for config ");
+                    }
+                }
+                catch(JSONException e)
+                {
+                    e.printStackTrace();
+                }
+                break;
+
+        }
+    }
+
+    private void launchDashBoardActivity(boolean configflag, boolean authflag)
+    {
+
+        if(configflag == true && authflag == true)
+        {
+            Utils.launchActivity(getBaseContext(), DashboardActivity.class);
+            finish();
+        }
+
+
+    }
+
+    private class setUpDatabaseAsyncTask extends AsyncTask<Void, Void, String>
+    {
+        ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+
+        @Override
+        protected void onPreExecute()
+        {
+            //super.onPreExecute();
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setTitle("Downloading Database. Please wait");
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setProgressNumberFormat(null);
+            progressDialog.setProgressPercentFormat(null);
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params)
+        {
+            try
+            {
+                createTables();
+
+                insertDummyData();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return "not applicable";
+        }
+
+        @Override
+        protected void onPostExecute(String s)
+        {
+            //super.onPostExecute(s);
+            progressDialog.dismiss();
+        }
     }
 }

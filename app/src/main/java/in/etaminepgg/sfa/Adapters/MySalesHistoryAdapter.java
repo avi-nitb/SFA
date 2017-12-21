@@ -11,8 +11,6 @@ import java.util.List;
 import in.etaminepgg.sfa.Models.MySalesHistory;
 import in.etaminepgg.sfa.R;
 
-import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
-
 public class MySalesHistoryAdapter extends RecyclerView.Adapter<MySalesHistoryAdapter.MySalesHistoryViewHolder>
 {
     private List<MySalesHistory> mySalesHistoryList;
@@ -64,11 +62,11 @@ public class MySalesHistoryAdapter extends RecyclerView.Adapter<MySalesHistoryAd
         {
             super(itemView);
 
-            orderId_TextView = (TextView)itemView.findViewById(R.id.orderId_TextView);
-            retailerId_TextView = (TextView)itemView.findViewById(R.id.retailerId_TextView);
-            orderDate_TextView = (TextView)itemView.findViewById(R.id.orderDate_TextView);
-            skuCount_TextView = (TextView)itemView.findViewById(R.id.skuCount_TextView);
-            orderTotal_TextView = (TextView)itemView.findViewById(R.id.orderTotal_TextView);
+            orderId_TextView = (TextView) itemView.findViewById(R.id.orderId_TextView);
+            retailerId_TextView = (TextView) itemView.findViewById(R.id.retailerId_TextView);
+            orderDate_TextView = (TextView) itemView.findViewById(R.id.orderDate_TextView);
+            skuCount_TextView = (TextView) itemView.findViewById(R.id.skuCount_TextView);
+            orderTotal_TextView = (TextView) itemView.findViewById(R.id.orderTotal_TextView);
         }
     }
 }

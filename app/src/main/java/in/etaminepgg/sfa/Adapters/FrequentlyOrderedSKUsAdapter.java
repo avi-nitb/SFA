@@ -14,7 +14,6 @@ import java.util.List;
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
-import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.Utils;
 
@@ -68,49 +67,6 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
         return skuList.size();
     }
 
-    class SkuInfoViewHolder extends RecyclerView.ViewHolder
-    {
-        ImageView skuPhoto_ImageView, addSkuToCart_ImageView;
-        TextView skuName_TextView, skuPrice_TextView, retailerCount_TextView, orderCount_TextView, salesValue_TextView;
-
-        SkuInfoViewHolder(final View itemView)
-        {
-            super(itemView);
-            skuPhoto_ImageView = (ImageView) itemView.findViewById(R.id.skuPhoto_ImageView);
-            addSkuToCart_ImageView = (ImageView) itemView.findViewById(R.id.addSkuToCart_ImageView);
-            skuName_TextView = (TextView) itemView.findViewById(R.id.skuName_TextView);
-            skuPrice_TextView = (TextView) itemView.findViewById(R.id.skuPrice_TextView);
-            orderCount_TextView = (TextView) itemView.findViewById(R.id.orderCount_TextView);
-            salesValue_TextView = (TextView) itemView.findViewById(R.id.salesValue_TextView);
-            retailerCount_TextView = (TextView)itemView.findViewById(R.id.retailerCount_TextView);
-
-            addSkuToCart_ImageView.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View view)
-                {
-                    String skuID = itemView.getTag(R.string.tag_sku_id).toString();
-                    String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
-                    String skuName = itemView.getTag(R.string.tag_sku_name).toString();
-                   // new DbUtils().addToSalesOrderOrPickRetailer(skuID, skuName, skuPrice, itemView.getContext());
-                    new Utils().pickAttributeValuesOrSelectRetailer(skuID, skuName, skuPrice, itemView.getContext());
-                }
-            });
-
-            itemView.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View view)
-                {
-                    //Utils.showToast(view.getContext(), itemView.getTag(R.string.tag_sku_id).toString());
-
-                    String skuID = itemView.getTag(R.string.tag_sku_id).toString();
-                    Utils.launchActivityWithExtra(view.getContext(), SkuDetailsActivity.class, KEY_SKU_ID, skuID);
-                }
-            });
-        }
-    }
-
     private String getRetailerCount(String skuID)
     {
         String retailerCount = "NA";
@@ -124,7 +80,7 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER_COUNT, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             retailerCount = cursor.getString(cursor.getColumnIndexOrThrow("retailerCount"));
         }
@@ -146,7 +102,7 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ORDER_COUNT, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             orderCount = cursor.getString(cursor.getColumnIndexOrThrow("orderCount"));
         }
@@ -168,7 +124,7 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_VALUE_FOR_SKU, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             salesValue = cursor.getString(cursor.getColumnIndexOrThrow("salesValue"));
         }
@@ -177,6 +133,49 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
         sqLiteDatabase.close();
 
         return salesValue;
+    }
+
+    class SkuInfoViewHolder extends RecyclerView.ViewHolder
+    {
+        ImageView skuPhoto_ImageView, addSkuToCart_ImageView;
+        TextView skuName_TextView, skuPrice_TextView, retailerCount_TextView, orderCount_TextView, salesValue_TextView;
+
+        SkuInfoViewHolder(final View itemView)
+        {
+            super(itemView);
+            skuPhoto_ImageView = (ImageView) itemView.findViewById(R.id.skuPhoto_ImageView);
+            addSkuToCart_ImageView = (ImageView) itemView.findViewById(R.id.addSkuToCart_ImageView);
+            skuName_TextView = (TextView) itemView.findViewById(R.id.skuName_TextView);
+            skuPrice_TextView = (TextView) itemView.findViewById(R.id.skuPrice_TextView);
+            orderCount_TextView = (TextView) itemView.findViewById(R.id.orderCount_TextView);
+            salesValue_TextView = (TextView) itemView.findViewById(R.id.salesValue_TextView);
+            retailerCount_TextView = (TextView) itemView.findViewById(R.id.retailerCount_TextView);
+
+            addSkuToCart_ImageView.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    String skuID = itemView.getTag(R.string.tag_sku_id).toString();
+                    String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
+                    String skuName = itemView.getTag(R.string.tag_sku_name).toString();
+                    // new DbUtils().addToSalesOrderOrPickRetailer(skuID, skuName, skuPrice, itemView.getContext());
+                    new Utils().pickAttributeValuesOrSelectRetailer(skuID, skuName, skuPrice, itemView.getContext());
+                }
+            });
+
+            itemView.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    //Utils.showToast(view.getContext(), itemView.getTag(R.string.tag_sku_id).toString());
+
+                    String skuID = itemView.getTag(R.string.tag_sku_id).toString();
+                    Utils.launchActivityWithExtra(view.getContext(), SkuDetailsActivity.class, KEY_SKU_ID, skuID);
+                }
+            });
+        }
     }
 
 }

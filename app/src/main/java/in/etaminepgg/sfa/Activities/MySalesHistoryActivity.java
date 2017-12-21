@@ -18,7 +18,6 @@ import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,14 +30,14 @@ import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.Utils;
 
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
-import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 
 public class MySalesHistoryActivity extends AppCompatActivity
 {
     private static final String TAG = "MySalesHistoryActivity";
+    private static final String ANY = "ANY";
+    private static final String COLON = " : ";
     Spinner retailer_Spinner, sku_Spinner;
     //List<String> skuList, retailerList;
     TextView startDate_TextView, endDate_TextView, emptyHistory_TextView;
@@ -46,16 +45,13 @@ public class MySalesHistoryActivity extends AppCompatActivity
     RecyclerView mySalesHistory_RecyclerView;
     DatePickerDialog startDatePickerDialog, endDatePickerDialog;
     DatePickerDialog.OnDateSetListener startDatePickerDialogListener, endDatePickerDialogListener;
-    private int startYear, startMonth, startDate, endYear, endMonth, endDate;
-
     Calendar cal;
-    private static final String ANY = "ANY";
-    private static final String COLON = " : ";
     //private static final String DD_MM_YYYY = "DD/MM/YYYY";
     String startDateChosen, endDateChosen;
     String SQL_SELECT_MY_SALES_HISTORY;
     List<String> selectionArgsList;
     MySalesHistoryAdapter mySalesHistoryAdapter;
+    private int startYear, startMonth, startDate, endYear, endMonth, endDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -68,7 +64,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
         startDate_TextView = (TextView) findViewById(R.id.startDate_TextView);
         endDate_TextView = (TextView) findViewById(R.id.endDate_TextView);
         emptyHistory_TextView = (TextView) findViewById(R.id.emptyHistory_TextView);
-        showHistory_Button = (Button)findViewById(R.id.showHistory_Button);
+        showHistory_Button = (Button) findViewById(R.id.showHistory_Button);
         mySalesHistory_RecyclerView = (RecyclerView) findViewById(R.id.mySalesHistory_RecyclerView);
 
 
@@ -114,9 +110,9 @@ public class MySalesHistoryActivity extends AppCompatActivity
 
         cal.add(Calendar.DATE, -30);
 
-         startYear = cal.get(Calendar.YEAR);
-         startMonth = cal.get(Calendar.MONTH);
-         startDate = cal.get(Calendar.DAY_OF_MONTH);
+        startYear = cal.get(Calendar.YEAR);
+        startMonth = cal.get(Calendar.MONTH);
+        startDate = cal.get(Calendar.DAY_OF_MONTH);
 
         startDatePickerDialog = new DatePickerDialog(MySalesHistoryActivity.this, android.R.style.Theme_Holo_Light_Dialog_MinWidth,
                 startDatePickerDialogListener, startYear, startMonth, startDate);
@@ -149,7 +145,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                if (isDateRangeValid(startDateChosen, endDateChosen))
+                if(isDateRangeValid(startDateChosen, endDateChosen))
                 {
                     constructQueryAndArgs();
                     populateSalesHistory();
@@ -165,22 +161,22 @@ public class MySalesHistoryActivity extends AppCompatActivity
 
         String date = String.valueOf(dayOfMonth);
         //add zero before date. Else SQL queries on dates won't work.
-        if (dayOfMonth < 9)
+        if(dayOfMonth < 9)
         {
-            date = "0"+date;
+            date = "0" + date;
         }
 
         //add zero before month. Else SQL queries on dates won't work.
         String monthTwoDigits = String.valueOf(month);
-        if (month < 9)
+        if(month < 9)
         {
-            monthTwoDigits = "0"+month;
+            monthTwoDigits = "0" + month;
         }
 
         //used while filtering results in SQL queries because order & visit dates are saved in YYYY-MM-DD format.
         startDateChosen = year + "-" + monthTwoDigits + "-" + date;
 
-        String startDateToShow = dayOfMonth+"/"+monthTwoDigits+"/"+year;
+        String startDateToShow = dayOfMonth + "/" + monthTwoDigits + "/" + year;
         startDate_TextView.setText(startDateToShow);
     }
 
@@ -191,22 +187,22 @@ public class MySalesHistoryActivity extends AppCompatActivity
 
         //add zero before date. Else SQL queries on dates won't work.
         String date = String.valueOf(dayOfMonth);
-        if (dayOfMonth < 9)
+        if(dayOfMonth < 9)
         {
-            date = "0"+date;
+            date = "0" + date;
         }
 
         //add zero before month. Else SQL queries on dates won't work.
         String monthTwoDigits = String.valueOf(month);
-        if (month < 9)
+        if(month < 9)
         {
-            monthTwoDigits = "0"+month;
+            monthTwoDigits = "0" + month;
         }
 
         //used while filtering results in SQL queries because order & visit dates are saved in YYYY-MM-DD format.
         endDateChosen = year + "-" + monthTwoDigits + "-" + date;
 
-        String endDateToShow = dayOfMonth+"/"+monthTwoDigits+"/"+year;
+        String endDateToShow = dayOfMonth + "/" + monthTwoDigits + "/" + year;
         endDate_TextView.setText(endDateToShow);
     }
 
@@ -220,7 +216,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
         List<String> skuList = new ArrayList<>();
         skuList.add(ANY);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String skuID = cursor.getString(cursor.getColumnIndexOrThrow("sku_id"));
             String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
@@ -245,7 +241,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
         List<String> retailerList = new ArrayList<>();
         retailerList.add(ANY);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
             String retailerName = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));
@@ -261,10 +257,10 @@ public class MySalesHistoryActivity extends AppCompatActivity
 
     boolean isDateRangeValid(String startDateChosen, String endDateChosen)
     {
-        Date startDate = new Date(startDateChosen.replace("-","/"));
-        Date endDate = new Date(endDateChosen.replace("-","/"));
+        Date startDate = new Date(startDateChosen.replace("-", "/"));
+        Date endDate = new Date(endDateChosen.replace("-", "/"));
 
-        if (endDate.after(startDate) || endDate.compareTo(startDate) == 0)
+        if(endDate.after(startDate) || endDate.compareTo(startDate) == 0)
         {
             return true;
         }
@@ -286,19 +282,19 @@ public class MySalesHistoryActivity extends AppCompatActivity
 
         selectionArgsList = new ArrayList<>();
 
-        String retailerChosen  = retailer_Spinner.getSelectedItem().toString().trim();
+        String retailerChosen = retailer_Spinner.getSelectedItem().toString().trim();
 
-        if (!retailerChosen.equals(ANY))
+        if(!retailerChosen.equals(ANY))
         {
             SQL_SELECT_MY_SALES_HISTORY += " where so.retailer_id = ?";
             selectionArgsList.add(0, retailerChosen.split(COLON)[1]);
         }
 
-        String skuChosen  = sku_Spinner.getSelectedItem().toString().trim();
+        String skuChosen = sku_Spinner.getSelectedItem().toString().trim();
 
-        if (!skuChosen.equals(ANY))
+        if(!skuChosen.equals(ANY))
         {
-            if (!retailerChosen.equals(ANY))
+            if(!retailerChosen.equals(ANY))
             {
                 SQL_SELECT_MY_SALES_HISTORY += " AND sod.sku_id = ?";
                 selectionArgsList.add(1, skuChosen.split(COLON)[1]);
@@ -310,7 +306,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
             }
         }
 
-        if (retailerChosen.equals(ANY) && skuChosen.equals(ANY))
+        if(retailerChosen.equals(ANY) && skuChosen.equals(ANY))
         {
            /* SQL_SELECT_MY_SALES_HISTORY = "select DISTINCT so.order_id, so.retailer_id, so.order_date, sod.sku_id" +
                     " from sales_orders so INNER JOIN sales_order_details sod " +
@@ -320,7 +316,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
             selectionArgsList.add(0, startDateChosen);
             selectionArgsList.add(1, endDateChosen);
         }
-        else if (retailerChosen.equals(ANY) || skuChosen.equals(ANY))
+        else if(retailerChosen.equals(ANY) || skuChosen.equals(ANY))
         {
             SQL_SELECT_MY_SALES_HISTORY += " AND date(so.order_date) BETWEEN " + "date(?) AND" + " date(?)";
             selectionArgsList.add(1, startDateChosen);
@@ -348,7 +344,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_MY_SALES_HISTORY, selectionArgs);
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String orderID = cursor.getString(cursor.getColumnIndexOrThrow("order_id"));
             String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
@@ -360,7 +356,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
         }
         cursor.close();
 
-        if (salesHistoryList.size() <= 0)
+        if(salesHistoryList.size() <= 0)
         {
             emptyHistory_TextView.setVisibility(View.VISIBLE);
             mySalesHistory_RecyclerView.setVisibility(View.INVISIBLE);

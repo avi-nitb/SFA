@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import in.etaminepgg.sfa.Adapters.NewSKUsAdapter;
 import in.etaminepgg.sfa.Adapters.PromotionalSKUsAdapter;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.DbUtils;
@@ -36,8 +35,8 @@ public class PromotionalSKUsFragment extends Fragment
 
         PromotionalSKUsAdapter promotionalSKUsAdapter = new PromotionalSKUsAdapter(DbUtils.getSkuList(SQL_SELECT_PROMO_SKUs, selectionArgs));
 
-        View layout =  inflater.inflate(R.layout.fragment_promotional_skus, container, false);
-        promotionalSKUs_RecyclerView = (RecyclerView)layout.findViewById(R.id.promotionalSKUs_RecyclerView);
+        View layout = inflater.inflate(R.layout.fragment_promotional_skus, container, false);
+        promotionalSKUs_RecyclerView = (RecyclerView) layout.findViewById(R.id.promotionalSKUs_RecyclerView);
         promotionalSKUs_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         promotionalSKUs_RecyclerView.setItemAnimator(new DefaultItemAnimator());
         promotionalSKUs_RecyclerView.setAdapter(promotionalSKUsAdapter);

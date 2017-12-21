@@ -1,7 +1,5 @@
 package in.etaminepgg.sfa.Adapters;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,12 +12,8 @@ import java.util.List;
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
-import in.etaminepgg.sfa.Utilities.DbUtils;
-import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.Utils;
 
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
-import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
 

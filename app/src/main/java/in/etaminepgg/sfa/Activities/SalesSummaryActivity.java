@@ -56,11 +56,11 @@ public class SalesSummaryActivity extends AppCompatActivity
     protected void onPostResume()
     {
         super.onPostResume();
-        Resources resources=getResources();
-        retailerVisitsDone_TextView.setText(resources.getString(R.string.label_retailer_visits_done)+" : " + (int)noOfVisitsMadeBySalesPerson);
-        salesFromRetailerVisits_TextView.setText(resources.getString(R.string.label_sales_orders_from_retailer_visits)+" : " + (int)noOfSalesOrders);
-        salesConversion_TextView.setText(resources.getString(R.string.label_sales_conversion)+" : " + getSalesConversion() + " %");
-        salesValueForTheDay_TextView.setText(resources.getString(R.string.label_sales_value_for_the_day)+" : " + getTodaysSalesValue(loggedInUserID));
+        Resources resources = getResources();
+        retailerVisitsDone_TextView.setText(resources.getString(R.string.label_retailer_visits_done) + " : " + (int) noOfVisitsMadeBySalesPerson);
+        salesFromRetailerVisits_TextView.setText(resources.getString(R.string.label_sales_orders_from_retailer_visits) + " : " + (int) noOfSalesOrders);
+        salesConversion_TextView.setText(resources.getString(R.string.label_sales_conversion) + " : " + getSalesConversion() + " %");
+        salesValueForTheDay_TextView.setText(resources.getString(R.string.label_sales_value_for_the_day) + " : " + getTodaysSalesValue(loggedInUserID));
     }
 
     @Override
@@ -83,7 +83,7 @@ public class SalesSummaryActivity extends AppCompatActivity
     {
         String SQL_SELECT_SALES_ORDERS =
                 "SELECT" + " visit_id " + "FROM " + TBL_RETAILER_VISIT + " WHERE " + "emp_id " + "= ? AND " + "has_order " + "= ? AND " + "visit_date " + "like ? " + "GROUP BY retailer_id";
-        String[] selectionArgs = {salesPersonId, "1", getTodayDate()+"%"};
+        String[] selectionArgs = {salesPersonId, "1", getTodayDate() + "%"};
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_ORDERS, selectionArgs);
         noOfSalesOrders = cursor.getCount();
         cursor.close();
@@ -97,11 +97,11 @@ public class SalesSummaryActivity extends AppCompatActivity
     {
         if(noOfVisitsMadeBySalesPerson <= 0)
         {
-            return  0;
+            return 0;
         }
         else
         {
-            return (noOfSalesOrders/noOfVisitsMadeBySalesPerson)*100;
+            return (noOfSalesOrders / noOfVisitsMadeBySalesPerson) * 100;
         }
     }
 
@@ -111,9 +111,9 @@ public class SalesSummaryActivity extends AppCompatActivity
 
         float salesValueForTheDay = 0;
 
-        if (orderIdList.size() > 0)
+        if(orderIdList.size() > 0)
         {
-            for (String orderId : orderIdList)
+            for(String orderId : orderIdList)
             {
                 salesValueForTheDay = salesValueForTheDay + getOrderTotal(orderId);
             }
@@ -130,11 +130,11 @@ public class SalesSummaryActivity extends AppCompatActivity
         String SQL_SELECT_SALES_ORDER_IDS =
                 "SELECT" + " order_id " + "FROM " + TBL_SALES_ORDER + " WHERE " + "emp_id " + "= ? AND " + "is_placed " + "= ? AND " + "order_date " + "like ? ";
 
-        String[] selectionArgs = {salesPersonId, "1", getTodayDate()+"%"};
+        String[] selectionArgs = {salesPersonId, "1", getTodayDate() + "%"};
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_ORDER_IDS, selectionArgs);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String orderID = cursor.getString(cursor.getColumnIndexOrThrow("order_id"));
             orderIdList.add(orderID);

@@ -14,7 +14,6 @@ import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
 import in.etaminepgg.sfa.Models.PendingOrder;
-import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
@@ -24,7 +23,6 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NEW_ORDER;
-import static in.etaminepgg.sfa.Utilities.DbUtils.makeCurrentActiveOrderInactive;
 
 /**
  * Created by etamine on 16/8/17.
@@ -70,60 +68,6 @@ public class PendingOrdersAdapter extends RecyclerView.Adapter<PendingOrdersAdap
         return pendingOrderList.size();
     }
 
-    class PendingOrderViewHolder extends RecyclerView.ViewHolder
-    {
-        TextView orderId_TextView, retailerId_TextView, retailerName_TextView, orderDate_TextView, orderTotal_TextView, itemCount_TextView;
-        ImageView deleteOrder_ImageView;
-
-        PendingOrderViewHolder(final View itemView)
-        {
-            super(itemView);
-
-            orderId_TextView = (TextView) itemView.findViewById(R.id.orderId_TextView);
-            retailerId_TextView = (TextView) itemView.findViewById(R.id.retailerId_TextView);
-            retailerName_TextView = (TextView) itemView.findViewById(R.id.retailerName_TextView);
-            orderDate_TextView = (TextView) itemView.findViewById(R.id.orderDate_TextView);
-            orderTotal_TextView = (TextView) itemView.findViewById(R.id.orderTotal_TextView);
-            itemCount_TextView = (TextView) itemView.findViewById(R.id.itemCount_TextView);
-            deleteOrder_ImageView = (ImageView)itemView.findViewById(R.id.deleteOrder_ImageView);
-
-            deleteOrder_ImageView.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    int position = getLayoutPosition();
-                    String orderID = itemView.getTag(R.string.tag_order_id).toString();
-                    
-                    cancelThisOrder(orderID);
-                    makeThisOrderInActive(orderID);
-                    
-                    pendingOrderList.remove(position);
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, pendingOrderList.size());
-                }
-            });
-
-            itemView.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View view)
-                {
-
-                    String orderID = itemView.getTag(R.string.tag_order_id).toString();
-
-                    DbUtils.makeCurrentActiveOrderInactive();
-                    makeThisOrderActive(orderID);
-
-                    Utils.makeThreadSleepFor(500);
-
-                    String intentExtraKey_selectedOrderType = itemView.getContext().getResources().getString(R.string.key_selected_order_type);
-                    Utils.launchActivityWithExtra(itemView.getContext(), SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, NEW_ORDER);
-                }
-            });
-        }
-    }
-
     private String getRetailerName(String retailerID)
     {
         String retailerName = "Error";
@@ -135,7 +79,7 @@ public class PendingOrdersAdapter extends RecyclerView.Adapter<PendingOrdersAdap
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER_NAME, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             retailerName = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));
         }
@@ -180,5 +124,59 @@ public class PendingOrdersAdapter extends RecyclerView.Adapter<PendingOrdersAdap
         sqLiteDatabase.update(TBL_SALES_ORDER, salesOrderValues, "order_id = ?", new String[]{orderID});
 
         sqLiteDatabase.close();
+    }
+
+    class PendingOrderViewHolder extends RecyclerView.ViewHolder
+    {
+        TextView orderId_TextView, retailerId_TextView, retailerName_TextView, orderDate_TextView, orderTotal_TextView, itemCount_TextView;
+        ImageView deleteOrder_ImageView;
+
+        PendingOrderViewHolder(final View itemView)
+        {
+            super(itemView);
+
+            orderId_TextView = (TextView) itemView.findViewById(R.id.orderId_TextView);
+            retailerId_TextView = (TextView) itemView.findViewById(R.id.retailerId_TextView);
+            retailerName_TextView = (TextView) itemView.findViewById(R.id.retailerName_TextView);
+            orderDate_TextView = (TextView) itemView.findViewById(R.id.orderDate_TextView);
+            orderTotal_TextView = (TextView) itemView.findViewById(R.id.orderTotal_TextView);
+            itemCount_TextView = (TextView) itemView.findViewById(R.id.itemCount_TextView);
+            deleteOrder_ImageView = (ImageView) itemView.findViewById(R.id.deleteOrder_ImageView);
+
+            deleteOrder_ImageView.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    int position = getLayoutPosition();
+                    String orderID = itemView.getTag(R.string.tag_order_id).toString();
+
+                    cancelThisOrder(orderID);
+                    makeThisOrderInActive(orderID);
+
+                    pendingOrderList.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, pendingOrderList.size());
+                }
+            });
+
+            itemView.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+
+                    String orderID = itemView.getTag(R.string.tag_order_id).toString();
+
+                    DbUtils.makeCurrentActiveOrderInactive();
+                    makeThisOrderActive(orderID);
+
+                    Utils.makeThreadSleepFor(500);
+
+                    String intentExtraKey_selectedOrderType = itemView.getContext().getResources().getString(R.string.key_selected_order_type);
+                    Utils.launchActivityWithExtra(itemView.getContext(), SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, NEW_ORDER);
+                }
+            });
+        }
     }
 }

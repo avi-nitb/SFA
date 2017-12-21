@@ -1,29 +1,21 @@
 package in.etaminepgg.sfa.Utilities;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import in.etaminepgg.sfa.Activities.PickRetailerActivity;
 import in.etaminepgg.sfa.Models.SalesOrderSku;
 import in.etaminepgg.sfa.Models.Sku;
 
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_EMPLOYEE;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_LOCATION_HIERARCHY;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER_VISIT;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_DETAILS;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NONE;
-import static in.etaminepgg.sfa.Utilities.ConstantsA.NO_ACTIVE_ORDER;
-import static in.etaminepgg.sfa.Utilities.Utils.getRandomNumber;
 import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 
 /**
@@ -43,7 +35,7 @@ public class DbUtils
 
         String SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON =
                 "SELECT" + " visit_id " + "FROM " + TBL_RETAILER_VISIT + " WHERE " + "emp_id " + "= ? AND " + "visit_date " + "like ? " + "GROUP BY retailer_id";
-        String[] selectionArgs = {salesPersonId, getTodayDate()+"%"};
+        String[] selectionArgs = {salesPersonId, getTodayDate() + "%"};
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON, selectionArgs);
         int noOfVisitsMadeBySalesPerson = cursor.getCount();
@@ -137,7 +129,7 @@ public class DbUtils
 
         int skuPriceInt = Integer.parseInt(skuPrice);
         int skuQtyInt = Integer.parseInt(skuQty);
-        String skuFinalPrice = String.valueOf(skuPriceInt*skuQtyInt);
+        String skuFinalPrice = String.valueOf(skuPriceInt * skuQtyInt);
 
         ContentValues salesOrderDetailsValues = new ContentValues();
         salesOrderDetailsValues.put("order_id", orderID);
@@ -163,7 +155,7 @@ public class DbUtils
 
         int skuPriceInt = Integer.parseInt(skuPrice);
         int skuQtyInt = Integer.parseInt(skuQty);
-        String skuFinalPrice = String.valueOf(skuPriceInt*skuQtyInt);
+        String skuFinalPrice = String.valueOf(skuPriceInt * skuQtyInt);
 
         ContentValues salesOrderDetailsValues = new ContentValues();
         salesOrderDetailsValues.put("order_id", orderID);
@@ -190,7 +182,7 @@ public class DbUtils
         String[] selectionArgs = {salesOrderID, skuID};
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SKU_FROM_SALES_ORDER_DETAILS, selectionArgs);
 
-        if (cursor.moveToFirst())
+        if(cursor.moveToFirst())
         {
             isSkuPresent = true;
         }
@@ -213,7 +205,7 @@ public class DbUtils
 
         Cursor cursor = sqLiteDatabase.rawQuery(sqlQuery, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             skuQuantity = cursor.getInt(cursor.getColumnIndexOrThrow("sku_qty"));
         }
@@ -245,7 +237,7 @@ public class DbUtils
 
         List<Sku> skuList = new ArrayList<>();
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String skuID = cursor.getString(cursor.getColumnIndexOrThrow("sku_id"));
             String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
@@ -271,7 +263,7 @@ public class DbUtils
 
         List<Sku> skuList = new ArrayList<>();
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String skuID = cursor.getString(cursor.getColumnIndexOrThrow("sku_id"));
             String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
@@ -296,7 +288,7 @@ public class DbUtils
 
         List<SalesOrderSku> skuList = new ArrayList<>();
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             long orderDetailId = cursor.getLong(cursor.getColumnIndexOrThrow("order_detail_id"));
             String skuID = cursor.getString(cursor.getColumnIndexOrThrow("sku_id"));
@@ -324,7 +316,7 @@ public class DbUtils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ORDER_TOTAL, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             orderTotal = cursor.getInt(cursor.getColumnIndexOrThrow("total"));
         }
@@ -346,7 +338,7 @@ public class DbUtils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ITEM_COUNT, selectionArgs);
 
-        if (cursor.moveToNext())
+        if(cursor.moveToNext())
         {
             itemCount = cursor.getInt(cursor.getColumnIndexOrThrow("count"));
         }
@@ -374,8 +366,8 @@ public class DbUtils
         sqLiteDatabase.close();
     }
 
-      //don't make this method static. Will not work inside ViewHolders
-      //Note: ViewHolders are inner classes of Adapters
+    //don't make this method static. Will not work inside ViewHolders
+    //Note: ViewHolders are inner classes of Adapters
     /*public void addToSalesOrderOrPickRetailer(String skuID, String skuName, String skuPrice, Context context)
     {
         String salesOrderID = getActiveOrderID();

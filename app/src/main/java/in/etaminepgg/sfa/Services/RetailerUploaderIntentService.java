@@ -15,11 +15,11 @@ import in.etaminepgg.sfa.Utilities.FileFunctions;
 import in.etaminepgg.sfa.Utilities.MyDb;
 
 import static in.etaminepgg.sfa.Activities.LoginActivity.uploadToURL;
-import static in.etaminepgg.sfa.Utilities.Constants.IMEI;
-import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.Constants.DBH;
-import static in.etaminepgg.sfa.Utilities.Constants.appSpecificDirectoryPath;
+import static in.etaminepgg.sfa.Utilities.Constants.IMEI;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
+import static in.etaminepgg.sfa.Utilities.Constants.appSpecificDirectoryPath;
+import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -28,25 +28,19 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
  * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
-public class RetailerUploaderIntentService extends IntentService {
+public class RetailerUploaderIntentService extends IntentService
+{
 
-    public RetailerUploaderIntentService() {
+    public RetailerUploaderIntentService()
+    {
         super("RetailerUploaderIntentService");
     }
 
+    public static void uploadNewRetailer()
+    {
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-
-        uploadNewRetailer();
-
-        uploadNewRetailerPhotos();
-
-    }
-
-    public static void uploadNewRetailer() {
-
-        try{
+        try
+        {
 
             int surveyDbi = MyDb.openDatabase(dbFileFullPath);
 
@@ -61,7 +55,7 @@ public class RetailerUploaderIntentService extends IntentService {
             String scopeDbFile = appSpecificDirectoryPath + File.separator + fprefix + ".reddb";
 
             // If this file exists, delete it
-            if( FileFunctions.fileExists(scopeDbFile))
+            if(FileFunctions.fileExists(scopeDbFile))
             {
                 FileFunctions.deleteFile(scopeDbFile);
             }
@@ -76,15 +70,15 @@ public class RetailerUploaderIntentService extends IntentService {
 
             s += "login`imei\n";
 
-            s += "l`"+IMEI+"\n";
+            s += "l`" + IMEI + "\n";
 
-            s +=".\n\n";
+            s += ".\n\n";
 
-            s += TBL_RETAILER +"\n";
+            s += TBL_RETAILER + "\n";
 
-            s +="ret_id`shop_name`shop_address`retailer_name`mobile_no`email`district`city`area`LONGITUDE`LATITUDE`media_name`saved_date";
+            s += "ret_id`shop_name`shop_address`retailer_name`mobile_no`email`district`city`area`LONGITUDE`LATITUDE`media_name`saved_date";
 
-            s+="\n";
+            s += "\n";
 
 //            String qrr = "Select ret_id, shop_name, shop_address, retailer_name, " +
 //                    "mobile_no, email, district, city, area, LONGITUDE, LATITUDE, media_name, saved_date " +
@@ -92,22 +86,23 @@ public class RetailerUploaderIntentService extends IntentService {
 
             String qrr = "Select ret_id, shop_name, shop_address, retailer_name, " +
                     "mobile_no, email, district, city, area, LONGITUDE, LATITUDE, media_name, saved_date " +
-                    " From "+ TBL_RETAILER;
+                    " From " + TBL_RETAILER;
 
             Cursor cur = dbh.rawQuery(qrr, null);
 
             cur.moveToFirst();
 
-            while (!cur.isAfterLast())
+            while(!cur.isAfterLast())
             {
 
-                s+= cur.getString(0)+"`"+cur.getString(1)+"`"+cur.getString(2)+"`"+cur.getString(3)+"`"
-                        +cur.getString(4)+"`"+cur.getString(5)+"`"+cur.getString(6)+"`"+cur.getString(7)+"`"
-                        +cur.getString(8)+"`"+cur.getString(9)+"`"+cur.getString(10)+"`";
+                s += cur.getString(0) + "`" + cur.getString(1) + "`" + cur.getString(2) + "`" + cur.getString(3) + "`"
+                        + cur.getString(4) + "`" + cur.getString(5) + "`" + cur.getString(6) + "`" + cur.getString(7) + "`"
+                        + cur.getString(8) + "`" + cur.getString(9) + "`" + cur.getString(10) + "`";
 
-                String imgName ="";
+                String imgName = "";
 
-                if (cur.getString(11).length()>0 && !cur.getString(11).equals(null)) {
+                if(cur.getString(11).length() > 0 && !cur.getString(11).equals(null))
+                {
 
                     String imgPath = cur.getString(11);
 
@@ -117,7 +112,7 @@ public class RetailerUploaderIntentService extends IntentService {
 
                 }
 
-                s+= imgName+"`"+cur.getString(12);
+                s += imgName + "`" + cur.getString(12);
 
                 s += "\n";
 
@@ -128,65 +123,67 @@ public class RetailerUploaderIntentService extends IntentService {
 
             s += ".\n\n";
 
-            Log.d("Data",s);
+            Log.d("Data", s);
 
-            FileFunctions.writeTextFile(s, scopeDbFile );
+            FileFunctions.writeTextFile(s, scopeDbFile);
 
-            File f1 = new File( scopeDbFile );
+            File f1 = new File(scopeDbFile);
 
             long fileSize = f1.length();
 
-            Log.i("Data upload ", "File size is : "+fileSize);
+            Log.i("Data upload ", "File size is : " + fileSize);
 
             String newName = appSpecificDirectoryPath + File.separator + fprefix + "_" + fileSize + ".reddb";
             FileFunctions.move(scopeDbFile, newName);
-            File f = new File( newName );
+            File f = new File(newName);
             try
             {
 
 //                String tempUrl = uploadToURL+"?login="+"imei="+IMEI;
 
-                String tempUrl = uploadToURL +"?login="+"l"+"&imei="+IMEI;
+                String tempUrl = uploadToURL + "?login=" + "l" + "&imei=" + IMEI;
 
 //                int ret = FileFunctions.uploadFile( newName, uploadToURL);
 
                 int ret = 0;
 
-                ret = FileFunctions.uploadFile( newName, tempUrl);
+                ret = FileFunctions.uploadFile(newName, tempUrl);
 
-                if( ret == f.length())
+                if(ret == f.length())
                 {
-                    Log.i("Data Uploaded : ", "Data Uploaded Successfully and Replyed Lenght is : "+ret);
+                    Log.i("Data Uploaded : ", "Data Uploaded Successfully and Replyed Lenght is : " + ret);
 
                     FileFunctions.deleteFile(newName);
 
                 }
-                else {
+                else
+                {
                     Log.i("Error on Data Upload : ", "Error uploading survey data. Check network connection and try again.");
                 }
             }
-            catch( Exception e )
+            catch(Exception e)
             {
 
-                Log.i("Error on Data Upload : ", ""+e.getMessage());
+                Log.i("Error on Data Upload : ", "" + e.getMessage());
 
             }
 
 
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
     }
 
-    public static void uploadNewRetailerPhotos() {
+    public static void uploadNewRetailerPhotos()
+    {
 
         try
         {
 //            String insQ1 = "SELECT media_name, ret_id FROM "+TBL_RETAILER+" where upload_status ='0'" ;
 //
-            String insQ1 = "SELECT media_name, ret_id FROM "+ TBL_RETAILER;
+            String insQ1 = "SELECT media_name, ret_id FROM " + TBL_RETAILER;
 
             Cursor insC1 = DBH.rawQuery(insQ1, null);
             insC1.moveToFirst();
@@ -198,9 +195,10 @@ public class RetailerUploaderIntentService extends IntentService {
 
                 String ret_id = insC1.getString(1);
 
-                Log.d("File Name ",getImage);
+                Log.d("File Name ", getImage);
 
-                try {
+                try
+                {
 
                     Uri myUri = Uri.parse("file://" + getImage); // complete path of audio file.
 
@@ -208,7 +206,7 @@ public class RetailerUploaderIntentService extends IntentService {
 
                     long fileSize = f1.length();
 
-                    Log.d("File Size",""+fileSize);
+                    Log.d("File Size", "" + fileSize);
 //
 //                    String curDateTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
 //
@@ -220,7 +218,8 @@ public class RetailerUploaderIntentService extends IntentService {
 //                    File ff = new File(myUri.getPath());
 //                    File ft = new File(newName);
 //
-                    try {
+                    try
+                    {
 
 //                        FileFunctions.copy(ff, ft);
 //
@@ -229,17 +228,20 @@ public class RetailerUploaderIntentService extends IntentService {
 
                         int uploadStatus = FileFunctions.uploadFile(getImage, uploadToURL);
 
-                        Log.d("Response File Size",""+uploadStatus);
+                        Log.d("Response File Size", "" + uploadStatus);
 
-                        if (uploadStatus == fileSize) {
+                        if(uploadStatus == fileSize)
+                        {
 
                             Log.d("uploadStatus", "Image Uploaded Successfully");
 
-                            String updQrr = "Update "+ TBL_RETAILER +" set upload_status ='1' where ret_id ='"+ret_id+"'";
+                            String updQrr = "Update " + TBL_RETAILER + " set upload_status ='1' where ret_id ='" + ret_id + "'";
 
                             DBH.execSQL(updQrr);
 
-                        } else {
+                        }
+                        else
+                        {
 
                             Log.d("uploadStatus", "Error In Image Uploaded");
 
@@ -247,19 +249,24 @@ public class RetailerUploaderIntentService extends IntentService {
 
 //                        ft.delete();
 
-                    } catch (Exception e) {
+                    }
+                    catch(Exception e)
+                    {
 
                         Log.d("uploadStatus", "Check.. File May Not Be Present.");
 
                     }
 
 
-                } catch (IllegalArgumentException
-                        | IllegalStateException e) {
+                }
+                catch(IllegalArgumentException
+                        | IllegalStateException e)
+                {
 
-                    	e.printStackTrace();
+                    e.printStackTrace();
 
-                } catch (Exception e)
+                }
+                catch(Exception e)
                 {
 
                     e.printStackTrace();
@@ -271,13 +278,23 @@ public class RetailerUploaderIntentService extends IntentService {
 
             insC1.close();
 
-            Log.d("End Of Images Upload","True");
+            Log.d("End Of Images Upload", "True");
 
         }
         catch(Exception e)
         {
-            	e.printStackTrace();
+            e.printStackTrace();
         }
+
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent)
+    {
+
+        uploadNewRetailer();
+
+        uploadNewRetailerPhotos();
 
     }
 

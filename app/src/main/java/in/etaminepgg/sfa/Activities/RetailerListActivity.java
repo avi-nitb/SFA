@@ -2,8 +2,8 @@ package in.etaminepgg.sfa.Activities;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,29 +13,26 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import in.etaminepgg.sfa.Adapters.PendingOrdersAdapter;
 import in.etaminepgg.sfa.Adapters.RetailerListAdapter;
-import in.etaminepgg.sfa.Models.PendingOrder;
 import in.etaminepgg.sfa.Models.Retailer;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.MyDb;
 
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
-import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 
 public class RetailerListActivity extends AppCompatActivity
 {
     RecyclerView retailerList_RecyclerView;
     TextView emptyAdapter_TextView;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_retailer_list);
 
-        retailerList_RecyclerView = (RecyclerView)findViewById(R.id.retailerList_RecyclerView);
-        emptyAdapter_TextView = (TextView)findViewById(R.id.emptyAdapter_TextView);
+        retailerList_RecyclerView = (RecyclerView) findViewById(R.id.retailerList_RecyclerView);
+        emptyAdapter_TextView = (TextView) findViewById(R.id.emptyAdapter_TextView);
 
         retailerList_RecyclerView.setLayoutManager(new LinearLayoutManager(this));
         retailerList_RecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -48,7 +45,7 @@ public class RetailerListActivity extends AppCompatActivity
 
         List<Retailer> retailerList = getRetailerList();
 
-        if (retailerList.size() < 1)
+        if(retailerList.size() < 1)
         {
             emptyAdapter_TextView.setVisibility(View.VISIBLE);
             retailerList_RecyclerView.setVisibility(View.GONE);
@@ -73,8 +70,8 @@ public class RetailerListActivity extends AppCompatActivity
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILERS, null);
-        
-        while (cursor.moveToNext())
+
+        while(cursor.moveToNext())
         {
             String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
             String retailerName = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));

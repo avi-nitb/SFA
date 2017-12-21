@@ -2,8 +2,8 @@ package in.etaminepgg.sfa.Activities;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,16 +13,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import in.etaminepgg.sfa.Adapters.AllSKUsAdapter;
 import in.etaminepgg.sfa.Adapters.PendingOrdersAdapter;
 import in.etaminepgg.sfa.Models.PendingOrder;
 import in.etaminepgg.sfa.R;
-import in.etaminepgg.sfa.Utilities.ConstantsA;
-import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
-import in.etaminepgg.sfa.Utilities.Utils;
 
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 
@@ -30,15 +25,15 @@ public class PendingOrdersActivity extends AppCompatActivity
 {
     RecyclerView pendingOrders_RecyclerView;
     TextView emptyAdapter_TextView;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pending_orders);
 
-        pendingOrders_RecyclerView = (RecyclerView)findViewById(R.id.pendingOrders_RecyclerView);
-        emptyAdapter_TextView = (TextView)findViewById(R.id.emptyAdapter_TextView);
+        pendingOrders_RecyclerView = (RecyclerView) findViewById(R.id.pendingOrders_RecyclerView);
+        emptyAdapter_TextView = (TextView) findViewById(R.id.emptyAdapter_TextView);
 
         pendingOrders_RecyclerView.setLayoutManager(new LinearLayoutManager(this));
         pendingOrders_RecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -51,7 +46,7 @@ public class PendingOrdersActivity extends AppCompatActivity
 
         List<PendingOrder> pendingOrderList = getPendingOrderList();
 
-        if (pendingOrderList.size() < 1)
+        if(pendingOrderList.size() < 1)
         {
             emptyAdapter_TextView.setVisibility(View.VISIBLE);
             pendingOrders_RecyclerView.setVisibility(View.GONE);
@@ -81,7 +76,7 @@ public class PendingOrdersActivity extends AppCompatActivity
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_PENDING_SALES_ORDERS, selectionArgs_Dummy);
 
-        while (cursor.moveToNext())
+        while(cursor.moveToNext())
         {
             String orderID = cursor.getString(cursor.getColumnIndexOrThrow("order_id"));
             String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));

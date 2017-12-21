@@ -1,7 +1,8 @@
 package in.etaminepgg.sfa.network_asynctask;
 
 
-public class ErrorTable {
+public class ErrorTable
+{
 
 /*
 
