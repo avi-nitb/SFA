@@ -4,12 +4,12 @@ package in.etaminepgg.sfa.InputModel_For_Network;
  * Created by Jaya on 21-12-2017.
  */
 
-public class InputMode_IsValidAuthKey
+public class IM_IsValidAuthKey
 {
 
     private  String authToken;
 
-    public InputMode_IsValidAuthKey(String authToken)
+    public IM_IsValidAuthKey(String authToken)
     {
         this.authToken = authToken;
     }

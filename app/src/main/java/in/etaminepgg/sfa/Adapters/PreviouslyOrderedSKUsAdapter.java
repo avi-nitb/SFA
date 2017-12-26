@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
@@ -21,6 +23,7 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
+import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 
 /**
  * Created by etamine on 6/6/17.
@@ -48,6 +51,7 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
         String skuID = skuList.get(position).getSkuId();
         String skuName = skuList.get(position).getSkuName();
         String skuPrice = skuList.get(position).getSkuPrice();
+        String sku_photo_url =  getSku_PhotoSource(skuID);
         //String skuCategory = skuList.get(position).getSkuCategory();
 
         skuInfoViewHolder.itemView.setTag(R.string.tag_sku_id, skuID);
@@ -56,7 +60,8 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
 
         skuInfoViewHolder.skuName_TextView.setText(skuName);
         skuInfoViewHolder.skuPrice_TextView.setText(RS + skuPrice);
-        skuInfoViewHolder.skuCategory_TextView.setText(getSKU_category(skuID));
+        skuInfoViewHolder.skuCategory_TextView.setText("Category : "+getSKU_category(skuID));
+        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
         //skuInfoViewHolder.sku_SO_Attr_TextView.setVisibility(View.GONE);
     }
 
@@ -88,6 +93,7 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
     {
         return skuList.size();
     }
+
 
     class SkuInfoViewHolder extends RecyclerView.ViewHolder
     {

@@ -4,14 +4,14 @@ package in.etaminepgg.sfa.InputModel_For_Network;
  * Created by Jaya on 21-12-2017.
  */
 
-public class InputModel_Config
+public class IM_Config
 {
 
    /* {"IMEI": "erdddddddddddasdasdasdasdasdasdw10","mobile_app_version":"0.0.1"}*/
    private  String IMEI;
    private  String mobile_app_version;
 
-    public InputModel_Config(String IMEI, String mobile_app_version)
+    public IM_Config(String IMEI, String mobile_app_version)
     {
         this.IMEI = IMEI;
         this.mobile_app_version = mobile_app_version;

@@ -23,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +43,7 @@ import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NONE;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
 import static in.etaminepgg.sfa.Utilities.DbUtils.getOrderTotal;
+import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 
 /**
  * Created by etamine on 12/6/17.
@@ -99,6 +102,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
         String skuName = skuList.get(position).getSkuName();
         String skuPrice = skuList.get(position).getSkuPrice();
         String skuQuantity = skuList.get(position).getSkuQty();
+        String sku_photo_url =  getSku_PhotoSource(skuID);
 
         skuInfoViewHolder.itemView.setTag(R.string.tag_order_detail_id, orderDetailID);
         skuInfoViewHolder.itemView.setTag(R.string.tag_sku_id, skuID);
@@ -107,6 +111,7 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
         skuInfoViewHolder.skuName_TextView.setText(skuName);
         skuInfoViewHolder.skuPrice_TextView.setText(RS + skuPrice);
         skuInfoViewHolder.skuQuantity_TextInputEditText.setText(skuQuantity);
+        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
 
         skuInfoViewHolder.sku_SO_Attr_TextView.setText(salesOrderSkuAttributes);
 

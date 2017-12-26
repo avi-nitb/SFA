@@ -3,28 +3,18 @@ package in.etaminepgg.sfa.Models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
 /**
- * Created by Jaya on 21-12-2017.
+ * Created by Jayattama Prusty on 23-Dec-17.
  */
 
-public class GetSkuListAfter
-{
-    /*
-    {
-        "api_status": 1,
-            "sku_ids": [
-        "1"
-    ]
-    }*/
+public class PutRetailerInfo_Model {
 
     @SerializedName("api_status")
     @Expose
     private Integer apiStatus;
-    @SerializedName("sku_ids")
+    @SerializedName("retailer_data")
     @Expose
-    private List<String> skuIds = null;
+    private String retailerData;
 
     public Integer getApiStatus() {
         return apiStatus;
@@ -34,14 +24,11 @@ public class GetSkuListAfter
         this.apiStatus = apiStatus;
     }
 
-    public List<String> getSkuIds() {
-        return skuIds;
+    public String getRetailerData() {
+        return retailerData;
     }
 
-    public void setSkuIds(List<String> skuIds) {
-        this.skuIds = skuIds;
+    public void setRetailerData(String retailerData) {
+        this.retailerData = retailerData;
     }
-
-
-
 }

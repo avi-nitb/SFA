@@ -30,12 +30,13 @@ public class Sku
         this.skuPrice = skuPrice;
     }
 
-    public Sku(String skuId, String skuName, String skuPrice, String skuCategory)
+    public Sku(String skuId, String skuName, String skuPrice, String skuCategory,String sku_photo_source)
     {
         this.skuId = skuId;
         this.skuName = skuName;
         this.skuPrice = skuPrice;
         this.skuCategory = skuCategory;
+        this.skuPhotoSource = sku_photo_source;
     }
 
 

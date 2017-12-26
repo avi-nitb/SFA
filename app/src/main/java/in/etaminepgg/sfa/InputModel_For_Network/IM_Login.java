@@ -4,14 +4,14 @@ package in.etaminepgg.sfa.InputModel_For_Network;
  * Created by Jaya on 20-12-2017.
  */
 
-public class LoginInput_Model
+public class IM_Login
 {
 
     private String IMEI;
     private String username;
     private String password;
 
-    public LoginInput_Model(String IMEI, String username, String password)
+    public IM_Login(String IMEI, String username, String password)
     {
         this.IMEI = IMEI;
         this.username = username;

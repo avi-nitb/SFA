@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
@@ -16,6 +18,7 @@ import in.etaminepgg.sfa.Utilities.Utils;
 
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
+import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 
 /**
  * Created by etamine on 8/6/17.
@@ -43,6 +46,7 @@ public class SimilarSKUsAdapter extends RecyclerView.Adapter<SimilarSKUsAdapter.
         String skuID = skuList.get(position).getSkuId();
         String skuName = skuList.get(position).getSkuName();
         String skuPrice = skuList.get(position).getSkuPrice();
+        String sku_photo_url =  getSku_PhotoSource(skuID);
 
         skuInfoViewHolder.itemView.setTag(R.string.tag_sku_id, skuID);
         skuInfoViewHolder.itemView.setTag(R.string.tag_sku_price, skuPrice);
@@ -50,6 +54,7 @@ public class SimilarSKUsAdapter extends RecyclerView.Adapter<SimilarSKUsAdapter.
 
         skuInfoViewHolder.skuName_TextView.setText(skuName);
         skuInfoViewHolder.skuPrice_TextView.setText(RS + skuPrice);
+        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
     }
 
     @Override

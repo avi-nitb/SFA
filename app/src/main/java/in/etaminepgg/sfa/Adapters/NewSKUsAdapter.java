@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
@@ -44,6 +46,7 @@ public class NewSKUsAdapter extends RecyclerView.Adapter<NewSKUsAdapter.SkuInfoV
         String skuName = skuList.get(position).getSkuName();
         String skuPrice = skuList.get(position).getSkuPrice();
         String skuCategory = skuList.get(position).getSkuCategory();
+        String sku_photo_url = skuList.get(position).getSkuPhotoSource();
 
         skuInfoViewHolder.itemView.setTag(R.string.tag_sku_id, skuID);
         skuInfoViewHolder.itemView.setTag(R.string.tag_sku_price, skuPrice);
@@ -51,7 +54,9 @@ public class NewSKUsAdapter extends RecyclerView.Adapter<NewSKUsAdapter.SkuInfoV
 
         skuInfoViewHolder.skuName_TextView.setText(skuName);
         skuInfoViewHolder.skuPrice_TextView.setText(RS + skuPrice);
-        skuInfoViewHolder.skuCategory_TextView.setText(skuCategory);
+        skuInfoViewHolder.skuCategory_TextView.setText("Category : "+skuCategory);
+        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
+        //skuInfoViewHolder.skuPhoto_ImageView.setImageResource(skuCategory);
     }
 
     @Override

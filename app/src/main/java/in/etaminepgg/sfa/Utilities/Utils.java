@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,6 +17,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.Dimension;
@@ -664,5 +666,25 @@ public class Utils
         }
 
         return -1L;
+    }
+
+    public static void startProgressDialog(Context context,ProgressDialog progressDialog){
+
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setMessage("Please Wait....");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(true);
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.setProgressNumberFormat(null);
+        progressDialog.setProgressPercentFormat(null);
+        progressDialog.show();
+    }
+
+    public static void dismissProgressDialog(ProgressDialog progressDialog){
+
+        if(progressDialog.isShowing()){
+
+            progressDialog.dismiss();
+        }
     }
 }

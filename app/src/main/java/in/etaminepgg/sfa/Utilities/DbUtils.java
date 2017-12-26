@@ -1,6 +1,7 @@
 package in.etaminepgg.sfa.Utilities;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -11,9 +12,11 @@ import in.etaminepgg.sfa.Models.SalesOrderSku;
 import in.etaminepgg.sfa.Models.Sku;
 
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_LOCATION_HIERARCHY;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER_VISIT;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_DETAILS;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NONE;
 import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
@@ -243,8 +246,9 @@ public class DbUtils
             String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
             String skuPrice = cursor.getString(cursor.getColumnIndexOrThrow("sku_price"));
             String skuCategory = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
+            String sku_photo_source = cursor.getString(cursor.getColumnIndexOrThrow("sku_photo_source"));
 
-            skuList.add(new Sku(skuID, skuName, skuPrice, skuCategory));
+            skuList.add(new Sku(skuID, skuName, skuPrice, skuCategory,sku_photo_source));
         }
 
         cursor.close();
@@ -397,5 +401,86 @@ public class DbUtils
             Utils.launchActivity(context, PickRetailerActivity.class);
         }
     }*/
+
+
+    ///////////////////////jayaa///////////////////
+
+
+    public static String getSku_PhotoSource(String frequentlyskuID)
+    {
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String sku_photo_source=null;
+
+        String SQL_sku_Photo_url = "select  sku_photo_source from " + TBL_SKU + " WHERE sku_id = ? ;";
+        String selectionargs[]={frequentlyskuID};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_sku_Photo_url,selectionargs );
+
+        if(cursor.moveToFirst())
+        {
+            sku_photo_source  = cursor.getString(cursor.getColumnIndexOrThrow("sku_photo_source"));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+        return sku_photo_source;
+    }
+
+    public static void clear_table(String tablename){
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+        sqLiteDatabase.delete(tablename,null,null);
+    }
+
+
+    public static boolean isRetailerPresentInDb(String retailerid)
+    {
+        boolean isRetailerPresent = false;
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String SQL_SELECT_RETAILER =
+                "SELECT" + " retailer_id " + "FROM " + TBL_RETAILER + " WHERE " + "retailer_id " + "= ? " ;
+        String[] selectionArgs = {retailerid};
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER, selectionArgs);
+
+        if(cursor.moveToFirst())
+        {
+            isRetailerPresent = true;
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return isRetailerPresent;
+    }
+
+    public static boolean isSKUPresentInDb(String skuid)
+    {
+        boolean isskuPresent = false;
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String SQL_SELECT_sku =
+                "SELECT" + " sku_id " + "FROM " + TBL_SKU + " WHERE " + "sku_id " + "= ? " ;
+        String[] selectionArgs = {skuid};
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_sku, selectionArgs);
+
+        if(cursor.moveToFirst())
+        {
+            isskuPresent = true;
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return isskuPresent;
+    }
 
 }

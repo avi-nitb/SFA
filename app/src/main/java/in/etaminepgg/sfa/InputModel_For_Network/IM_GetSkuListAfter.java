@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by Jaya on 21-12-2017.
  */
 
-public class Input_Model_GetSkuListAfter
+public class IM_GetSkuListAfter
 {
 
     @SerializedName("authToken")
@@ -20,7 +20,7 @@ public class Input_Model_GetSkuListAfter
     @Expose
     private String date;
 
-    public Input_Model_GetSkuListAfter(String authToken, String type, String date)
+    public IM_GetSkuListAfter(String authToken, String type, String date)
     {
         this.authToken = authToken;
         this.type = type;

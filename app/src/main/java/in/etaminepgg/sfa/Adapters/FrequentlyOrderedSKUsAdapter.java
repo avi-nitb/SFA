@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
@@ -17,9 +20,11 @@ import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.Utils;
 
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
+import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 
 /**
  * Created by etamine on 6/6/17.
@@ -47,6 +52,9 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
         String skuID = skuList.get(position).getSkuId();
         String skuName = skuList.get(position).getSkuName();
         String skuPrice = skuList.get(position).getSkuPrice();
+
+
+        String sku_photo_url =  getSku_PhotoSource(skuID);
         //String skuCategory = skuList.get(position).getSkuCategory();
 
         skuInfoViewHolder.itemView.setTag(R.string.tag_sku_id, skuID);
@@ -58,8 +66,11 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
         skuInfoViewHolder.retailerCount_TextView.setText(getRetailerCount(skuID) + " Retailers, ");
         skuInfoViewHolder.orderCount_TextView.setText(getOrderCount(skuID) + " Orders, ");
         skuInfoViewHolder.salesValue_TextView.setText("Sales Value: " + "Rs." + getSalesValue(skuID));
+        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
         //skuInfoViewHolder.sku_SO_Attr_TextView.setText(skuCategory);
     }
+
+
 
     @Override
     public int getItemCount()
