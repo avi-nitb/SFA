@@ -142,7 +142,7 @@ public class AllSKUsFragment extends Fragment
                 else
                 {
                     Utils.dismissProgressDialog(progressDialog);
-                    Utils.showToast(getActivity(), "Unsuccessful api call for getSkuListAfter ");
+                    Utils.showToast(getActivity(), "ALL : Unsuccessful api call for getSkuListAfter ");
                 }
 
             }

@@ -4,6 +4,7 @@ import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuInfo;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_IsValidAuthKey;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuListAfter;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_PutRetailerInfo;
+import in.etaminepgg.sfa.InputModel_For_Network.IM_PutRetailerVisit;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_RetailerInfo;
 import in.etaminepgg.sfa.Models.AuthUser_Model;
 import in.etaminepgg.sfa.Models.BasicConfigModel;
@@ -59,5 +60,11 @@ public interface Apimethods
 
     @POST(ApiUrl.LOG_URL_GETSIMILARSKU)
     Call<GetSkuListAfter> getSimilarSkuList(@Body IM_GetSkuInfo im_getSkuInfo_attr);
+
+    @POST(ApiUrl.LOG_URL_PUTRETAILERVISIT)
+    Call<PutRetailerInfo_Model> putRetailerVisit(@Body IM_PutRetailerVisit im_putRetailerVisit);
+
+    @POST(ApiUrl.LOG_URL_PUTSALESORDERDETAILS)
+    Call<PutRetailerInfo_Model> putSalesOrderDetails(@Body IM_PutRetailerVisit im_putRetailerVisit);
 }
 

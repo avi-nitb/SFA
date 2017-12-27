@@ -348,7 +348,6 @@ public class NewSKUsFragment extends Fragment
                                     skuValues.put("new_sku", 1);
                                 }
 
-
                                 skuValues.put("upload_status", 0);
                                 sqLiteDatabase.insert(TBL_SKU, null, skuValues);
 
@@ -359,7 +358,7 @@ public class NewSKUsFragment extends Fragment
                         else
                         {
                             Utils.dismissProgressDialog(progressDialog);
-                            Utils.showToast(getActivity(), "Unsuccessful api call for getskuinfo ");
+                            Utils.showToast(getActivity(), "NEW : Unsuccessful api call for getskuinfo ");
                         }
                     }
 

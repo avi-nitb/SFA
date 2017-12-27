@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -29,11 +30,22 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.Gson;
 
+import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuInfo;
+import in.etaminepgg.sfa.InputModel_For_Network.IM_PutRetailerVisit;
+import in.etaminepgg.sfa.Models.GetSkuListAfter;
+import in.etaminepgg.sfa.Models.PutRetailerInfo_Model;
+import in.etaminepgg.sfa.Network.API_Call_Retrofit;
+import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
+import in.etaminepgg.sfa.Utilities.MySharedPrefrencesData;
 import in.etaminepgg.sfa.Utilities.Utils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static in.etaminepgg.sfa.Utilities.Constants.REQUEST_TURN_ON_LOCATION;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER_VISIT;
@@ -42,6 +54,7 @@ import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_RETAILER_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_RETAILER_NAME;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NEW_ORDER;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.NO_INTERNET_CONNECTION;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.ORDER_TYPE_NEW_ORDER;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.ORDER_TYPE_NEW_REGULAR_ORDER;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.ORDER_TYPE_NO_ORDER;
@@ -238,16 +251,15 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         {
             case ORDER_TYPE_NEW_ORDER:
 
-                makeEntriesIntoVisitAndOrderTables(null);
-
+                makeEntriesIntoVisitAndOrderTables(null,ORDER_TYPE_NEW_ORDER);
                 dismissProgressDialog();
-                Utils.launchActivityWithExtra(getBaseContext(), SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, NEW_ORDER);
+
                 break;
 
             case ORDER_TYPE_NEW_REGULAR_ORDER:
-                makeEntriesIntoVisitAndOrderTables(null);
-                dismissProgressDialog();
-                Utils.launchActivityWithExtra(getBaseContext(), SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, REGULAR_ORDER);
+                makeEntriesIntoVisitAndOrderTables(null,ORDER_TYPE_NEW_REGULAR_ORDER);
+               dismissProgressDialog();
+
                 break;
 
             case ORDER_TYPE_NO_ORDER:
@@ -278,7 +290,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
-                        makeEntriesIntoVisitAndOrderTables(retailerFeedback);
+                        makeEntriesIntoVisitAndOrderTables(retailerFeedback,ORDER_TYPE_NO_ORDER);
                         whyNoOrder_TextInputEditText.setText("");
                         orderTypes_RadioGroup.clearCheck();
                         selectedOrderType = -123;
@@ -297,13 +309,112 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     }
 
     //retailerFeedback is explanation/reason by retailer, why there is no order from him
-    private void makeEntriesIntoVisitAndOrderTables(String retailerFeedback)
+    private void makeEntriesIntoVisitAndOrderTables(String retailerFeedback,int selectedOrderType)
     {
-        String visitID = "VISIT_" + getIST() + "_" + getRandomNumber();
 
-        insertIntoRetailerVisitTable(visitID, retailerFeedback);
-        DbUtils.makeCurrentActiveOrderInactive();
-        insertIntoSalesOrderTable(visitID);
+        if(Utils.isNetworkConnected(SelectSalesOrderTypeActivity.this)){
+
+            networkcall_put_retailer_visit(selectedOrderType);
+
+        }else {
+
+            String visitID = "VISIT_" + getIST() + "_" + getRandomNumber();
+
+            insertIntoRetailerVisitTable(visitID, retailerFeedback);
+            DbUtils.makeCurrentActiveOrderInactive();
+            insertIntoSalesOrderTable(visitID);
+
+            launch_corresponding_tab(selectedOrderType);
+        }
+    }
+
+    private void launch_corresponding_tab(int selectedOrderType)
+    {
+
+        Resources resources = getResources();
+        String intentExtraKey_selectedOrderType = resources.getString(R.string.key_selected_order_type);
+        switch(selectedOrderType)
+        {
+            case ORDER_TYPE_NEW_ORDER:
+                dismissProgressDialog();
+                Utils.launchActivityWithExtra(getBaseContext(), SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, NEW_ORDER);
+                break;
+
+            case ORDER_TYPE_NEW_REGULAR_ORDER:
+
+                dismissProgressDialog();
+                Utils.launchActivityWithExtra(getBaseContext(), SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, REGULAR_ORDER);
+                break;
+
+            case ORDER_TYPE_NO_ORDER:
+
+                break;
+
+            default:
+                Utils.showPopUp(getBaseContext(), "Please Select Order Type");
+                break;
+        }
+
+    }
+
+    private void networkcall_put_retailer_visit(final int selectedOrderType)
+    {
+        Apimethods methods= API_Call_Retrofit.getretrofit(SelectSalesOrderTypeActivity.this).create(Apimethods.class);
+
+        final ProgressDialog progressDialog=new ProgressDialog(SelectSalesOrderTypeActivity.this);
+        Utils.startProgressDialog(SelectSalesOrderTypeActivity.this,progressDialog);
+
+        IM_PutRetailerVisit.RetailerData retailerData=new IM_PutRetailerVisit().new RetailerData(retailerID,loggedInUserID,lat,lng,getDateTime(),"",retailerFeedback,"","1");
+        IM_PutRetailerVisit im_putRetailerVisit = new IM_PutRetailerVisit(new MySharedPrefrencesData().getEmployee_AuthKey(SelectSalesOrderTypeActivity.this), retailerData);
+
+        Call<PutRetailerInfo_Model> call = methods.putRetailerVisit(im_putRetailerVisit);
+        Log.d("url", "url=" + call.request().url().toString());
+
+        Log.d("put_retail_visit_input",new Gson().toJson(im_putRetailerVisit));
+
+        call.enqueue(new Callback<PutRetailerInfo_Model>()
+        {
+            @Override
+            public void onResponse(Call<PutRetailerInfo_Model> call, Response<PutRetailerInfo_Model> response)
+            {
+                int statusCode = response.code();
+                Log.d("Response", "" + statusCode);
+                Log.d("respones", "" + response);
+                Log.d("put_retail_visit_output",new Gson().toJson(response));
+
+                if(response.isSuccessful()){
+
+                    PutRetailerInfo_Model putRetailerInfo_model=response.body();
+                    if(putRetailerInfo_model.getApiStatus()==1){
+                        Utils.dismissProgressDialog(progressDialog);
+                        Log.d("put_retail_visit_output",new Gson().toJson(putRetailerInfo_model));
+
+                        String visitID = "VISIT_" + getIST() + "_" + getRandomNumber();
+
+                        insertIntoRetailerVisitTable(visitID, retailerFeedback);
+                        DbUtils.makeCurrentActiveOrderInactive();
+                        insertIntoSalesOrderTable(visitID);
+                        launch_corresponding_tab(selectedOrderType);
+
+                    }
+                }else {
+                    Log.d("put_retail_visit_output",new Gson().toJson(response.errorBody()));
+                    Utils.dismissProgressDialog(progressDialog);
+                    Utils.showToast(SelectSalesOrderTypeActivity.this,"Retailer visit is not updated successfully.");
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<PutRetailerInfo_Model> call, Throwable t)
+            {
+                Utils.dismissProgressDialog(progressDialog);
+                Utils.showToast(SelectSalesOrderTypeActivity.this,NO_INTERNET_CONNECTION);
+            }
+        });
+
+
+
     }
 
     void insertIntoRetailerVisitTable(String visitID, String retailerFeedback)

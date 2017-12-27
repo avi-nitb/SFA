@@ -340,13 +340,14 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
 
                 SharedPreferences sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
-                ;
                 SharedPreferences.Editor mEditor = sharedPreferences.edit();
                 mEditor.remove(KEY_USERNAME);
                 mEditor.remove(KEY_PASSWORD);
                 mEditor.commit();
+
                 Utils.launchActivity(this, LoginActivity.class);
                 finish();
+
                 break;
             default:
                 break;
@@ -547,6 +548,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                         mySharedPrefrencesData.setUsername(DashboardActivity.this, usernameInSharedPreferences);
                         mySharedPrefrencesData.setUser_pwd(DashboardActivity.this, passwordInSharedPreferences);
                       //  Utils.showToast(DashboardActivity.this, "valid auth key ");
+                        Log.e("authkey",mySharedPrefrencesData.getEmployee_AuthKey(DashboardActivity.this));
                         isValidAuthkey = true;
                         Utils.dismissProgressDialog(progressDialog);
 

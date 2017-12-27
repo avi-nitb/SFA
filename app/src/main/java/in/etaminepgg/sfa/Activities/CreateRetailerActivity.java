@@ -102,7 +102,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
             dismissProgressDialog();
 
-          //  Utils.showSuccessDialog(CreateRetailerActivity.this, "Retailer creation successful.");
+           Utils.showSuccessDialog(CreateRetailerActivity.this, "Retailer creation successful.");
         }
     };
     private LocationRequest locationRequest;
@@ -280,6 +280,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 //LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
             }
 
+            insertIntoRetailers(loggedInUserID, retailerName, shopName, shopAddress, pincode,
+                    mobileNumber, email, areaID, lat, lng, getImagePath());
+/*
             if(Utils.isNetworkConnected(CreateRetailerActivity.this)){
 
                 network_call_for_PutRetailerInfo(new MySharedPrefrencesData().getEmployee_AuthKey
@@ -292,120 +295,14 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             }else{
                 insertIntoRetailers(loggedInUserID, retailerName, shopName, shopAddress, pincode,
                         mobileNumber, email, areaID, lat, lng, getImagePath());
-            }
+            }*/
             // clearFormData();
         }
     }
 
 
 
-    private void network_call_for_PutRetailerInfo(String employee_authKey,
-                                                  String loggedInUserID,
-                                                  String retailerName,
-                                                  String shopName,
-                                                  String shopAddress,
-                                                  String pincode,
-                                                  String mobileNumber,
-                                                  String email,
-                                                  String areaID,
-                                                  String lat,
-                                                  String lng,
-                                                  String imagePath) {
 
-
-        Apimethods methods = API_Call_Retrofit.getretrofit(CreateRetailerActivity.this).create
-                (Apimethods.class);
-
-
-       /* RetailerData(String customerCode, String customerGeopos, String
-                customerCompanyname, String customerType, String customerSince, String
-                creditRating, String creditDays, String creditLimit, String assignedSalesperson,
-                String assignedSupervisor, String assignedDistributor, String
-                customerContactName, String customerContactDesignation,
-                String contactCell, String contactEmail, String contactLl1, String
-                contactFax, String locationId, String customerAddress1,
-                String customerCity, String customerPincode, String customerRegion,
-                String customerState, String delAddress1, String delAddressCity,
-                String delAddressPincode, String delAddressState, String approved,
-                String approvedBy, String approvedDate, String createdBy, String
-                modifiedBy)*/
-
-
-        IM_PutRetailerInfo.RetailerData retailerData = new IM_PutRetailerInfo().new RetailerData(
-                "",
-                lat + "," + lng,
-                shopName,
-                "",
-                "",
-                "",
-                "",
-                "",
-                loggedInUserID,
-                "",
-                "",
-                retailerName,
-                "",
-                mobileNumber,
-                email,
-                "",
-                "",
-                areaID,
-                shopAddress,
-                districtName,
-                pincode,
-                "",
-                stateName,
-                areaName,
-                districtName,
-                pincode,
-                stateName,
-                "",
-                "",
-                "",
-                "",
-                ""
-
-
-        );
-
-        IM_PutRetailerInfo im_putRetailerInfo = new IM_PutRetailerInfo(employee_authKey,
-                retailerData);
-
-
-        Call<PutRetailerInfo_Model> call = methods.putRetailerInfo(im_putRetailerInfo);
-        Log.d("url", "url=" + call.request().url().toString());
-
-        call.enqueue(new Callback<PutRetailerInfo_Model>() {
-            @Override
-            public void onResponse(Call<PutRetailerInfo_Model> call,
-                                   Response<PutRetailerInfo_Model> response) {
-                int statusCode = response.code();
-                Log.d("Response", "" + statusCode);
-                Log.d("respones", "" + response);
-                if(response.isSuccessful()){
-
-                    PutRetailerInfo_Model putRetailerInfo_model=response.body();
-                    if(putRetailerInfo_model.getApiStatus()==1){
-
-                        Utils.showSuccessDialog(CreateRetailerActivity.this,putRetailerInfo_model.getRetailerData());
-                    }
-                }else {
-
-                    Utils.showErrorDialog(CreateRetailerActivity.this,"Retailer Info is not updated.");
-                }
-
-
-            }
-
-            @Override
-            public void onFailure(Call<PutRetailerInfo_Model> call, Throwable t) {
-
-                Utils.showToast(CreateRetailerActivity.this, ConstantsA.NO_INTERNET_CONNECTION);
-            }
-        });
-
-
-    }
 
     String getImagePath()
     {
@@ -818,16 +715,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         retailerValues.put("taluk", "taluk");
         retailerValues.put("district", "district");
         retailerValues.put("state", "state");
-
-        if(Utils.isNetworkConnected(CreateRetailerActivity.this)){
-
-            retailerValues.put("upload_status", 1);
-
-        }else {
-
-            retailerValues.put("upload_status", 0);
-        }
-
+        retailerValues.put("upload_status", 0);
         sqLiteDatabase.insert(TBL_RETAILER, null, retailerValues);
 
         sqLiteDatabase.close();
