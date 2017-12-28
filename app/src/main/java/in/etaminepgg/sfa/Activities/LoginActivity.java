@@ -391,6 +391,7 @@ public class LoginActivity extends AppCompatActivity
                         } else {
 
                             Utils.showToast(LoginActivity.this, "No retailer found ");
+                            Utils.dismissProgressDialog(progressDialog);
                             network_call_for_basicconfig();
                         }
                     }
@@ -468,12 +469,21 @@ public class LoginActivity extends AppCompatActivity
                                             retailerValues.put("upload_status", 1);
 
                                             sqLiteDatabase.insert(TBL_RETAILER, null, retailerValues);
+                                            // DbUtils.clear_table(TBL_CONFIG);
+
                                             if(is_config_inserted_to_db){
-                                               // DbUtils.clear_table(TBL_CONFIG);
+                                                dismissProgressDialog(progressDialog);
+                                                DbUtils.clear_table(TBL_CONFIG);
                                                 network_call_for_basicconfig();
                                                 is_config_inserted_to_db=false;
                                             }
-                                            dismissProgressDialog(progressDialog);
+                                        }else {
+                                            if(is_config_inserted_to_db){
+                                                dismissProgressDialog(progressDialog);
+                                                DbUtils.clear_table(TBL_CONFIG);
+                                                network_call_for_basicconfig();
+                                                is_config_inserted_to_db=false;
+                                            }
                                         }
                                     }
 

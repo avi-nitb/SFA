@@ -211,14 +211,14 @@ public class SalesOrderAdapter extends RecyclerView.Adapter<SalesOrderAdapter.Sk
                 }
             });
 
-            skuPhoto_ImageView.setOnClickListener(new View.OnClickListener()
+           /* skuPhoto_ImageView.setOnClickListener(new View.OnClickListener()
             {
                 @Override
                 public void onClick(View view)
                 {
                     Utils.launchActivity(view.getContext(), SkuDetailsActivity.class);
                 }
-            });
+            });*/
 
             deleteSKU_ImageButton.setOnClickListener(new View.OnClickListener()
             {

@@ -345,6 +345,8 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 mEditor.remove(KEY_PASSWORD);
                 mEditor.commit();
 
+                is_config_inserted_to_db=true;
+
                 Utils.launchActivity(this, LoginActivity.class);
                 finish();
 
