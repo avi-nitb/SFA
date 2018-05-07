@@ -19,6 +19,10 @@ public class AuthUser_Model
     @Expose
     private String message;
 
+    @SerializedName("userId")
+    @Expose
+    private String userId;
+
     public Integer getApiStatus()
     {
         return apiStatus;
@@ -57,6 +61,16 @@ public class AuthUser_Model
     public void setMessage(String message)
     {
         this.message = message;
+    }
+
+    public String getUserId()
+    {
+        return userId;
+    }
+
+    public void setUserId(String userId)
+    {
+        this.userId = userId;
     }
 
 }

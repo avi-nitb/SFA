@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -27,11 +29,27 @@ public class SchemesActivity extends AppCompatActivity
     RecyclerView schemes_RecyclerView;
     TextView emptyAdapter_TextView;
 
+    private Toolbar toolbar;
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home)
+            finish();
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schemes);
+
+        toolbar=(Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Schemes");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
 
         emptyAdapter_TextView = (TextView) findViewById(R.id.emptyAdapter_TextView);
         schemes_RecyclerView = (RecyclerView) findViewById(R.id.schemes_RecyclerView);
@@ -63,10 +81,14 @@ public class SchemesActivity extends AppCompatActivity
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        String SQL_SELECT_SCHEMES = "SELECT" + " * " + "FROM " + TBL_SCHEME + " WHERE " + "is_viewed " + "= ? AND " + "end_date " + ">= ?";
+      /*  String SQL_SELECT_SCHEMES = "SELECT" + " * " + "FROM " + TBL_SCHEME + " WHERE " + "is_viewed " + "= ? AND " + "end_date " + ">= ?";
         String[] selectionArgs = {"0", getTodayDate()};
 
-        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SCHEMES, selectionArgs);
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SCHEMES, selectionArgs);*/
+
+        String SQL_SELECT_SCHEMES = "SELECT" + " * " + "FROM " + TBL_SCHEME ;
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SCHEMES, null);
+
 
         while(cursor.moveToNext())
         {

@@ -31,15 +31,39 @@ public class Constants
     public static String TBL_SALES_ORDER_SKU_ATTRIBUTES = "sales_order_sku_attributes";
     public static String TBL_CONFIG = "config";
     public static String TBL_LOCATION_HIERARCHY = "loc_hierarchy";
+    public static String TBL_SKU_CATEGORY = "sfa_sku_category";
+    public static String TBL_SKU_SUBCATEGORY = "sfa_sku_sub_category";
+    public static String TBL_SKU_NO_ORDERREASON= "sfa_sku_noOrder_Reason";
     public static double LATITUDE = 0.0;
     public static double LONGITUDE = 0.0;
     public static String dbFileFullPath;
     public static int DBI = -1;
     public static SQLiteDatabase DBH = null;
-    public static String appSpecificDirectoryPath = "";
+    public static String appSpecificDirectoryPath ;
     public static String IMAGES_DIR = appSpecificDirectoryPath + "/Images";
     public static Bitmap M_BITMAP;
     public static String STR_UPLD_PHOTO_NAME = "";
     public static String IMEI = "";
     public static String JINGLE_FILE_NAME = "jingle.mp3";
+    public static String selected_sku_from_history = "ANY";
+
+    public  static final String PROMOTION_REQUIRED = "promotion scheme for retailers";
+    public  static final String RETAILER_CREATION_PER_MONTH = "Retailer_addition_per_month";
+    public  static final String SKU_ATTRIBUTE_REQUIRED = "Sku-attributes";
+    public  static final String SHOW_UPDATE_BUTTON = "show_update_button";
+    public  static final String OP_TYPE_SKU_NEW = "N";
+    public  static final String OP_TYPE_SKU_MODIFICATION = "M";
+    public  static final String MOD_TYPE_SKU_INFO = "properties";
+    public  static final String MOD_TYPE_SKU_ATTR = "attributes";
+    public  static final String MOD_TYPE_SKU_MULTIMEDIA = "multimedia";
+    public  static final String MOD_TYPE_SKU_ATTR_AND_INFO = "attributes,properties";
+    public  static final String MOD_TYPE_SKU_INFO_AND_ATTR = "properties,attributes";
+    public  static final String MOD_TYPE_SKU_MULTIMEDIA_AND_ATTR = "multimedia,attributes";
+    public  static final String MOD_TYPE_SKU_ATTR_AND_MULTIMEDIA = "attributes,multimedia";
+    public  static final String MOD_TYPE_SKU_MULTIMEDIA_AND_INFO = "multimedia,properties";
+    public  static final String MOD_TYPE_SKU_INFO_AND_MULTIMEDIA = "properties,multimedia";
+
+    public static String  search_skuId="";
+
+
 }

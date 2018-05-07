@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context="in.etaminepgg.sfa.Fragments.NewSKUsFragment">
 
+
     <android.support.v7.widget.RecyclerView
         android:background="@android:color/white"
         android:id="@+id/newSKUs_RecyclerView"

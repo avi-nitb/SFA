@@ -65,7 +65,7 @@ public class GetSkuInfo
         private String skuIntroducedOn;
         @SerializedName("sku_new_flag")
         @Expose
-        private Object skuNewFlag;
+        private String skuNewFlag;
         @SerializedName("sku_new_days")
         @Expose
         private Object skuNewDays;
@@ -78,15 +78,27 @@ public class GetSkuInfo
         @SerializedName("sku_created_by")
         @Expose
         private String skuCreatedBy;
+
         @SerializedName("sku_modified_on")
         @Expose
         private String skuModifiedOn;
+
         @SerializedName("sku_modified_by")
         @Expose
         private String skuModifiedBy;
+
         @SerializedName("sku_isactive")
         @Expose
         private String skuIsactive;
+
+
+        @SerializedName("category_description")
+        @Expose
+        private String category_description;
+
+        @SerializedName("sub_category_description")
+        @Expose
+        private String sub_category_description;
 
         public String getSkuId() {
             return skuId;
@@ -160,11 +172,11 @@ public class GetSkuInfo
             this.skuIntroducedOn = skuIntroducedOn;
         }
 
-        public Object getSkuNewFlag() {
+        public String getSkuNewFlag() {
             return skuNewFlag;
         }
 
-        public void setSkuNewFlag(Object skuNewFlag) {
+        public void setSkuNewFlag(String skuNewFlag) {
             this.skuNewFlag = skuNewFlag;
         }
 
@@ -224,5 +236,24 @@ public class GetSkuInfo
             this.skuIsactive = skuIsactive;
         }
 
+        public String getCategory_description()
+        {
+            return category_description;
+        }
+
+        public void setCategory_description(String category_description)
+        {
+            this.category_description = category_description;
+        }
+
+        public String getSub_category_description()
+        {
+            return sub_category_description;
+        }
+
+        public void setSub_category_description(String sub_category_description)
+        {
+            this.sub_category_description = sub_category_description;
+        }
     }
 }

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_noreason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_check_box_outline_blank_black_24dp"
+        android:gravity="center_vertical"
+        android:padding="5dp"/>
+
+    <TextView
+        android:id="@+id/noreason_header"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/lato_regular"
+        android:text="@string/label_why_enter_reason_below"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_medium"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/txtlay_noreason"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/eight_dp">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/whyNoOrder_TextInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_rectangle"
+            android:paddingEnd="@dimen/eight_dp"
+            android:paddingStart="@dimen/eight_dp"
+            android:textColor="@color/pink500"/>
+    </android.support.design.widget.TextInputLayout>
+
+</LinearLayout>

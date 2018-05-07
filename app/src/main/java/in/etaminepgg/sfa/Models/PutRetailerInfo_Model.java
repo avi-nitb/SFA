@@ -16,6 +16,10 @@ public class PutRetailerInfo_Model {
     @Expose
     private String retailerData;
 
+    @SerializedName("retailer_visit_id")
+    @Expose
+    private String retailer_visit_id;
+
     public Integer getApiStatus() {
         return apiStatus;
     }
@@ -30,5 +34,15 @@ public class PutRetailerInfo_Model {
 
     public void setRetailerData(String retailerData) {
         this.retailerData = retailerData;
+    }
+
+    public String getRetailer_visit_id()
+    {
+        return retailer_visit_id;
+    }
+
+    public void setRetailer_visit_id(String retailer_visit_id)
+    {
+        this.retailer_visit_id = retailer_visit_id;
     }
 }

@@ -211,6 +211,7 @@ public class MyDb
 
     public static SQLiteDatabase getDbHandle(int dbh)
     {
+
         return (dbHandles[dbh]);
     }
 

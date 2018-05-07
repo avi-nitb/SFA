@@ -5,11 +5,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/skuDetails_ScrollView"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@android:color/white"
-    android:padding="@dimen/eight_dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="@color/colorAccent"
+        app:contentInsetStartWithNavigation="0dp"/>
 
     <LinearLayout
+        android:padding="@dimen/eight_dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -25,16 +33,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Name: No SKU in DB"
-            android:textColor="@color/colorAccent"
+            android:fontFamily="@font/lato_bold"
+            android:textColor="@color/colorYellow"
             android:textSize="@dimen/text_size_large"/>
 
         <TextView
             android:id="@+id/skuPrice_TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minHeight="30dp"
+            android:fontFamily="@font/lato_regular"
             android:text="Price: No SKU in DB"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/black"
+            android:layout_marginTop="5dp"
             android:textSize="@dimen/text_size_large"/>
 
         <TextView
@@ -42,43 +52,52 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Category: No SKU in DB"
-            android:textColor="@color/colorAccent"
-            android:textSize="@dimen/text_size_small"/>
+            android:fontFamily="@font/lato_regular"
+            android:textColor="@color/black"
+            android:layout_marginTop="5dp"
+            android:textSize="@dimen/text_size_medium"/>
 
         <TextView
             android:id="@+id/skuSubCategory_TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/lato_regular"
             android:text="Sub Category: No SKU in DB"
-            android:textColor="@color/colorAccent"
-            android:textSize="@dimen/text_size_small"/>
+            android:textColor="@color/black"
+            android:layout_marginTop="5dp"
+            android:textSize="@dimen/text_size_medium"/>
 
         <TextView
             android:id="@+id/skuDescription_TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/lato_regular"
             android:text="Description: No SKU in DB"
-            android:textColor="@color/colorAccent"
-            android:textSize="@dimen/text_size_small"/>
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size_medium"
+            android:layout_marginTop="5dp"/>
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="0.5dp"
             android:layout_marginTop="@dimen/eight_dp"
-            android:background="@android:color/black"/>
+            android:background="@color/colorYellow"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/four_dp"
             android:text="Similar SKUs:-"
+            android:fontFamily="@font/lato_bold_font"
             android:textColor="@android:color/black"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:textSize="@dimen/text_size_large"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/similarSKUs_RecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"/>
 
     </LinearLayout>
 </LinearLayout>

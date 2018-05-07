@@ -1,58 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/schemeName_TextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/one_dp"
-        android:text="Name: NA"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size_small"/>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="10dp"
+    app:cardElevation="10dp"
+    app:cardCornerRadius="5dp">
 
-    <TextView
-        android:id="@+id/schemeDescription_TextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/one_dp"
-        android:text="Description: NA"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size_small"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:padding="10dp">
 
-    <!--<TextView
-        android:id="@+id/schemeCreatedDate_TextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/one_dp"
-        android:text="Created Date: NA"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size"/>-->
+        <TextView
+            android:id="@+id/schemeName_TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lato_bold"
+            android:padding="@dimen/one_dp"
+            android:text="Name: NA"
+            android:textColor="@color/colorYellow"
+            android:textSize="@dimen/text_size_small"/>
 
-    <TextView
-        android:id="@+id/schemeStartDate_TextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/one_dp"
-        android:text="Start Date: NA"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size_small"/>
+        <TextView
+            android:id="@+id/schemeDescription_TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lato_regular"
+            android:padding="@dimen/one_dp"
+            android:text="Description: NA"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_small"/>
 
-    <TextView
-        android:id="@+id/schemeEndDate_TextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/one_dp"
-        android:text="End Date: NA"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size_small"/>
+        <!--<TextView
+            android:id="@+id/schemeCreatedDate_TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/one_dp"
+            android:text="Created Date: NA"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size"/>-->
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/two_dp"
-        android:layout_marginTop="@dimen/two_dp"
-        android:background="@android:color/holo_green_light"/>
+        <TextView
+            android:id="@+id/schemeStartDate_TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lato_light_font"
+            android:padding="@dimen/one_dp"
+            android:text="Start Date: NA"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/text_size_small"/>
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/schemeEndDate_TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lato_light_font"
+            android:padding="@dimen/one_dp"
+            android:text="End Date: NA"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/text_size_small"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_margin="10dp"
+            android:layout_marginTop="@dimen/two_dp"
+            android:background="@android:color/holo_green_light"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

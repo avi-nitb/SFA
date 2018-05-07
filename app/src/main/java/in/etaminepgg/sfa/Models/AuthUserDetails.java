@@ -8,6 +8,8 @@ public class AuthUserDetails
 
     private final String authToken;
 
+    private  String userId;
+
     private final Data data;
 
     public AuthUserDetails(int apiStatus, String authToken, Data data)
@@ -32,6 +34,16 @@ public class AuthUserDetails
         return data;
     }
 
+    public String getUserId()
+    {
+        return userId;
+    }
+
+    public void setUserId(String userId)
+    {
+        this.userId = userId;
+    }
+
     public static class Data
     {
         private final String username;
@@ -42,19 +54,22 @@ public class AuthUserDetails
 
         private final String role;
 
-        private final String locationId;
+        private final String location_id;
 
-        private final String companyId;
+        private final String company_id;
+
+        private final String no_mandatory_visit;
 
         public Data(String username, String mobile, String email, String role, String locationId,
-                    String companyId)
+                    String companyId,String no_mandatory_visit)
         {
             this.username = username;
             this.mobile = mobile;
             this.email = email;
             this.role = role;
-            this.locationId = locationId;
-            this.companyId = companyId;
+            this.location_id = locationId;
+            this.company_id = companyId;
+            this.no_mandatory_visit = no_mandatory_visit;
         }
 
         public String getUsername()
@@ -79,12 +94,16 @@ public class AuthUserDetails
 
         public String getLocationId()
         {
-            return locationId;
+            return location_id;
         }
 
         public String getCompanyId()
         {
-            return companyId;
+            return company_id;
+        }
+
+        public String getNo_mandatory_visit() {
+            return no_mandatory_visit;
         }
     }
 }

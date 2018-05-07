@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="in.etaminepgg.sfa.Activities.PickRetailerActivity">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              tools:context="in.etaminepgg.sfa.Activities.PickRetailerActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorAccent" />
+        android:background="@color/colorAccent"
+        app:contentInsetStartWithNavigation="0dp"/>
 
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -34,8 +36,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/sixteen_dp"
                 android:text="Enter shop name of retailer below, for whom you want to create sales order "
-                android:textColor="@android:color/holo_green_dark"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="@font/lato_bold"
                 android:textSize="@dimen/text_size_small" />
+
+
 
             <AutoCompleteTextView
                 android:id="@+id/shopName_AutoCompleteTextView"
@@ -93,6 +98,14 @@
                 android:layout_marginBottom="@dimen/eight_dp"
                 android:layout_marginTop="@dimen/sixteen_dp"
                 android:text="Name: "
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/text_size_small" />
+            <TextView
+                android:id="@+id/retailerOwnerName_TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/eight_dp"
+                android:text="Owner name: "
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/text_size_small" />
 
@@ -153,7 +166,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/eight_dp"
-                android:text="select order type" />
+                android:text="Create Order" />
 
             <Button
                 android:id="@+id/updateRetailer_Button"

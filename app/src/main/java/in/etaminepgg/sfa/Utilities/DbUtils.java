@@ -1,13 +1,13 @@
 package in.etaminepgg.sfa.Utilities;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import in.etaminepgg.sfa.Activities.LoginActivity;
 import in.etaminepgg.sfa.Models.SalesOrderSku;
 import in.etaminepgg.sfa.Models.Sku;
 
@@ -17,6 +17,7 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER_VISIT;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_DETAILS;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_NO_ORDERREASON;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NONE;
 import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
@@ -38,7 +39,52 @@ public class DbUtils
 
         String SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON =
                 "SELECT" + " visit_id " + "FROM " + TBL_RETAILER_VISIT + " WHERE " + "emp_id " + "= ? AND " + "visit_date " + "like ? " + "GROUP BY retailer_id";
+
+       /* String SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON =
+                "SELECT" + " visit_id " + "FROM " + TBL_RETAILER_VISIT + " WHERE " + "emp_id " + "= ? AND " + "visit_date " + "like ? " ;*/
         String[] selectionArgs = {salesPersonId, getTodayDate() + "%"};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON, selectionArgs);
+        int noOfVisitsMadeBySalesPerson = cursor.getCount();
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return noOfVisitsMadeBySalesPerson;
+    }
+
+    //copy pasted from SalesSummary Activity for duplicate retailer visits
+    public static int getAllRetailerVisitsFor(String salesPersonId)
+    {
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+       /* String SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON =
+                "SELECT" + " visit_id " + "FROM " + TBL_RETAILER_VISIT + " WHERE " + "emp_id " + "= ? AND " + "visit_date " + "like ? " + "GROUP BY retailer_id";*/
+
+        String SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON =
+                "SELECT" + " visit_id " + "FROM " + TBL_RETAILER_VISIT + " WHERE " + "emp_id " + "= ? AND " + "visit_date " + "like ? " ;
+        String[] selectionArgs = {salesPersonId, getTodayDate() + "%"};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON, selectionArgs);
+        int noOfVisitsMadeBySalesPerson = cursor.getCount();
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return noOfVisitsMadeBySalesPerson;
+    }
+
+    //copy pasted from SalesSummary Activity for  retailer visits according to location
+    public static int getRetailerVisitsForLocationId(String salesPersonId,String locationId)
+    {
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+       /* String SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON =
+                "SELECT" + " visit_id " + "FROM " + TBL_RETAILER_VISIT + " WHERE " + "emp_id " + "= ? AND " + "visit_date " + "like ? " + "GROUP BY retailer_id";*/
+
+        String SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON =
+                "SELECT" + " retailer_visit.visit_id " + "FROM " + TBL_RETAILER +" retailer "+" INNER JOIN "+TBL_RETAILER_VISIT+" retailer_visit "+ " ON retailer.retailer_id=retailer_visit.retailer_id "+" WHERE " + "retailer_visit.emp_id " + "= ? AND " + "retailer_visit.visit_date " + "like ? AND retailer.area_id = ? " ;
+        String[] selectionArgs = {salesPersonId, getTodayDate() + "%",locationId};
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER_VISITS_OF_SALES_PERSON, selectionArgs);
         int noOfVisitsMadeBySalesPerson = cursor.getCount();
@@ -52,10 +98,9 @@ public class DbUtils
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
-
         ContentValues salesOrderValues = new ContentValues();
         salesOrderValues.put("is_active", "0");
-        sqLiteDatabase.update(TBL_SALES_ORDER, salesOrderValues, "is_active = ?", new String[]{"1"});
+        sqLiteDatabase.update(TBL_SALES_ORDER, salesOrderValues, "is_active = ? AND emp_id = ? ", new String[]{"1",new MySharedPrefrencesData().getUser_Id(LoginActivity.baseContext)});
 
         sqLiteDatabase.close();
     }
@@ -68,8 +113,8 @@ public class DbUtils
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        String SQL_SELECT_ACTIVE_SALES_ORDER_ID = "select order_id from " + TBL_SALES_ORDER + " WHERE " + "is_active = ?";
-        String[] selectionArgs = new String[]{"1"};
+        String SQL_SELECT_ACTIVE_SALES_ORDER_ID = "select order_id from " + TBL_SALES_ORDER + " WHERE " + "is_active = ? AND emp_id = ?";
+        String[] selectionArgs = new String[]{"1",new MySharedPrefrencesData().getUser_Id(LoginActivity.baseContext)};
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ACTIVE_SALES_ORDER_ID, selectionArgs);
 
         if(cursor.moveToFirst())
@@ -90,8 +135,8 @@ public class DbUtils
         String regularOrderID = NONE;
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
-        String SQL_SELECT_REGULAR_ORDER_ID = "SELECT " + "order_id" + " FROM " + TBL_SALES_ORDER + " WHERE " + "retailer_id = ? AND " + "is_regular = ?";
-        String[] selectionArgs = {retailerID, "1"};
+        String SQL_SELECT_REGULAR_ORDER_ID = "SELECT " + "order_id" + " FROM " + TBL_SALES_ORDER + " WHERE " + "retailer_id = ? AND " + "is_regular = ? AND emp_id = ?";
+        String[] selectionArgs = {retailerID, "1",new MySharedPrefrencesData().getUser_Id(LoginActivity.baseContext)};
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_REGULAR_ORDER_ID, selectionArgs);
         if(cursor.moveToFirst())
@@ -111,8 +156,8 @@ public class DbUtils
         String retailerID = NONE;
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
-        String SQL_SELECT_RETAILER_ID_OF_ACTIVE_ORDER = "SELECT " + "retailer_id" + " FROM " + TBL_SALES_ORDER + " WHERE " + "is_active = ?";
-        String[] selectionArgs = {"1"};
+        String SQL_SELECT_RETAILER_ID_OF_ACTIVE_ORDER = "SELECT " + "retailer_id" + " FROM " + TBL_SALES_ORDER + " WHERE " + "is_active = ? AND emp_id = ?";
+        String[] selectionArgs = {"1",new MySharedPrefrencesData().getUser_Id(LoginActivity.baseContext)};
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER_ID_OF_ACTIVE_ORDER, selectionArgs);
         if(cursor.moveToFirst())
@@ -125,12 +170,34 @@ public class DbUtils
         return retailerID;
     }
 
+
+   //return retailer name according to retailer id
+
+    public static String getRetailerNameAccordingToRetailerId(String retailerid)
+    {
+       String retailername=NONE;
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+        String SQL_SELECT_RETAILER_ID_OF_ACTIVE_ORDER = "SELECT " + "retailer_name" + " FROM " + TBL_RETAILER + " WHERE " + "retailer_id = ?";
+        String[] selectionArgs = {retailerid};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILER_ID_OF_ACTIVE_ORDER, selectionArgs);
+        if(cursor.moveToFirst())
+        {
+            retailername = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return retailername;
+    }
+
     public static long insertIntoSalesOrderDetailsTable(String orderID, String skuID, String skuName, String skuPrice, String skuQty)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        int skuPriceInt = Integer.parseInt(skuPrice);
+        float skuPriceInt = Float.parseFloat(skuPrice);
         int skuQtyInt = Integer.parseInt(skuQty);
         String skuFinalPrice = String.valueOf(skuPriceInt * skuQtyInt);
 
@@ -246,9 +313,37 @@ public class DbUtils
             String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
             String skuPrice = cursor.getString(cursor.getColumnIndexOrThrow("sku_price"));
             String skuCategory = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
+            String sku_category_description = cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description"));
             String sku_photo_source = cursor.getString(cursor.getColumnIndexOrThrow("sku_photo_source"));
 
-            skuList.add(new Sku(skuID, skuName, skuPrice, skuCategory,sku_photo_source));
+            skuList.add(new Sku(skuID, skuName, skuPrice, skuCategory,sku_category_description,sku_photo_source));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return skuList;
+    }
+
+    public static List<Sku> getSkuList_Category(String sqlQuery, String[] selectionArgs)
+    {
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        Cursor cursor = sqLiteDatabase.rawQuery(sqlQuery, selectionArgs);
+
+        List<Sku> skuList = new ArrayList<>();
+
+        while(cursor.moveToNext())
+        {
+            String skuID = cursor.getString(cursor.getColumnIndexOrThrow("sku_id"));
+            String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
+            String skuPrice = cursor.getString(cursor.getColumnIndexOrThrow("sku_price"));
+            String skuCategory = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
+            String sku_category_description = cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description"));
+            String sku_photo_source = cursor.getString(cursor.getColumnIndexOrThrow("sku_photo_source"));
+
+            skuList.add(new Sku(skuID, skuName, skuPrice, skuCategory,sku_category_description,sku_photo_source));
         }
 
         cursor.close();
@@ -353,7 +448,7 @@ public class DbUtils
         return itemCount;
     }
 
-    public static void insertIntoLocationHierarchy(int locationID, String locationName, String hierarchyLevel, String parentLocationID)
+    public static void insertIntoLocationHierarchy(int locationID, String locationName, String hierarchyLevel,String full_hier_level, String parentLocationID)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
@@ -362,12 +457,26 @@ public class DbUtils
         locationValues.put("loc_id", locationID);
         locationValues.put("loc_name", locationName);
         locationValues.put("hier_level", hierarchyLevel);
+        locationValues.put("full_hier_level", full_hier_level);
         locationValues.put("parent_loc_id", parentLocationID);
         locationValues.put("upload_status", 0);
 
         sqLiteDatabase.insert(TBL_LOCATION_HIERARCHY, null, locationValues);
 
         sqLiteDatabase.close();
+    }
+
+
+    public static boolean isAttribute_IDPresentInDb(String attr_id) {
+        boolean isattrPresent = false;
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(Constants.dbFileFullPath));
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT attribute_id FROM " + Constants.TBL_GLOBAL_ATTRIBUTES + " WHERE attribute_id = ? ", new String[]{attr_id});
+        if (cursor.moveToFirst()) {
+            isattrPresent = true;
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+        return isattrPresent;
     }
 
     //don't make this method static. Will not work inside ViewHolders
@@ -429,6 +538,57 @@ public class DbUtils
         return sku_photo_source;
     }
 
+
+    public static String getSkuVideoURL(String sku_id)
+    {
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String sku_video_source=null;
+
+        String SQL_sku_Photo_url = "select  sku_video_source from " + TBL_SKU + " WHERE sku_id = ? ;";
+        String selectionargs[]={sku_id};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_sku_Photo_url,selectionargs );
+
+        if(cursor.moveToFirst())
+        {
+            sku_video_source  = cursor.getString(cursor.getColumnIndexOrThrow("sku_video_source"));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+        return sku_video_source;
+
+
+    }
+
+  public static String getSkuCatalogueURL(String sku_id)
+    {
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String sku_catalogue_source=null;
+
+        String sku_catalogue_source_query = "select  sku_catalogue_source from " + TBL_SKU + " WHERE sku_id = ? ;";
+        String selectionargs[]={sku_id};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(sku_catalogue_source_query,selectionargs );
+
+        if(cursor.moveToFirst())
+        {
+            sku_catalogue_source  = cursor.getString(cursor.getColumnIndexOrThrow("sku_catalogue_source"));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+        return sku_catalogue_source;
+
+
+    }
+
     public static void clear_table(String tablename){
 
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
@@ -481,6 +641,123 @@ public class DbUtils
         sqLiteDatabase.close();
 
         return isskuPresent;
+    }
+
+
+
+ public static boolean isReasonIdInDb(String reasonid)
+    {
+        boolean isReason = false;
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String SQL_SELECT_REASON = "SELECT" + " reason_id " + "FROM " + TBL_SKU_NO_ORDERREASON + " WHERE " + "reason_id " + "= ? " ;
+        String[] selectionArgs = {reasonid};
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_REASON, selectionArgs);
+
+        if(cursor.moveToFirst())
+        {
+            isReason = true;
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return isReason;
+    }
+
+
+    /*public static boolean getPromotionFromDb()
+    {
+
+        boolean is_promotion=false;
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String isPromotionQuery = "SELECT config_value from " + Constants.TBL_CONFIG + " WHERE config_for =? ";
+        String[] selectionArgs = new String[]{Constants.PROMOTION_REQUIRED};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(isPromotionQuery, selectionArgs);
+
+        if(cursor.moveToFirst()){
+
+            if(cursor.getString(cursor.getColumnIndexOrThrow("config_value")).equalsIgnoreCase("Yes")){
+
+                is_promotion=true;
+            }
+        }
+
+        return is_promotion;
+    }*/
+
+    public static boolean getConfigValue(String configfor)
+    {
+
+        boolean is_value=false;
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String isPromotionQuery = "SELECT config_value from " + Constants.TBL_CONFIG + " WHERE config_for =? ";
+        String[] selectionArgs = new String[]{configfor};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(isPromotionQuery, selectionArgs);
+
+        if(cursor.moveToFirst()){
+
+            if(cursor.getString(cursor.getColumnIndexOrThrow("config_value")).equalsIgnoreCase("Yes")){
+
+                is_value=true;
+            }
+        }
+
+        return is_value;
+    }
+
+    public static String getLocationName(String Location_Id){
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String location_name=null;
+
+        String SQL_SELECT_LOCATION = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
+        String[] selectionArgs = {Location_Id};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_LOCATION,selectionArgs );
+
+        if(cursor.moveToFirst())
+        {
+            location_name  = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+        return location_name;
+
+    }
+
+
+    public static String getActiveRetailer(String activeOrderId)
+    {
+
+        String active_retailer_name=NONE;
+
+        String SQL_QUERY_ACTIVE_RETAILER="SELECT retailer.retailer_name from "+TBL_RETAILER+" retailer "+" INNER JOIN "+TBL_SALES_ORDER+" so "+" ON retailer.retailer_id = so.retailer_id "+" WHERE so.order_id = ?";
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(Constants.dbFileFullPath));
+
+        String[] selectionArgs = {String.valueOf(activeOrderId)};
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_QUERY_ACTIVE_RETAILER, selectionArgs);
+        while (cursor.moveToNext()) {
+
+            active_retailer_name= cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));
+        }
+        cursor.close();
+        sqLiteDatabase.close();
+        return active_retailer_name;
     }
 
 }

@@ -12,6 +12,7 @@ public class Sku
     String description;
     String skuCategory;
     String skuSubCategory;
+    String skuCategoryDescription;
     String isNewSku;
     String isPromotionalSku;
     String skuSize;
@@ -30,12 +31,13 @@ public class Sku
         this.skuPrice = skuPrice;
     }
 
-    public Sku(String skuId, String skuName, String skuPrice, String skuCategory,String sku_photo_source)
+    public Sku(String skuId, String skuName, String skuPrice, String skuCategory,String skuCategoryDescription,String sku_photo_source)
     {
         this.skuId = skuId;
         this.skuName = skuName;
         this.skuPrice = skuPrice;
         this.skuCategory = skuCategory;
+        this.skuCategoryDescription = skuCategoryDescription;
         this.skuPhotoSource = sku_photo_source;
     }
 
@@ -198,6 +200,16 @@ public class Sku
     public void setUploadStatus(String uploadStatus)
     {
         this.uploadStatus = uploadStatus;
+    }
+
+    public String getSkuCategoryDescription()
+    {
+        return skuCategoryDescription;
+    }
+
+    public void setSkuCategoryDescription(String skuCategoryDescription)
+    {
+        this.skuCategoryDescription = skuCategoryDescription;
     }
 }
 

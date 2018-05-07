@@ -3,13 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"> 
+
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorAccent" />
+        android:background="@color/colorAccent"
+        app:contentInsetStartWithNavigation="0dp"/>
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -33,18 +35,29 @@
                 android:textSize="23sp"
                 android:textStyle="bold" />
 
+            <Button
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:gravity="center"
+                android:id="@+id/btn_bcr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="BCR"
+                />
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <EditText
+
                     android:id="@+id/etRetailerName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                     android:ems="10"
                     android:hint="@string/retailer_name"
-                    android:inputType="textPersonName"
+                    android:inputType="textPersonName|textCapWords"
                     android:textSize="18sp" />
             </android.support.design.widget.TextInputLayout>
 
@@ -53,12 +66,12 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/etShopName"
+                    android:id="@+id/eOwnerName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:hint="@string/shop_name"
-                    android:inputType="textPersonName"
+                    android:hint="@string/owner_name"
+                    android:inputType="textPersonName|textCapWords"
                     android:textSize="18sp" />
             </android.support.design.widget.TextInputLayout>
 
@@ -72,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="@string/shop_address"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName|textCapWords" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -146,6 +159,7 @@
                 android:layout_height="50dp" />
 
             <TextView
+                android:visibility="gone"
                 android:id="@+id/textView11"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -154,6 +168,7 @@
                 android:textStyle="bold" />
 
             <Spinner
+                android:visibility="gone"
                 android:id="@+id/spnTaluk"
                 android:layout_width="match_parent"
                 android:layout_height="50dp" />

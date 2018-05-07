@@ -73,7 +73,7 @@ public class PromotionalSKUsFragment extends Fragment
 
         if(Utils.isNetworkConnected(getActivity())){
 
-            networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()));
+           // networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()));
 
         }else {
             setAdapter(layout);
@@ -127,13 +127,13 @@ public class PromotionalSKUsFragment extends Fragment
                     {
 
 
-                        for(String sku_id : getSkuListAfter.getSkuIds())
+                        for(GetSkuListAfter.SkuInfo skuInfo : getSkuListAfter.getSkuIds())
                         {
 
-                            if(!DbUtils.isSKUPresentInDb(sku_id)){
+                            if(!DbUtils.isSKUPresentInDb(skuInfo.getSku_id())){
 
-                                networkcall_for_sku_info(sku_id, authToken);
-                                networkcall_for_sku_Attr(sku_id, authToken);
+                                networkcall_for_sku_info(skuInfo.getSku_id(), authToken);
+                                networkcall_for_sku_Attr(skuInfo.getSku_id(), authToken);
                             }
 
                         }
@@ -310,6 +310,8 @@ public class PromotionalSKUsFragment extends Fragment
                                 skuValues.put("description", skuId_Info.getSkuDescription());
                                 skuValues.put("sku_category", skuId_Info.getSkuCategory());
                                 skuValues.put("sku_sub_category", skuId_Info.getSkuSubCategory());
+                                skuValues.put("sku_category_description", skuId_Info.getCategory_description());
+                                skuValues.put("sku_sub_category_description", skuId_Info.getSub_category_description());
                                 if(type.equalsIgnoreCase("1"))
                                 {
 

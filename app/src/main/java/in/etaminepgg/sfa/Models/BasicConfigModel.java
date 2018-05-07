@@ -25,32 +25,35 @@ public class BasicConfigModel
 
     public static class AppData
     {
-        private final String propname;
+        private final String parameter_name;
 
-        private final String propval;
+        private final String parameter_value;
 
-        private final String app_version;
+        private final String description;
 
-        public AppData(String propname, String propval, String app_version)
+
+        public AppData(String propname, String propval, String description)
         {
-            this.propname = propname;
-            this.propval = propval;
-            this.app_version = app_version;
+            this.parameter_name = propname;
+            this.parameter_value = propval;
+            this.description = description;
         }
 
-        public String getPropname()
+        public String getParameter_name()
         {
-            return propname;
+            return parameter_name;
         }
 
-        public String getPropval()
+        public String getParameter_value()
         {
-            return propval;
+            return parameter_value;
         }
 
-        public String getApp_version()
+        public String getDescription()
         {
-            return app_version;
+            return description;
         }
+
+
     }
 }

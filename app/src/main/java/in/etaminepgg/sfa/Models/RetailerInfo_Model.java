@@ -139,7 +139,7 @@ public class RetailerInfo_Model {
         private String modifiedDate;
         @SerializedName("customer_picture")
         @Expose
-        private Object customerPicture;
+        private String customerPicture;
         @SerializedName("customer_isactive")
         @Expose
         private String customerIsactive;
@@ -455,11 +455,11 @@ public class RetailerInfo_Model {
             this.modifiedDate = modifiedDate;
         }
 
-        public Object getCustomerPicture() {
+        public String getCustomerPicture() {
             return customerPicture;
         }
 
-        public void setCustomerPicture(Object customerPicture) {
+        public void setCustomerPicture(String customerPicture) {
             this.customerPicture = customerPicture;
         }
 

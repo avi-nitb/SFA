@@ -27,6 +27,7 @@ public class API_Call_Retrofit
                 .connectTimeout(60, TimeUnit.SECONDS)
                 .build();
 
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(ApiUrl.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))

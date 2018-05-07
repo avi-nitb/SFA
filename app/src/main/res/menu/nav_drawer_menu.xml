@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-<group android:checkableBehavior="single">
-    <item
-        android:id="@+id/navItem_NewRetailer"
-        android:title="@string/nav_item_new_retailer"/>
-    <item
-        android:id="@+id/navItem_NewSalesOrder"
-        android:title="@string/nav_item_new_sales_order"/>
+    <group android:checkableBehavior="single">
 
-    <item
-        android:id="@+id/navItem_mySalesHistory"
-        android:title="@string/nav_item_my_sales_history"/>
 
-    <item
-        android:id="@+id/navItem_logout"
-        android:title="@string/nav_item_logout"/>
 
-    <!-- <item
-        android:id="@+id/navItem_pendingOrders"
-        android:title="@string/nav_item_pending_orders"/>-->
-</group>
+        <item
+            android:id="@+id/navItem_NewRetailer"
+            android:icon="@drawable/newretailericon"
+            android:title="@string/nav_item_new_retailer"/>
+        <item
+            android:id="@+id/navItem_UpdateRetailer"
+            android:icon="@drawable/updateretailericon"
+            android:title="@string/nav_item_update_retailer"/>
+        <item
+            android:id="@+id/navItem_NewSalesOrder"
+            android:icon="@drawable/new_order"
+            android:title="@string/nav_item_new_sales_order"/>
+        <item
+            android:id="@+id/navItem_mySalesHistory"
+            android:icon="@drawable/newsalesordericon"
+            android:title="@string/nav_item_my_sales_history"/>
+        <item
+            android:id="@+id/navItem_profile"
+            android:icon="@drawable/nav_profile1"
+            android:title="@string/nav_item_Profile"/>
+        <item
+            android:id="@+id/navItem_logout"
+            android:icon="@drawable/logouticon"
+            android:title="@string/nav_item_logout"/>
+
+        <!-- <item
+            android:id="@+id/navItem_pendingOrders"
+            android:title="@string/nav_item_pending_orders"/>-->
+    </group>
 </menu>

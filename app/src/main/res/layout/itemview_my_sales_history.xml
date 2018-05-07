@@ -1,42 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="10dp"
+    app:cardElevation="10dp"
+    app:cardCornerRadius="10dp">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:background="#82c2ed"
               android:gravity="center"
-              android:padding="@dimen/four_dp"
+              android:padding="10dp"
               android:orientation="vertical">
 
     <TextView
-        android:textColor="@android:color/black"
+        android:textColor="@color/colorAccent"
         android:textSize="@dimen/text_size_small"
         android:id="@+id/orderId_TextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/lato_bold"
         android:text="Order ID:"/>
 
     <TextView
         android:textColor="@android:color/black"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/lato_regular"
+        android:textSize="@dimen/text_size_small"
+        android:id="@+id/orderDate_TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Order Date:"/>
+    <TextView
+        android:textColor="@android:color/black"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/lato_regular"
         android:textSize="@dimen/text_size_small"
         android:id="@+id/retailerId_TextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Retailer ID:"/>
 
-    <TextView
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size_small"
-        android:id="@+id/orderDate_TextView"
+
+
+
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_marginTop="10dp"
+        android:nestedScrollingEnabled="false"
+        android:id="@+id/rv_child_for_skuitem"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Order Date:"/>
+        android:layout_height="match_parent"/>
+
+    <View
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="0.3dp"
+        android:layout_margin="10dp"
+        android:background="@android:color/black"/>
 
     <LinearLayout
+        android:layout_marginTop="5dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
+            android:layout_weight="1"
+            android:fontFamily="@font/lato_bold"
             android:textColor="@android:color/black"
             android:textSize="@dimen/text_size_small"
             android:id="@+id/skuCount_TextView"
@@ -45,6 +79,8 @@
             android:text="Total Items:"/>
 
         <TextView
+            android:layout_weight="1"
+            android:fontFamily="@font/lato_bold"
             android:textColor="@android:color/black"
             android:textSize="@dimen/text_size_small"
             android:id="@+id/orderTotal_TextView"
@@ -52,10 +88,5 @@
             android:layout_height="wrap_content"
             android:text="Order Total:"/>
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/two_dp"
-        android:layout_marginTop="@dimen/two_dp"
-        android:background="@color/colorYellow"/>
 </LinearLayout>
+</android.support.v7.widget.CardView>

@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="in.etaminepgg.sfa.Activities.SalesSummaryActivity">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              tools:context="in.etaminepgg.sfa.Activities.SalesSummaryActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorAccent" />
+        android:background="@color/colorAccent"
+        app:contentInsetStartWithNavigation="0dp"/>
 
     <TextView
         android:textStyle="bold"
@@ -27,7 +29,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/linlay_salessummary">
 
         <TextView
             android:layout_marginBottom="20dp"
@@ -35,6 +38,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/label_retailer_visits_done"
+            android:textColor="@color/colorGreen"
+            android:textSize="@dimen/text_size_medium" />
+
+        <TextView
+            android:layout_marginBottom="20dp"
+            android:id="@+id/duplicate_retailerVisitsDone_TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label__duplicate_retailer_visits_done"
             android:textColor="@color/colorGreen"
             android:textSize="@dimen/text_size_medium" />
 

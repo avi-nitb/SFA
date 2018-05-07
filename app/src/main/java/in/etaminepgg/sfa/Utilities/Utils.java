@@ -1,6 +1,7 @@
 package in.etaminepgg.sfa.Utilities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -17,14 +18,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.Dimension;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -32,6 +35,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -85,18 +89,19 @@ public class Utils
     public static String loggedInUserID;
 
     private Map<Integer, String> selectedSkuAttributesMap = new HashMap<>();
+    private Map<Integer, String> selectedSkuQuantityMap ;
 
     public static void launchActivity(Context context, Class<?> activityClassToLaunch)
     {
         Intent intent = new Intent(context, activityClassToLaunch);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
     public static void launchActivityWithExtra(Context context, Class<?> activityClassToLaunch, String extraName, String extraValue)
     {
         Intent intent = new Intent(context, activityClassToLaunch);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(extraName, extraValue);
         context.startActivity(intent);
     }
@@ -105,10 +110,10 @@ public class Utils
     public static void showPopUp(Context context, String messageToShow)
     {
         Toast popUp = Toast.makeText(context, messageToShow, Toast.LENGTH_LONG);
-        View popUpView = popUp.getView();
-        popUpView.setBackgroundColor(Color.BLACK);
-        popUpView.setPadding(20, 20, 20, 20);
-        popUp.setGravity(Gravity.CENTER, 0, 0);
+//        View popUpView = popUp.getView();
+//        popUpView.setBackgroundColor(Color.BLACK);
+//        popUpView.setPadding(20, 20, 20, 20);
+//        popUp.setGravity(Gravity.CENTER, 0, 0);
         popUp.show();
     }
 
@@ -116,10 +121,10 @@ public class Utils
     public static void showToast(Context context, String messageToShow)
     {
         Toast toast = Toast.makeText(context, messageToShow, Toast.LENGTH_SHORT);
-        View toastView = toast.getView();
-        toastView.setBackgroundColor(Color.BLACK);
-        toastView.setPadding(20, 20, 20, 20);
-        toast.setGravity(Gravity.CENTER, 0, 0);
+        //       View toastView = toast.getView();
+//        toastView.setBackgroundColor(Color.BLACK);
+//        toastView.setPadding(20, 20, 20, 20);
+//        toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
     }
 
@@ -191,7 +196,7 @@ public class Utils
         {
             Thread.sleep(milliSeconds);
         }
-        catch(InterruptedException e)
+        catch (InterruptedException e)
         {
             e.printStackTrace();
         }
@@ -228,7 +233,7 @@ public class Utils
     {
         String imeiNumber = null;
 
-        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
         {
             TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             imeiNumber = telephonyManager.getDeviceId();
@@ -266,12 +271,12 @@ public class Utils
         int bytesRead;
         long totalBytesRead = 0;
 
-        while((bytesRead = inputStream.read(buffer)) != -1)
+        while ((bytesRead = inputStream.read(buffer)) != -1)
         {
             totalBytesRead += bytesRead;
             outputStream.write(buffer, 0, bytesRead);
 
-            if(totalBytesRead > 1024 * 1024)
+            if (totalBytesRead > 1024 * 1024)
             {
                 totalBytesRead = 0;
                 outputStream.flush();
@@ -288,13 +293,13 @@ public class Utils
         int locationMode = 0;
         String locationProviders;
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
         {
             try
             {
                 locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
             }
-            catch(Settings.SettingNotFoundException e)
+            catch (Settings.SettingNotFoundException e)
             {
                 e.printStackTrace();
                 return false;
@@ -325,14 +330,14 @@ public class Utils
             {
                 final Status status = settingsResult.getStatus();
 
-                switch(status.getStatusCode())
+                switch (status.getStatusCode())
                 {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try
                         {
                             status.startResolutionForResult(activity, REQUEST_TURN_ON_LOCATION);
                         }
-                        catch(IntentSender.SendIntentException e)
+                        catch (IntentSender.SendIntentException e)
                         {
                             e.printStackTrace();
                         }
@@ -349,6 +354,29 @@ public class Utils
         return cm.getActiveNetworkInfo() != null;
     }
 
+    public static void startProgressDialog(Context context, ProgressDialog progressDialog)
+    {
+
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setMessage("Please Wait....");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(true);
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.setProgressNumberFormat(null);
+        progressDialog.setProgressPercentFormat(null);
+        progressDialog.show();
+    }
+
+    public static void dismissProgressDialog(ProgressDialog progressDialog)
+    {
+
+        if (progressDialog.isShowing())
+        {
+
+            progressDialog.dismiss();
+        }
+    }
+
     public List<Integer> getAttributeIDs(String skuID)
     {
         List<Integer> attributeIDsList = new ArrayList<>();
@@ -361,7 +389,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ATTRIBUTE_LIST, selectionArgs);
 
-        while(cursor.moveToNext())
+        while (cursor.moveToNext())
         {
             int attributeID = cursor.getInt(cursor.getColumnIndexOrThrow("attribute_id"));
             attributeIDsList.add(attributeID);
@@ -385,7 +413,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ATTRIBUTE_NAME, selectionArgs);
 
-        if(cursor.moveToNext())
+        if (cursor.moveToNext())
         {
             attributeName = cursor.getString(cursor.getColumnIndexOrThrow("attribute_name"));
         }
@@ -408,7 +436,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ATTRIBUTE_VALUE_SET, selectionArgs);
 
-        if(cursor.moveToNext())
+        if (cursor.moveToNext())
         {
             attributeValueSet = cursor.getString(cursor.getColumnIndexOrThrow("attribute_value"));
         }
@@ -420,6 +448,8 @@ public class Utils
     }
 
     //dynamically builds View For alert dialog depending on attributes of SKU
+
+    @SuppressLint("ResourceType")
     public View constructViewForAttributesDialog(String skuID, Context context)
     {
         LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -439,51 +469,218 @@ public class Utils
 
         List<Integer> attributeIDsList = getAttributeIDs(skuID);
 
-        for(final int attributeID : attributeIDsList)
-        {
-            TextView textView = new TextView(context);
-            textView.setLayoutParams(lp2);
-            textView.setText("choose from " + getAttributeName(attributeID));
-            textView.setTextSize(Dimension.SP, 25);
-            textView.setTextColor(Color.RED);
-            textView.setGravity(Gravity.CENTER_VERTICAL);
-            linearLayout.addView(textView);
+        TextView textView1 = new TextView(context);
+        textView1.setLayoutParams(lp2);
+        textView1.setText("Quantity");
+        textView1.setTextSize(Dimension.SP, 20);
+        textView1.setTextColor(Color.RED);
+        textView1.setGravity(Gravity.CENTER_VERTICAL);
+        linearLayout.addView(textView1);
 
-            Spinner spinner = new Spinner(context);
-            spinner.setLayoutParams(lp2);
-            spinner.setBackgroundColor(Color.CYAN);
+       /* Spinner spinner_qty = new Spinner(context);
+        spinner_qty.setLayoutParams(lp2);
+        spinner_qty.setBackgroundColor(Color.CYAN);
 
-            spinner.setId(attributeID);
+        String[] intArray = new String[20];
+        for(int i = 0; i < 20; i++) {
 
-            //attributeValuesSet contains all values separated by `
-            String attributeValuesSet = getAttributeValueSet(attributeID);
-            String[] attributeValues = attributeValuesSet.split("`");
-
-            ArrayAdapter<String> attributeValuesAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, attributeValues);
-            attributeValuesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner.setAdapter(attributeValuesAdapter);
-
-            linearLayout.addView(spinner);
-
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-            {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-                {
-                    String attributeValue = parent.getItemAtPosition(position).toString();
-
-                    selectedSkuAttributesMap.put(attributeID, attributeValue);
-
-                    Log.e("selected Value", attributeID + " : " + getAttributeName(attributeID) + " : " + attributeValue);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent)
-                {
-
-                }
-            });
+            intArray[i] = String.valueOf(i+1);
         }
+
+        ArrayAdapter<String> qty_spinner_adapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, intArray);
+        qty_spinner_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner_qty.setAdapter(qty_spinner_adapter);
+
+        linearLayout.addView(spinner_qty);*/
+
+        EditText qty_edit = new EditText(context);
+        qty_edit.setLayoutParams(lp2);
+        qty_edit.setBackgroundColor(context.getResources().getColor(R.color.lightgray));
+        qty_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+        qty_edit.setPadding(10,0,0,0);
+        qty_edit.setText("1");
+        qty_edit.setId(R.string.tag_sky_qty_id);
+        qty_edit.setTextSize(Dimension.SP, 13);
+        qty_edit.setTextColor(Color.BLACK);
+        qty_edit.setGravity(Gravity.CENTER_VERTICAL);
+
+        selectedSkuQuantityMap= new HashMap<>();
+        selectedSkuQuantityMap.put(Integer.parseInt(qty_edit.getText().toString().trim()), qty_edit.getText().toString().trim());
+
+        linearLayout.addView(qty_edit);
+
+
+
+       /* LinearLayout linearLayout_quantity = new LinearLayout(context);
+        linearLayout_quantity.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout_quantity.setLayoutParams(lp2);
+        linearLayout_quantity.setGravity(Gravity.CENTER);
+        linearLayout_quantity.setBackgroundColor(Color.CYAN);
+
+        ViewGroup.LayoutParams lp_wrapcontent = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        ImageView imageview_minus= new ImageView(context);
+        // Add image path from drawable folder.
+        imageview_minus.setImageResource(R.drawable.ic_remove_black_24dp);
+        imageview_minus.setLayoutParams(lp_wrapcontent);
+
+        LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(30, 0, 30, 0);
+
+        final TextView txt_qty = new TextView(context);
+        txt_qty.setLayoutParams(params);
+        txt_qty.setText("1");
+        txt_qty.setTextSize(Dimension.SP, 20);
+        txt_qty.setTextColor(Color.RED);
+        txt_qty.setGravity(Gravity.CENTER_VERTICAL);
+
+
+
+        ImageView imageview_add = new ImageView(context);
+        // Add image path from drawable folder.
+        imageview_add.setImageResource(R.drawable.ic_add_black_24dp);
+        imageview_add.setLayoutParams(lp_wrapcontent);
+
+
+        linearLayout_quantity.addView(imageview_minus);
+        linearLayout_quantity.addView(txt_qty);
+        linearLayout_quantity.addView(imageview_add);
+
+        linearLayout.addView(linearLayout_quantity);*/
+
+        boolean is_Attribute=DbUtils.getConfigValue(Constants.SKU_ATTRIBUTE_REQUIRED);
+
+        if(is_Attribute){
+
+
+            for (final int attributeID : attributeIDsList)
+            {
+                TextView textView = new TextView(context);
+                textView.setLayoutParams(lp2);
+                textView.setText("choose from " + getAttributeName(attributeID));
+                textView.setTextSize(Dimension.SP, 20);
+                textView.setTextColor(Color.RED);
+                textView.setGravity(Gravity.CENTER_VERTICAL);
+                linearLayout.addView(textView);
+
+                Spinner spinner = new Spinner(context);
+                spinner.setLayoutParams(lp2);
+                spinner.setBackgroundColor(Color.CYAN);
+
+                spinner.setId(attributeID);
+
+                //attributeValuesSet contains all values separated by `
+                String attributeValuesSet = getAttributeValueSet(attributeID);
+                String[] attributeValues = attributeValuesSet.split("`");
+
+
+                ArrayAdapter<String> attributeValuesAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, attributeValues);
+                attributeValuesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(attributeValuesAdapter);
+
+                linearLayout.addView(spinner);
+
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+                {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                    {
+                        String attributeValue = parent.getItemAtPosition(position).toString();
+
+                        selectedSkuAttributesMap.put(attributeID, attributeValue);
+
+                        Log.e("selected Value", attributeID + " : " + getAttributeName(attributeID) + " : " + attributeValue);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent)
+                    {
+
+                    }
+                });
+
+            }
+        }
+
+
+
+
+     /*   imageview_add.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+               int qty=Integer.parseInt(txt_qty.getText().toString());
+               qty++;
+               txt_qty.setText(String.valueOf(qty));
+            }
+        });
+
+        imageview_minus.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                int qty=Integer.parseInt(txt_qty.getText().toString());
+
+                if(qty>0){
+                    qty--;
+                    txt_qty.setText(String.valueOf(qty));
+                }
+
+            }
+        });*/
+
+     qty_edit.addTextChangedListener(new TextWatcher()
+     {
+         @Override
+         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+         {
+
+         }
+
+         @Override
+         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+         {
+
+         }
+
+         @Override
+         public void afterTextChanged(Editable editable)
+         {
+             selectedSkuQuantityMap= new HashMap<>();
+             if(!editable.toString().isEmpty()){
+
+                 selectedSkuQuantityMap.put(Integer.parseInt(editable.toString().trim()), editable.toString().trim());
+             }else if(editable.toString().trim().equalsIgnoreCase("0")){
+                 Utils.showToast(LoginActivity.baseContext,"Quantity can not be 0.");
+             }else {
+                 Utils.showToast(LoginActivity.baseContext,"Please enter valid quantity.");
+             }
+
+             Log.e("Sku Quantity Value", editable.toString().trim() + " : " +  editable.toString().trim());
+         }
+     });
+
+
+     /*spinner_qty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+     {
+         @Override
+         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
+         {
+             String skuQtyValue = adapterView.getItemAtPosition(i).toString();
+             selectedSkuQuantityMap= new HashMap<>();
+             selectedSkuQuantityMap.put(i, skuQtyValue);
+
+             Log.e("Sku Quantity Value", i + " : " +  skuQtyValue);
+         }
+
+         @Override
+         public void onNothingSelected(AdapterView<?> adapterView)
+         {
+
+         }
+     });*/
 
         scrollView.addView(linearLayout);
 
@@ -496,7 +693,7 @@ public class Utils
     {
         String salesOrderID = getActiveOrderID();
 
-        if(!salesOrderID.equals(NONE))
+        if (!salesOrderID.equals(NONE))
         {
             View alertDialogView = constructViewForAttributesDialog(skuID, context);
 
@@ -504,13 +701,13 @@ public class Utils
         }
         else
         {
-            Utils.launchActivity(context, PickRetailerActivity.class);
+            Utils.launchActivityWithExtra(context, PickRetailerActivity.class,Constants.SHOW_UPDATE_BUTTON,"NO");
         }
     }
 
     void showSelectAttributesDialog(View alertDialogView, final String salesOrderID, final String skuID, final String skuName, final String skuPrice, Context context)
     {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
         dialogBuilder.setView(alertDialogView);
 
         dialogBuilder.setPositiveButton("add to cart", new DialogInterface.OnClickListener()
@@ -518,9 +715,18 @@ public class Utils
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
-                insertSkuOrIncreaseQuantity(salesOrderID, skuID, skuName, skuPrice);
+                if(selectedSkuQuantityMap.isEmpty()){
+
+                    Utils.showToast(LoginActivity.baseContext,"Quantity can not be empty.");
+
+                }else {
+
+                    insertSkuOrIncreaseQuantity(salesOrderID, skuID, skuName, skuPrice);
+                }
             }
         });
+
+
 
         dialogBuilder.setNegativeButton("cancel", new DialogInterface.OnClickListener()
         {
@@ -536,12 +742,23 @@ public class Utils
 
     void insertSkuOrIncreaseQuantity(String salesOrderID, String skuID, String skuName, String skuPrice)
     {
-        //if Sku doesn't exists in the sales order details table, insert new row for that Sku
-        if(!isSkuPresent(skuID, salesOrderID))
-        {
-            long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, "1");
 
-            if(rowID != -1L)
+        String finalqty=NONE;
+
+        for (Map.Entry<Integer, String> entry : selectedSkuQuantityMap.entrySet())
+        {
+            finalqty=entry.getValue();
+
+        }
+
+
+        //if Sku doesn't exists in the sales order details table, insert new row for that Sku
+        if (!isSkuPresent(skuID, salesOrderID))
+        {
+
+            long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, finalqty);
+
+            if (rowID != -1L)
             {
                 long salesOrderDetailID = rowID;
 
@@ -556,19 +773,19 @@ public class Utils
 
             long orderDetailIdWithSameAttributes = getOrderDetailIdWithSameAttributes(orderDetailIDsList);
 
-            if(orderDetailIdWithSameAttributes > 0)
+            if (orderDetailIdWithSameAttributes > 0)
             {
                 int currentSkuQuantity = getSkuQuantity(orderDetailIdWithSameAttributes);
-                int newSkuQuantity = currentSkuQuantity + 1;
+                int newSkuQuantity = currentSkuQuantity + Integer.parseInt(finalqty);
                 DbUtils.increaseSkuQuantity(orderDetailIdWithSameAttributes, newSkuQuantity);
 
                 Utils.showPopUp(LoginActivity.baseContext, "SKU quantity increased");
             }
-            else if(orderDetailIdWithSameAttributes == -1L)
+            else if (orderDetailIdWithSameAttributes == -1L)
             {
-                long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, "1");
+                long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, finalqty);
 
-                if(rowID != -1L)
+                if (rowID != -1L)
                 {
                     long salesOrderDetailID = rowID;
 
@@ -588,7 +805,7 @@ public class Utils
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        for(Map.Entry<Integer, String> entry : selectedSkuAttributesMap.entrySet())
+        for (Map.Entry<Integer, String> entry : selectedSkuAttributesMap.entrySet())
         {
             ContentValues contentValues = new ContentValues();
             contentValues.put("order_detail_id", salesOrderDetailID);
@@ -614,7 +831,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ORDER_DETAIL_IDS, selectionArgs);
 
-        while(cursor.moveToNext())
+        while (cursor.moveToNext())
         {
             Long orderDetailId = cursor.getLong(cursor.getColumnIndexOrThrow("order_detail_id"));
 
@@ -639,7 +856,7 @@ public class Utils
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_ORDER_ATTRIBUTES_SET, selectionArgs);
 
-        while(cursor.moveToNext())
+        while (cursor.moveToNext())
         {
             int attributeId = cursor.getInt(cursor.getColumnIndexOrThrow("attribute_id"));
             String attributeValue = cursor.getString(cursor.getColumnIndexOrThrow("attribute_value"));
@@ -655,11 +872,11 @@ public class Utils
 
     long getOrderDetailIdWithSameAttributes(List<Long> orderDetailIDsList)
     {
-        for(Long orderDetailID : orderDetailIDsList)
+        for (Long orderDetailID : orderDetailIDsList)
         {
             Map<Integer, String> salesOrderSkuAttributesMap = getSalesOrderSkuAttributesMap(orderDetailID);
 
-            if(selectedSkuAttributesMap.equals(salesOrderSkuAttributesMap))
+            if (selectedSkuAttributesMap.equals(salesOrderSkuAttributesMap))
             {
                 return orderDetailID;
             }
@@ -668,23 +885,12 @@ public class Utils
         return -1L;
     }
 
-    public static void startProgressDialog(Context context,ProgressDialog progressDialog){
-
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage("Please Wait....");
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(true);
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setProgressNumberFormat(null);
-        progressDialog.setProgressPercentFormat(null);
-        progressDialog.show();
+    public String getModifiedkeyValueString(String key,String Value)
+    {
+        String name_string=key+Value;
+        String replacedWith1 = "<font color='blue'>" + key + "</font>";
+        String modified_string_name = name_string.replaceAll(key,replacedWith1);
+        return modified_string_name;
     }
 
-    public static void dismissProgressDialog(ProgressDialog progressDialog){
-
-        if(progressDialog.isShowing()){
-
-            progressDialog.dismiss();
-        }
-    }
 }

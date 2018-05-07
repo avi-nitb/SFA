@@ -17,12 +17,15 @@ import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.MyDb;
+import in.etaminepgg.sfa.Utilities.RoundedCornersTransformation;
 import in.etaminepgg.sfa.Utilities.Utils;
 
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.sCorner;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.sMargin;
 import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 
 /**
@@ -32,6 +35,8 @@ import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<PreviouslyOrderedSKUsAdapter.SkuInfoViewHolder>
 {
     private List<Sku> skuList;
+
+    int read = 1;
 
     public PreviouslyOrderedSKUsAdapter(List<Sku> skuList)
     {
@@ -61,7 +66,8 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
         skuInfoViewHolder.skuName_TextView.setText(skuName);
         skuInfoViewHolder.skuPrice_TextView.setText(RS + skuPrice);
         skuInfoViewHolder.skuCategory_TextView.setText("Category : "+getSKU_category(skuID));
-        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
+        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).error(R.drawable.ic_tiffin_box).bitmapTransform(new RoundedCornersTransformation(skuInfoViewHolder.itemView.getContext(),sCorner,sMargin)).into(skuInfoViewHolder.skuPhoto_ImageView);
+       // Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
         //skuInfoViewHolder.sku_SO_Attr_TextView.setVisibility(View.GONE);
     }
 
@@ -72,14 +78,14 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        String SKU_CATEGORY_QUERY = "select  sku_category from " + TBL_SKU + " WHERE sku_id=? ;";
+        String SKU_CATEGORY_QUERY = "select  sku_category_description from " + TBL_SKU + " WHERE sku_id=? ;";
         String[] selectionArgs = {skuID};
 
         Cursor cursor = sqLiteDatabase.rawQuery(SKU_CATEGORY_QUERY, selectionArgs);
 
         if(cursor.moveToFirst())
         {
-            sku_category = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
+            sku_category = cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description"));
         }
 
         cursor.close();

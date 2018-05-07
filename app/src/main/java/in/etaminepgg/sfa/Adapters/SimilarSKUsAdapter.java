@@ -1,10 +1,15 @@
 package in.etaminepgg.sfa.Adapters;
 
+import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -14,10 +19,16 @@ import java.util.List;
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
+import in.etaminepgg.sfa.Utilities.MyDb;
+import in.etaminepgg.sfa.Utilities.RoundedCornersTransformation;
 import in.etaminepgg.sfa.Utilities.Utils;
 
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
+import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.sCorner;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.sMargin;
 import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 
 /**
@@ -27,10 +38,12 @@ import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 public class SimilarSKUsAdapter extends RecyclerView.Adapter<SimilarSKUsAdapter.SkuInfoViewHolder>
 {
     private List<Sku> skuList;
+    private LinearLayout container_lay;
 
-    public SimilarSKUsAdapter(List<Sku> skuList)
+    public SimilarSKUsAdapter(List<Sku> skuList, LinearLayout container_lay)
     {
         this.skuList = skuList;
+        this.container_lay = container_lay;
     }
 
     @Override
@@ -54,7 +67,7 @@ public class SimilarSKUsAdapter extends RecyclerView.Adapter<SimilarSKUsAdapter.
 
         skuInfoViewHolder.skuName_TextView.setText(skuName);
         skuInfoViewHolder.skuPrice_TextView.setText(RS + skuPrice);
-        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
+        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).error(R.drawable.ic_tiffin_box).bitmapTransform(new RoundedCornersTransformation(skuInfoViewHolder.itemView.getContext(),sCorner,sMargin)).into(skuInfoViewHolder.skuPhoto_ImageView);
     }
 
     @Override
@@ -98,9 +111,48 @@ public class SimilarSKUsAdapter extends RecyclerView.Adapter<SimilarSKUsAdapter.
                     //Utils.showToast(view.getContext(), itemView.getTag(R.string.tag_sku_id).toString());
 
                     String skuID = itemView.getTag(R.string.tag_sku_id).toString();
-                    Utils.launchActivityWithExtra(view.getContext(), SkuDetailsActivity.class, KEY_SKU_ID, skuID);
+                    Context context=itemView.getContext();
+                    getDataAndBind(context,container_lay,skuID);
+                  //  Utils.launchActivityWithExtra(view.getContext(), SkuDetailsActivity.class, KEY_SKU_ID, skuID);
+                }
+
+                private void getDataAndBind(Context context, LinearLayout container_lay, String skuID)
+                {
+
+                    int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+                    SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+                    String SQL_SELECT_SKU_DATA = "select sku_id, sku_name, sku_price, sku_category, sku_sub_category,sku_category_description,sku_sub_category_description ,description from " + TBL_SKU + " where sku_id=?";
+                    String[] selectionArgs = new String[]{skuID};
+                    Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SKU_DATA, selectionArgs);
+
+                    if(cursor.moveToFirst())
+                    {
+                        //skuPhoto_ImageView = (ImageView) findViewById(R.id.skuPhoto_ImageView);
+
+                        ImageView skuPhoto_ImageView_actlay = (ImageView)container_lay.findViewById(R.id.skuPhoto_ImageView);
+                        TextView skuName_TextView_actlay  = (TextView)container_lay. findViewById(R.id.skuName_TextView);
+                        TextView skuPrice_TextView_actlay  = (TextView) container_lay.findViewById(R.id.skuPrice_TextView);
+                        TextView skuCategory_TextView_actlay  = (TextView) container_lay.findViewById(R.id.sku_SO_Attr_TextView);
+                        TextView skuSubCategory_TextView_actlay = (TextView)container_lay. findViewById(R.id.skuSubCategory_TextView);
+                        TextView skuDescription_TextView_actlay  = (TextView) container_lay.findViewById(R.id.skuDescription_TextView);
+
+
+                        String skuCategory = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
+
+                        skuName_TextView_actlay.setText(/*skuID + " : " +*/ cursor.getString(cursor.getColumnIndexOrThrow("sku_name")));
+                        skuPrice_TextView_actlay.setText(RS + cursor.getString(cursor.getColumnIndexOrThrow("sku_price")));
+                        skuCategory_TextView_actlay.setText("Category : "+cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description")));
+                        skuSubCategory_TextView_actlay.setText("Sub category : "+cursor.getString(cursor.getColumnIndexOrThrow("sku_sub_category_description")));
+                        skuDescription_TextView_actlay.setText("Description : "+cursor.getString(cursor.getColumnIndexOrThrow("description")));
+                        Glide.with(context).load(getSku_PhotoSource(skuID)).error(R.drawable.ic_tiffin_box).bitmapTransform(new RoundedCornersTransformation(context,sCorner,sMargin)).into(skuPhoto_ImageView_actlay);
+                    }
+
+                    cursor.close();
+                    sqLiteDatabase.close();
                 }
             });
         }
     }
+
+
 }

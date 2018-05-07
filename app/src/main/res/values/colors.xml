@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimaryDark">#212121</color>
+    <color name="colorPrimaryDark">#ef6c00</color>
     <color name="colorPrimary">#424242</color>
-    <color name="colorAccent">#FFC107</color>
+    <color name="colorAccent">#f5ad04</color>
 
-    <color name="pink500">#E91E63</color>
+   <!-- #FFC107-->
+
+    <color name="pink500">#0840c4</color>
+    <color name="white">#fff</color>
+    <color name="black">#000</color>
    <!-- <color name="green500">#A5D6A7</color>-->
 
    <!-- <color name="colorPrimary">#3F51B5</color>
@@ -13,10 +17,11 @@
     <color name="colorGreen">#034400</color>
     <color name="colorYellow">#ef6c00</color>
     <color name="colorRed">#cd3333</color>
-    <color name="colorTitle">#e65100</color>
-    <color name="rippelColor">#e65100</color>
 
 
     <color name="errorColor">#F44336</color>
     <color name="successColor">#7CB342</color>
+    <color name="cyan">#6bf3f5</color>
+    <color name="blue">#090586</color>
+    <color name="lightgray">#cfcfd4</color>
 </resources>

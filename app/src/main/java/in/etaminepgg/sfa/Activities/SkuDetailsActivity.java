@@ -9,8 +9,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -29,6 +33,7 @@ import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.MySharedPrefrencesData;
+import in.etaminepgg.sfa.Utilities.RoundedCornersTransformation;
 import in.etaminepgg.sfa.Utilities.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,6 +43,8 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.sCorner;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.sMargin;
 import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 
 public class SkuDetailsActivity extends AppCompatActivity
@@ -50,13 +57,23 @@ public class SkuDetailsActivity extends AppCompatActivity
     String skuCategory = null;
 
     MySharedPrefrencesData mySharedPrefrencesData;
+    LinearLayout container_lay;
+
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sku_details);
+
+        toolbar=(Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Sku Details");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         mySharedPrefrencesData=new MySharedPrefrencesData();
+
 
         findViewsByIDs();
 
@@ -71,11 +88,19 @@ public class SkuDetailsActivity extends AppCompatActivity
 
               //  network_call_for_getSimilarSKUsList(mySharedPrefrencesData.getEmployee_AuthKey(SkuDetailsActivity.this),skuID);
 
-                similarSKUs_RecyclerView.setAdapter(new SimilarSKUsAdapter(getSimilarSKUsList()));
+                similarSKUs_RecyclerView.setAdapter(new SimilarSKUsAdapter(getSimilarSKUsList(),container_lay));
                 similarSKUs_RecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
                 similarSKUs_RecyclerView.setItemAnimator(new DefaultItemAnimator());
             }
         }
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home)
+            finish();
+        return super.onOptionsItemSelected(item);
     }
 
     private void findViewsByIDs()
@@ -87,13 +112,14 @@ public class SkuDetailsActivity extends AppCompatActivity
         skuSubCategory_TextView = (TextView) findViewById(R.id.skuSubCategory_TextView);
         skuDescription_TextView = (TextView) findViewById(R.id.skuDescription_TextView);
         similarSKUs_RecyclerView = (RecyclerView) findViewById(R.id.similarSKUs_RecyclerView);
+        container_lay=(LinearLayout)findViewById(R.id.skuDetails_ScrollView);
     }
 
-    private void getDataAndBind(String skuID)
+    private  void getDataAndBind(String skuID)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
-        String SQL_SELECT_SKU_DATA = "select sku_id, sku_name, sku_price, sku_category, sku_sub_category, description from " + TBL_SKU + " where sku_id=?";
+        String SQL_SELECT_SKU_DATA = "select sku_id, sku_name, sku_price, sku_category, sku_sub_category,sku_category_description,sku_sub_category_description, description from " + TBL_SKU + " where sku_id=?";
         String[] selectionArgs = new String[]{skuID};
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SKU_DATA, selectionArgs);
 
@@ -101,13 +127,17 @@ public class SkuDetailsActivity extends AppCompatActivity
         {
             //skuPhoto_ImageView = (ImageView) findViewById(R.id.skuPhoto_ImageView);
             skuCategory = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
-
             skuName_TextView.setText(/*skuID + " : " +*/ cursor.getString(cursor.getColumnIndexOrThrow("sku_name")));
             skuPrice_TextView.setText(RS + cursor.getString(cursor.getColumnIndexOrThrow("sku_price")));
-            skuCategory_TextView.setText("Category : "+skuCategory);
-            skuSubCategory_TextView.setText("Sub category : "+cursor.getString(cursor.getColumnIndexOrThrow("sku_sub_category")));
-            skuDescription_TextView.setText("Description : "+cursor.getString(cursor.getColumnIndexOrThrow("description")));
-            Glide.with(SkuDetailsActivity.this).load(getSku_PhotoSource(skuID)).into(skuPhoto_ImageView);
+
+
+            skuCategory_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Category : ",cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description")))));
+            skuSubCategory_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Sub category : ",cursor.getString(cursor.getColumnIndexOrThrow("sku_sub_category_description")))));
+            skuDescription_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Description : ",cursor.getString(cursor.getColumnIndexOrThrow("description")))));
+           // skuCategory_TextView.setText("Category : "+cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description")));
+            //skuSubCategory_TextView.setText("Sub category : "+cursor.getString(cursor.getColumnIndexOrThrow("sku_sub_category_description")));
+           // skuDescription_TextView.setText("Description : "+cursor.getString(cursor.getColumnIndexOrThrow("description")));
+            Glide.with(SkuDetailsActivity.this).load(getSku_PhotoSource(skuID)).error(R.drawable.ic_tiffin_box).bitmapTransform(new RoundedCornersTransformation(this,sCorner,sMargin)).into(skuPhoto_ImageView);
         }
 
         cursor.close();

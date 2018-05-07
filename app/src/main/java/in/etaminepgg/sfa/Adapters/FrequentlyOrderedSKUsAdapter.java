@@ -11,19 +11,20 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.MyDb;
+import in.etaminepgg.sfa.Utilities.RoundedCornersTransformation;
 import in.etaminepgg.sfa.Utilities.Utils;
 
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_SKU_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.RS;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.sCorner;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.sMargin;
 import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 
 /**
@@ -33,6 +34,8 @@ import static in.etaminepgg.sfa.Utilities.DbUtils.getSku_PhotoSource;
 public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<FrequentlyOrderedSKUsAdapter.SkuInfoViewHolder>
 {
     private List<Sku> skuList;
+
+    int read = 1;
 
     public FrequentlyOrderedSKUsAdapter(List<Sku> skuList)
     {
@@ -66,7 +69,8 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
         skuInfoViewHolder.retailerCount_TextView.setText(getRetailerCount(skuID) + " Retailers, ");
         skuInfoViewHolder.orderCount_TextView.setText(getOrderCount(skuID) + " Orders, ");
         skuInfoViewHolder.salesValue_TextView.setText("Sales Value: " + "Rs." + getSalesValue(skuID));
-        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
+        Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).error(R.drawable.ic_tiffin_box).bitmapTransform(new RoundedCornersTransformation(skuInfoViewHolder.itemView.getContext(),sCorner,sMargin)).into(skuInfoViewHolder.skuPhoto_ImageView);
+       // Glide.with(skuInfoViewHolder.itemView.getContext()).load(sku_photo_url).into(skuInfoViewHolder.skuPhoto_ImageView);
         //skuInfoViewHolder.sku_SO_Attr_TextView.setText(skuCategory);
     }
 

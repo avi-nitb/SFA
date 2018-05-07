@@ -21,17 +21,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.gson.Gson;
+
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import in.etaminepgg.sfa.BuildConfig;
+import in.etaminepgg.sfa.InputModel_For_Network.IM_Config;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_IsValidAuthKey;
+import in.etaminepgg.sfa.InputModel_For_Network.IM_Login;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_RetailerInfo;
+import in.etaminepgg.sfa.Models.AuthUserDetails;
 import in.etaminepgg.sfa.Models.AuthUser_Model;
 import in.etaminepgg.sfa.Models.BasicConfigModel;
-import in.etaminepgg.sfa.InputModel_For_Network.IM_Config;
-import in.etaminepgg.sfa.InputModel_For_Network.IM_Login;
+import in.etaminepgg.sfa.Models.Location_Model;
 import in.etaminepgg.sfa.Models.RetailerInfo_Model;
 import in.etaminepgg.sfa.Models.RetailerList_Model;
+import in.etaminepgg.sfa.Models.ValidAuthModel;
 import in.etaminepgg.sfa.Network.API_Call_Retrofit;
 import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
@@ -57,12 +64,15 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_SKU_ATTRIBUT
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SCHEME;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_ATTRIBUTE_MAPPING;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_CATEGORY;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_NO_ORDERREASON;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_SUBCATEGORY;
 import static in.etaminepgg.sfa.Utilities.Constants.appSpecificDirectoryPath;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NOT_PRESENT;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NO_INTERNET_CONNECTION;
-import static in.etaminepgg.sfa.Utilities.SharedPreferenceSingleton.MY_PREF;
 import static in.etaminepgg.sfa.Utilities.Utils.dismissProgressDialog;
+import static in.etaminepgg.sfa.Utilities.Utils.getDateTime;
 import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserName;
@@ -81,38 +91,47 @@ public class LoginActivity extends AppCompatActivity
     public static Context baseContext;
     public static String KEY_USERNAME = "username";
     public static String KEY_PASSWORD = "password";
+    public static boolean is_config_inserted_to_db = true;
     Button login_Button;
     EditText username_EditText, password_EditText;
     int valueFromOpenDatabase;
     SQLiteDatabase sqLiteDatabase;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor sharedPreferencesEditor;
-    String usernameEntered = "usernameEntered";
-    String passwordEntered = "passwordEntered";
+    String usernameEntered = "";
+    String passwordEntered = "";
     String imei;
-
     MySharedPrefrencesData mySharedPrefrencesData;
-
-
     boolean configflag = false;
     boolean authflag = false;
-    public static boolean is_config_inserted_to_db = true;
+
+    int a=0;
+    int b=0;
+
+
+    ProgressDialog progressDialog ;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                                           @NonNull int[] grantResults)
+    {
+        if (requestCode == 1)
+        {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
                 if (ActivityCompat.checkSelfPermission(LoginActivity.this, Manifest.permission
-                        .READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                        .READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+                {
                     TelephonyManager telephonyManager = (TelephonyManager) LoginActivity.this
                             .getSystemService(Context.TELEPHONY_SERVICE);
                     imei = telephonyManager.getDeviceId();
 
-                    launchDashboardIfLoggedIn();
+                    //launchDashboardIfLoggedIn();
                 }
-            } else if (grantResults.length > 0 && grantResults[0] == PackageManager
-                    .PERMISSION_DENIED) {
+            }
+            else if (grantResults.length > 0 && grantResults[0] == PackageManager
+                    .PERMISSION_DENIED)
+            {
                 String[] permissionsArray = {"android.permission.READ_PHONE_STATE"};
                 ActivityCompat.requestPermissions(LoginActivity.this, permissionsArray, 1);
             }
@@ -120,9 +139,12 @@ public class LoginActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        progressDialog = new ProgressDialog(LoginActivity.this);
 
         baseContext = getBaseContext();
         mySharedPrefrencesData = new MySharedPrefrencesData();
@@ -135,55 +157,74 @@ public class LoginActivity extends AppCompatActivity
 
         downloadDatabaseIfNotExists();
 
-        Utils.makeThreadSleepFor(1000);
-        imei = Utils.getDeviceId(LoginActivity.this);
+       // Utils.makeThreadSleepFor(5000);
+        //imei = Utils.getDeviceId(LoginActivity.this);
 
         findViewsByIDs();
         setListenersToViews();
 
-        try {
+        try
+        {
             AssetManager assetManager = getAssets();
             Utils.copyFile(assetManager, appSpecificDirectoryPath, JINGLE_FILE_NAME);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
 
         if (ActivityCompat.checkSelfPermission(LoginActivity.this, Manifest.permission
-                .READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                .READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        {
             TelephonyManager telephonyManager = (TelephonyManager) LoginActivity.this
                     .getSystemService(Context.TELEPHONY_SERVICE);
             imei = telephonyManager.getDeviceId();
 
-            launchDashboardIfLoggedIn();
-        } else {
+            sharedPreferences = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, Context.MODE_PRIVATE);
+
+            boolean isLaunch=sharedPreferences.getBoolean("hasLoggedIn",false);
+
+            if(isLaunch){
+
+                launchDashboardIfLoggedIn();
+            }
+
+        }
+        else
+        {
             String[] permissionsArray = {"android.permission.READ_PHONE_STATE"};
             ActivityCompat.requestPermissions(LoginActivity.this, permissionsArray, 1);
         }
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         sqLiteDatabase.releaseReference();
         super.onDestroy();
     }
 
-    private void findViewsByIDs() {
+    private void findViewsByIDs()
+    {
         login_Button = (Button) findViewById(R.id.login_Button);
         username_EditText = (EditText) findViewById(R.id.username_EditText);
         password_EditText = (EditText) findViewById(R.id.password_EditText);
 
-        username_EditText.setText("surya");
-        password_EditText.setText("surya");
     }
 
-    private void setListenersToViews() {
-        login_Button.setOnClickListener(new View.OnClickListener() {
+    private void setListenersToViews()
+    {
+        login_Button.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 usernameEntered = username_EditText.getText().toString().trim();
                 passwordEntered = password_EditText.getText().toString().trim();
 
-                if (isValidUser(usernameEntered, passwordEntered)) {
+                callWebApi();
+
+         /*       if (isValidUser(usernameEntered, passwordEntered)) {
                     sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
                     sharedPreferencesEditor = sharedPreferences.edit();
                     sharedPreferencesEditor.putString(KEY_USERNAME, usernameEntered);
@@ -199,8 +240,8 @@ public class LoginActivity extends AppCompatActivity
                     Log.e("loggedInUserName", loggedInUserName);
                     Log.e("loggedInUserID", loggedInUserID);
 
-                   /* Utils.launchActivity(getBaseContext(), DashboardActivity.class);
-                    finish();*/
+                   *//* Utils.launchActivity(getBaseContext(), DashboardActivity.class);
+                    finish();*//*
 
                     //networkcall_for_authtoken(getDeviceId(LoginActivity.this),usernameEntered,
                     // passwordEntered);
@@ -208,82 +249,168 @@ public class LoginActivity extends AppCompatActivity
                     callWebApi();
                 } else {
                     Utils.showPopUp(getBaseContext(), "Please Enter Valid Username, Password");
-                }
+                }*/
             }
         });
     }
 
-    private void callWebApi() {
-        if (Utils.isNetworkConnected(getBaseContext())) {
-            if (imei.equalsIgnoreCase(null) || imei.trim().length() <= 0) {
+    private void callWebApi()
+    {
+        if (Utils.isNetworkConnected(getBaseContext()))
+        {
+            if (imei.equalsIgnoreCase(null) || imei.trim().length() <= 0)
+            {
                 Utils.showErrorDialog(LoginActivity.this, "You can not login as you denied " +
                         "permission.");
-            } else {
+            }
+            else
+            {
                 networkcall_for_authtoken();
             }
-        } else {
+        }
+        else
+        {
             Utils.showErrorDialog(LoginActivity.this, "Please check your internet connection.");
         }
 
-
     }
 
-    private void launchDashboardIfLoggedIn() {
+    private void launchDashboardIfLoggedIn()
+    {
         downloadDatabaseIfNotExists();
-        Utils.makeThreadSleepFor(1000);
+       // Utils.makeThreadSleepFor(5000);
 
-        sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
+       /* sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
         String spDefaultValue = "spDefaultValue"; //sp = shared preferences
 
         String usernameInSharedPreferences = sharedPreferences.getString(KEY_USERNAME,
                 spDefaultValue);
         String passwordInSharedPreferences = sharedPreferences.getString(KEY_PASSWORD,
-                spDefaultValue);
+                spDefaultValue);*/
+
+        String usernameInSharedPreferences = new MySharedPrefrencesData().getUsername(LoginActivity.this);
+        String passwordInSharedPreferences = new MySharedPrefrencesData().getUser_pwd(LoginActivity.this);
 
         loggedInUserName = usernameInSharedPreferences;
-        loggedInUserID = getEmployeeIdFor(loggedInUserName);
+        //loggedInUserID = getEmployeeIdFor(loggedInUserName);
+        loggedInUserID = new MySharedPrefrencesData().getUser_Id(LoginActivity.this);
 
         Log.e("usernameInSharedPref", usernameInSharedPreferences);
         Log.e("passwordInSharedPref", passwordInSharedPreferences);
 
-        if (isValidUser(usernameInSharedPreferences, passwordInSharedPreferences)) {
-            loggedInUserID = getEmployeeIdFor(loggedInUserName);
-            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-
-
-            SharedPreferences settings = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, 0);
-            //Get "hasLoggedIn" value. If the value doesn't exist yet false is returned
-            boolean hasLoggedIn = settings.getBoolean("hasLoggedIn", false);
-            if (hasLoggedIn) {
-
-                Utils.launchActivity(getBaseContext(), DashboardActivity.class);
-                finish();
-            } else {
-                callWebApi();
-            }
-
-               /* String authkey_expirydate_frm_sp=mySharedPrefrencesData.getAuthTokenExpiryDate
-               (LoginActivity.this);
-                Date date_sp=sdf.parse(authkey_expirydate_frm_sp);
-
-                String current_date=Utils.getDateTime();
-                Date date_current=sdf.parse(current_date);
-
-                if(date_sp.after(date_current)){
-                    Utils.launchActivity(getBaseContext(), DashboardActivity.class);
-                    finish();
-                }else {
-
-                    networkAsync();
-                }*/
-
-
-            //System.exit(0);
-
+        if (autoLogout())
+        {
+            callLogoutApi(mySharedPrefrencesData.getEmployee_AuthKey(LoginActivity.this));
         }
+        else
+        {
+
+            if (isValidUser(usernameInSharedPreferences, passwordInSharedPreferences))
+            {
+                loggedInUserID = new MySharedPrefrencesData().getUser_Id(LoginActivity.this);
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+
+                SharedPreferences settings = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, 0);
+                //Get "hasLoggedIn" value. If the value doesn't exist yet false is returned
+                boolean hasLoggedIn = settings.getBoolean("hasLoggedIn", false);
+                if (hasLoggedIn)
+                {
+
+                    Utils.launchActivity(LoginActivity.this, DashboardActivity.class);
+                    finish();
+                }
+                //System.exit(0);
+
+            }
+        }
+
     }
 
-    private boolean isValidUser(String userName, String password) {
+    private void callLogoutApi(String employee_authKey)
+    {
+
+
+        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+        Utils.startProgressDialog(LoginActivity.this, progressDialog);
+
+        final Apimethods methods = API_Call_Retrofit.getretrofit(this).create(Apimethods.class);
+
+        IM_IsValidAuthKey IM_isValidAuthKey = new IM_IsValidAuthKey(mySharedPrefrencesData.getEmployee_AuthKey(LoginActivity.this),"1");
+
+
+        Call<ValidAuthModel> call = methods.setLogout(IM_isValidAuthKey);
+
+
+        Log.i("logout_ip", new Gson().toJson(IM_isValidAuthKey));
+
+        Log.d("url", "url=" + call.request().url().toString());
+
+        call.enqueue(new Callback<ValidAuthModel>()
+        {
+            @Override
+            public void onResponse(Call<ValidAuthModel> call, Response<ValidAuthModel> response)
+            {
+                if (response.isSuccessful())
+                {
+
+                    Utils.showToast(LoginActivity.this, "Logged out successfully.");
+                }
+
+                Utils.dismissProgressDialog(progressDialog);
+
+            }
+
+            @Override
+            public void onFailure(Call<ValidAuthModel> call, Throwable t)
+            {
+                Utils.dismissProgressDialog(progressDialog);
+                Utils.showToast(LoginActivity.this, ConstantsA.NO_INTERNET_CONNECTION);
+            }
+        });
+    }
+
+    private boolean autoLogout()
+    {
+
+        valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        boolean isAutoLogout = false;
+        String SQL_SELECT_LOGIN_TIME = "SELECT emp_login_time FROM " + TBL_EMPLOYEE;
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_LOGIN_TIME, null);
+
+        while (cursor.moveToNext())
+        {
+
+            String emp_logintime = cursor.getString(cursor.getColumnIndexOrThrow("emp_login_time"));
+
+            String currentdateandtime = getDateTime();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            try
+            {
+                if (sdf.parse(currentdateandtime).after(sdf.parse(emp_logintime)))
+                {
+                    isAutoLogout = true;
+                }
+            }
+            catch (ParseException e)
+            {
+                e.printStackTrace();
+            }
+
+        }
+
+        cursor.close();
+        return isAutoLogout;
+
+    }
+
+    private boolean isValidUser(String userName, String password)
+    {
         String SQL_SELECT_SALES_PERSON = "SELECT emp_id FROM " + TBL_EMPLOYEE + " WHERE " +
                 "emp_username " + "= ? AND " + "emp_password " + "= ?";
         String[] selectionArgs = {userName, password};
@@ -293,40 +420,92 @@ public class LoginActivity extends AppCompatActivity
         return isUserFound;
     }
 
-    private String getEmployeeIdFor(String salesPersonUsername) {
+    private String getEmployeeIdFor(String salesPersonUsername)
+    {
         String salesPersonEmpID = "getEmployeeIdFor()";
         String SQL_SELECT_SALES_PERSON_ID = "SELECT " + "emp_id" + " FROM " + TBL_EMPLOYEE + " " +
                 "WHERE " + "emp_username " + "= ?";
         String[] selectionArgs = {salesPersonUsername};
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_PERSON_ID, selectionArgs);
-        if (cursor.moveToFirst()) {
+        if (cursor.moveToFirst())
+        {
             salesPersonEmpID = cursor.getString(cursor.getColumnIndexOrThrow("emp_id"));
         }
         cursor.close();
         return salesPersonEmpID;
     }
 
-    private void networkcall_for_authtoken() {
+    private void networkcall_for_authtoken()
+    {
 
         final Apimethods methods = API_Call_Retrofit.getretrofit(this).create(Apimethods.class);
 
-        final ProgressDialog progressDialog=new ProgressDialog(LoginActivity.this);
-        Utils.startProgressDialog(LoginActivity.this,progressDialog);
 
-        IM_Login IMLogin = new IM_Login(imei, usernameEntered, passwordEntered);
+        Utils.startProgressDialog(LoginActivity.this, progressDialog);
+
+        IM_Login IMLogin = new IM_Login(imei, usernameEntered, passwordEntered,"1");
+
+
+        Log.i("authuser_input", new Gson().toJson(IMLogin));
 
         Call<AuthUser_Model> call = methods.getUserAuthKey(IMLogin);
+        //Call<AuthUser_Model> call = methods.getUserAuthKey(imei,"1",passwordEntered,usernameEntered);
         Log.d("url", "url=" + call.request().url().toString());
 
-        call.enqueue(new Callback<AuthUser_Model>() {
+        call.enqueue(new Callback<AuthUser_Model>()
+        {
             @Override
-            public void onResponse(Call<AuthUser_Model> call, Response<AuthUser_Model> response) {
+            public void onResponse(Call<AuthUser_Model> call, Response<AuthUser_Model> response)
+            {
                 int statusCode = response.code();
                 Log.d("Response", "" + statusCode);
                 Log.d("respones", "" + response);
-                if (response.isSuccessful()) {
+                if (response.isSuccessful())
+                {
                     AuthUser_Model authUser_model = response.body();
-                    if (authUser_model.getApiStatus() == 1) {
+
+
+                    Log.i("authuser_output", new Gson().toJson(authUser_model));
+
+                    if (authUser_model.getApiStatus() == 1)
+                    {
+//                        SharedPreferences settings1 = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, 0);
+//                        //Get "hasLoggedIn" value. If the value doesn't exist yet false is returned
+//                        boolean hasLoggedIn = settings1.getBoolean("hasLoggedIn", false);
+
+
+                        valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+                        sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+
+                        DbUtils.clear_table(TBL_EMPLOYEE);
+                        DbUtils.clear_table(TBL_LOCATION_HIERARCHY);
+                        DbUtils.clear_table(TBL_RETAILER);
+
+
+                        loggedInUserName = usernameEntered;
+                        // loggedInUserID = getEmployeeIdFor(loggedInUserName);
+                        loggedInUserID = authUser_model.getUserId();
+
+                        Log.e("usernameEntered", usernameEntered);
+                        Log.e("passwordEntered", passwordEntered);
+
+                        Log.e("loggedInUserName", loggedInUserName);
+                        Log.e("loggedInUserID", loggedInUserID);
+
+
+                        ContentValues suryaValues = new ContentValues();
+                        suryaValues.put("emp_id", authUser_model.getUserId());
+                        suryaValues.put("imei", Utils.getDeviceId(LoginActivity.this));
+                        suryaValues.put("reports_to", "Manager");
+                        suryaValues.put("emp_name", usernameEntered);
+                        suryaValues.put("emp_username", usernameEntered);
+                        suryaValues.put("emp_password", passwordEntered);
+                        suryaValues.put("created_date", getTodayDate());
+                        suryaValues.put("modified_date", getTodayDate());
+                        suryaValues.put("emp_login_time", getDateTime());
+                        suryaValues.put("upload_status", 1);
+                        sqLiteDatabase.insert(TBL_EMPLOYEE, null, suryaValues);
 
 
                         mySharedPrefrencesData.setEmployee_AuthKey(LoginActivity.this,
@@ -334,6 +513,16 @@ public class LoginActivity extends AppCompatActivity
                                         .getAuthToken());
                         mySharedPrefrencesData.setAuthTokenExpiryDate(LoginActivity.this,
                                 authUser_model.getAuthTokenExpiryDate());
+
+                        mySharedPrefrencesData.setUser_Id(LoginActivity.this,
+                                authUser_model.getUserId());
+
+
+                        mySharedPrefrencesData.setfirsttimeflagfornew(LoginActivity.this, true);
+                        mySharedPrefrencesData.setfirsttimeflagforAll(LoginActivity.this, true);
+                        mySharedPrefrencesData.setApiCallForCategoryListOnce(LoginActivity.this, true);
+
+
                         SharedPreferences settings = getSharedPreferences(MySharedPrefrencesData
                                 .PREFS_NAME, 0); // 0 - for private mode
                         SharedPreferences.Editor editor = settings.edit();
@@ -347,48 +536,66 @@ public class LoginActivity extends AppCompatActivity
                         networkcall_for_retailerlist(authUser_model.getAuthToken());
                     }
 
-                } else {
+
+                }
+                else
+                {
                     dismissProgressDialog(progressDialog);
                     Utils.showErrorDialog(LoginActivity.this, "User not found, Please login and " +
                             "try again with valid username");
                 }
             }
 
-            private void networkcall_for_retailerlist(final String authToken) {
+            private void networkcall_for_retailerlist(final String authToken)
+            {
 
-                IM_IsValidAuthKey im_isValidAuthKey = new IM_IsValidAuthKey(authToken);
+                IM_IsValidAuthKey im_isValidAuthKey = new IM_IsValidAuthKey(authToken,"1");
 
                 Call<RetailerList_Model> call = methods.getRetailerList(im_isValidAuthKey);
+
+                Log.i("getRetailerlist_ip", new Gson().toJson(im_isValidAuthKey));
+
                 Log.d("url", "url=" + call.request().url().toString());
 
-                call.enqueue(new Callback<RetailerList_Model>() {
+                call.enqueue(new Callback<RetailerList_Model>()
+                {
                     @Override
                     public void onResponse(Call<RetailerList_Model> call,
-                                           Response<RetailerList_Model> response) {
+                                           Response<RetailerList_Model> response)
+                    {
 
                         int statusCode = response.code();
                         Log.d("Response", "" + statusCode);
                         Log.d("respones", "" + response);
 
 
-                        if (response.isSuccessful()) {
+                        if (response.isSuccessful())
+                        {
 
                             RetailerList_Model retailerList_model = response.body();
 
+                            Log.i("getRetailerlist_op", new Gson().toJson(retailerList_model));
 
 
-                            if (retailerList_model.getApiStatus() == 1) {
+                            if (retailerList_model.getApiStatus() == 1)
+                            {
+
+                                a=retailerList_model.getRetailerData().size();
 
                                 for (RetailerList_Model.RetailerDatum retailerDatum :
-                                        retailerList_model.getRetailerData()) {
+                                        retailerList_model.getRetailerData())
+                                {
 
                                     String retailerid = retailerDatum.getCustomerCode();
+
                                     networkcall_for_retailerinfo(authToken, retailerid);
 
                                 }
                             }
 
-                        } else {
+                        }
+                        else
+                        {
 
                             Utils.showToast(LoginActivity.this, "No retailer found ");
                             Utils.dismissProgressDialog(progressDialog);
@@ -396,7 +603,8 @@ public class LoginActivity extends AppCompatActivity
                         }
                     }
 
-                    private void networkcall_for_retailerinfo(String authToken, String retailerid) {
+                    private void networkcall_for_retailerinfo(String authToken, String retailerid)
+                    {
 
                         IM_RetailerInfo im_retailerInfo = new IM_RetailerInfo(authToken,
                                 retailerid);
@@ -404,33 +612,37 @@ public class LoginActivity extends AppCompatActivity
                         Call<RetailerInfo_Model> call = methods.getRetailerInfo(im_retailerInfo);
                         Log.d("url", "url=" + call.request().url().toString());
 
-                        call.enqueue(new Callback<RetailerInfo_Model>() {
+                        call.enqueue(new Callback<RetailerInfo_Model>()
+                        {
                             @Override
                             public void onResponse(Call<RetailerInfo_Model> call,
-                                                   Response<RetailerInfo_Model> response) {
+                                                   Response<RetailerInfo_Model> response)
+                            {
 
                                 int statusCode = response.code();
                                 Log.d("Response", "" + statusCode);
                                 Log.d("respones", "" + response);
 
-                                if (response.isSuccessful()) {
+                                if (response.isSuccessful())
+                                {
 
                                     RetailerInfo_Model retailerInfo_model = response.body();
-                                    if (retailerInfo_model.getApiStatus() == 1) {
+                                    if (retailerInfo_model.getApiStatus() == 1)
+                                    {
 
-                                        RetailerInfo_Model.RetailerData retailerData =
-                                                retailerInfo_model.getRetailerData();
+                                        RetailerInfo_Model.RetailerData retailerData = retailerInfo_model.getRetailerData();
 
-                                        if(!DbUtils.isRetailerPresentInDb(retailerData.getCustomerCode())){
+                                        if (!DbUtils.isRetailerPresentInDb(retailerData.getCustomerCode()))
+                                        {
                                             ContentValues retailerValues = new ContentValues();
                                             retailerValues.put("retailer_id", retailerData
                                                     .getCustomerCode());
                                             retailerValues.put("emp_id", getEmployeeIdFor
                                                     (usernameEntered));
                                             retailerValues.put("retailer_name", retailerData
-                                                    .getCustomerContactName());
-                                            retailerValues.put("shop_name", retailerData
                                                     .getCustomerCompanyname());
+                                            retailerValues.put("shop_name", retailerData
+                                                    .getCustomerContactName());
                                             retailerValues.put("shop_address", retailerData
                                                     .getCustomerAddress1());
                                             retailerValues.put("pincode", retailerData
@@ -442,16 +654,28 @@ public class LoginActivity extends AppCompatActivity
 
                                             String latlong = retailerData.getCustomerGeopos();
 
-                                            if (latlong != null && latlong.length() > 0) {
+                                            if (latlong != null && latlong.length() > 0)
+                                            {
 
                                                 String latlong_arra[] = latlong.split(",");
                                                 retailerValues.put("latitude", latlong_arra[0]);
                                                 retailerValues.put("longitude", latlong_arra[1]);
-                                            } else {
+                                            }
+                                            else
+                                            {
                                                 retailerValues.put("latitude", NOT_PRESENT);
                                                 retailerValues.put("longitude", NOT_PRESENT);
                                             }
-                                            retailerValues.put("img_source", NOT_PRESENT);
+
+                                            if(retailerData.getCustomerPicture() != null && retailerData.getCustomerPicture().length() > 1){
+
+
+                                                retailerValues.put("img_source", retailerData.getCustomerPicture());
+                                            }else {
+
+                                                retailerValues.put("img_source", NOT_PRESENT);
+                                            }
+
                                             retailerValues.put("created_date", retailerData
                                                     .getCreatedDate());
                                             retailerValues.put("modified_date", retailerData
@@ -471,30 +695,48 @@ public class LoginActivity extends AppCompatActivity
                                             sqLiteDatabase.insert(TBL_RETAILER, null, retailerValues);
                                             // DbUtils.clear_table(TBL_CONFIG);
 
-                                            if(is_config_inserted_to_db){
-                                                dismissProgressDialog(progressDialog);
-                                                DbUtils.clear_table(TBL_CONFIG);
-                                                network_call_for_basicconfig();
-                                                is_config_inserted_to_db=false;
+                                            b++;
+
+                                            if(a==b){
+
+
+                                                if (is_config_inserted_to_db)
+                                                {
+                                                    //dismissProgressDialog(progressDialog);
+                                                    DbUtils.clear_table(TBL_CONFIG);
+                                                    network_call_for_basicconfig();
+                                                    is_config_inserted_to_db = false;
+                                                }
+
                                             }
-                                        }else {
-                                            if(is_config_inserted_to_db){
+
+                                        }
+                                        else
+                                        {
+                                            /*ContentValues contentValues=new ContentValues();
+                                            contentValues.put("emp_id", getEmployeeIdFor(usernameEntered));
+                                            sqLiteDatabase.update(TBL_RETAILER,contentValues,"retailer_id = ?",new String[]{retailerData.getCustomerCode()});*/
+                                            if (is_config_inserted_to_db)
+                                            {
                                                 dismissProgressDialog(progressDialog);
                                                 DbUtils.clear_table(TBL_CONFIG);
                                                 network_call_for_basicconfig();
-                                                is_config_inserted_to_db=false;
+                                                is_config_inserted_to_db = false;
                                             }
                                         }
                                     }
 
-                                } else {
+                                }
+                                else
+                                {
                                     dismissProgressDialog(progressDialog);
                                     Utils.showToast(LoginActivity.this, "Unsuccessful api call " + "for retailerinfo ");
                                 }
                             }
 
                             @Override
-                            public void onFailure(Call<RetailerInfo_Model> call, Throwable t) {
+                            public void onFailure(Call<RetailerInfo_Model> call, Throwable t)
+                            {
                                 dismissProgressDialog(progressDialog);
                                 Utils.showToast(LoginActivity.this, NO_INTERNET_CONNECTION);
 
@@ -503,14 +745,17 @@ public class LoginActivity extends AppCompatActivity
                     }
 
                     @Override
-                    public void onFailure(Call<RetailerList_Model> call, Throwable t) {
+                    public void onFailure(Call<RetailerList_Model> call, Throwable t)
+                    {
                         dismissProgressDialog(progressDialog);
                         Utils.showToast(LoginActivity.this, NO_INTERNET_CONNECTION);
                     }
                 });
             }
+
             @Override
-            public void onFailure(Call<AuthUser_Model> call, Throwable t) {
+            public void onFailure(Call<AuthUser_Model> call, Throwable t)
+            {
                 dismissProgressDialog(progressDialog);
                 Utils.showToast(LoginActivity.this, ConstantsA.NO_INTERNET_CONNECTION);
 
@@ -521,15 +766,19 @@ public class LoginActivity extends AppCompatActivity
 
     private void network_call_for_basicconfig()
     {
-        // String mobile_app_version=BuildConfig.VERSION_NAME;
-        String mobile_app_version = "0.0.1";
+         String mobile_app_version= BuildConfig.VERSION_NAME;
+        //String mobile_app_version = "0.0.1";
 
         Apimethods methods = API_Call_Retrofit.getretrofit(this).create(Apimethods.class);
 
-        IM_Config IM_config = new IM_Config(imei,mobile_app_version);
+        IM_Config IM_config = new IM_Config(imei, mobile_app_version);
 
         Call<BasicConfigModel> call = methods.sendBasicConfig(IM_config);
+
+        Log.i("basicconfig_input", new Gson().toJson(IM_config));
+
         Log.d("url", "url=" + call.request().url().toString());
+
 
         call.enqueue(new Callback<BasicConfigModel>()
         {
@@ -539,31 +788,35 @@ public class LoginActivity extends AppCompatActivity
                 int statusCode = response.code();
                 Log.d("Response", "" + statusCode);
                 Log.d("respones", "" + response);
-                if(response.isSuccessful()){
+                if (response.isSuccessful())
+                {
 
                     BasicConfigModel basicConfigModel = response.body();
-                    if(basicConfigModel.getApi_status() == 1)
+
+                    Log.i("basicconfig_output", new Gson().toJson(basicConfigModel));
+
+                    if (basicConfigModel.getApi_status() == 1)
                     {
 
 
                         valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
                         sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-                        for(int i = 0; i < basicConfigModel.getApp_data().size(); i++)
+                        for (int i = 0; i < basicConfigModel.getApp_data().size(); i++)
                         {
 
                             ContentValues configValues = new ContentValues();
                             configValues.put("config_for", basicConfigModel.getApp_data().get(i)
-                                    .getPropname());
+                                    .getParameter_name());
                             configValues.put("config_value", basicConfigModel.getApp_data().get
-                                    (i).getPropval());
+                                    (i).getParameter_value());
                             configValues.put("upload_status", 0);
                             sqLiteDatabase.insert(TBL_CONFIG, null, configValues);
 
                         }
 
-                        configflag = true;
-                        launchDashBoardActivity(configflag, authflag);
+                        network_call_for_getLocationsinfo(new MySharedPrefrencesData().getEmployee_AuthKey(LoginActivity.this));
+
                     }
 
 
@@ -573,6 +826,116 @@ public class LoginActivity extends AppCompatActivity
                     Utils.showToast(baseContext, "Unsuccessful api call for config ");
                 }
 
+            }
+
+            private void network_call_for_getLocationsinfo(final String employee_authKey)
+            {
+                Apimethods methods = API_Call_Retrofit.getretrofit(LoginActivity.this).create(Apimethods.class);
+
+                IM_IsValidAuthKey authkey = new IM_IsValidAuthKey(employee_authKey,"1");
+
+                Call<Location_Model> call = methods.getLocationinfo(authkey);
+
+                Log.i("loc_ip", new Gson().toJson(authkey));
+
+                Log.d("url", "url=" + call.request().url().toString());
+
+                call.enqueue(new Callback<Location_Model>()
+                {
+                    @Override
+                    public void onResponse(Call<Location_Model> call, Response<Location_Model> response)
+                    {
+
+                        if (response.isSuccessful())
+                        {
+
+                            Location_Model location_model = response.body();
+
+                            Log.i("loc_op", new Gson().toJson(location_model));
+
+                            if (location_model.getApiStatus() == 1)
+                            {
+
+                                for (int i = 0; i < location_model.getLocatoinsInfo().size(); i++)
+                                {
+
+
+                                    Location_Model.LocatoinsInfo locatoinsInfo = location_model.getLocatoinsInfo().get(i);
+
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put("loc_id", locatoinsInfo.getLocHierId());
+                                    contentValues.put("loc_name", locatoinsInfo.getName());
+                                    contentValues.put("hier_level", locatoinsInfo.getHierLevel());
+                                    contentValues.put("full_hier_level", locatoinsInfo.getFullHier());
+                                    contentValues.put("parent_loc_id", locatoinsInfo.getParentId());
+                                    contentValues.put("upload_status", 1);
+                                    sqLiteDatabase.insert(TBL_LOCATION_HIERARCHY, null, contentValues);
+
+
+                                }
+
+                                networkcall_for_getUserDetails(employee_authKey);
+
+
+                            }
+                        }
+                    }
+
+                    private void networkcall_for_getUserDetails(String employee_authKey)
+                    {
+                        Apimethods methods = API_Call_Retrofit.getretrofit(LoginActivity.this).create(Apimethods.class);
+
+                        IM_IsValidAuthKey authkey = new IM_IsValidAuthKey(employee_authKey,"1");
+
+                        Call<AuthUserDetails> call = methods.getUserDetails(authkey);
+
+                        Log.i("getuserdetails_ip", new Gson().toJson(authkey));
+
+                        Log.d("url", "url=" + call.request().url().toString());
+
+                        call.enqueue(new Callback<AuthUserDetails>()
+                        {
+                            @Override
+                            public void onResponse(Call<AuthUserDetails> call, Response<AuthUserDetails> response)
+                            {
+                                if (response.isSuccessful())
+                                {
+
+                                    AuthUserDetails authUserDetails = response.body();
+
+                                    Log.i("getuserdetails_op", new Gson().toJson(authUserDetails));
+
+                                    mySharedPrefrencesData.set_User_mobile(LoginActivity.this, authUserDetails.getData().getMobile());
+                                    mySharedPrefrencesData.setUsername(LoginActivity.this, authUserDetails.getData().getUsername());
+                                    mySharedPrefrencesData.setUser_pwd(LoginActivity.this, passwordEntered);
+                                    mySharedPrefrencesData.setEmail(LoginActivity.this, authUserDetails.getData().getEmail());
+                                    mySharedPrefrencesData.setUser_LocationId(LoginActivity.this, authUserDetails.getData().getLocationId());
+                                    mySharedPrefrencesData.set_User_CompanyId(LoginActivity.this, authUserDetails.getData().getCompanyId());
+                                    mySharedPrefrencesData.setRetailerVisit_LocationId(LoginActivity.this, authUserDetails.getData().getNo_mandatory_visit());
+
+                                    configflag = true;
+
+
+                                    launchDashBoardActivity(configflag, authflag);
+                                }
+
+                            }
+
+                            @Override
+                            public void onFailure(Call<AuthUserDetails> call, Throwable t)
+                            {
+
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<Location_Model> call, Throwable t)
+                    {
+
+                    }
+                });
 
             }
 
@@ -588,71 +951,71 @@ public class LoginActivity extends AppCompatActivity
 
     }
 
-    private void launchDashBoardActivity(boolean configflag, boolean authflag) {
+    private void launchDashBoardActivity(boolean configflag, boolean authflag)
+    {
+        dismissProgressDialog(progressDialog);
 
-        if (configflag == true && authflag == true) {
-            Utils.launchActivity(getBaseContext(), DashboardActivity.class);
+        if (configflag == true && authflag == true)
+        {
+            Utils.launchActivity(LoginActivity.this, DashboardActivity.class);
             finish();
         }
 
     }
 
-    private void downloadDatabaseIfNotExists() {
+    private void downloadDatabaseIfNotExists()
+    {
         File f = new File(appSpecificDirectoryPath, DbFileName);
 
-        if (!f.exists()) {
+        if (!f.exists())
+        {
             Log.d("File Status", "Not Exist");
-            new setUpDatabaseAsyncTask().execute();
-        } else {
+            new setUpDatabaseAsyncTask(LoginActivity.this).execute();
+        }
+        else
+        {
             valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
             sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+
         }
     }
 
-    private class setUpDatabaseAsyncTask extends AsyncTask<Void, Void, String> {
-        ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            //super.onPreExecute();
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.setTitle("Downloading Database. Please wait");
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCancelable(false);
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.setProgressNumberFormat(null);
-            progressDialog.setProgressPercentFormat(null);
-            progressDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            try {
-                createTables();
-
-                insertDummyData();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return "not applicable";
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            //super.onPostExecute(s);
-            progressDialog.dismiss();
-        }
-    }
-
-    private void createTables() {
+    private void createTables()
+    {
         valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        sqLiteDatabase.execSQL("CREATE TABLE " + TBL_CONFIG + " ("
+                + "config_id INTEGER PRIMARY KEY, "
+                + "config_for varchar(100), "
+                + "config_value varchar(50), "
+              /*  + "created_date varchar(50), "
+                + "modified_date varchar(50), "
+                + "created_by varchar(50), "
+                + "modified_by varchar(50), "*/
+                + "upload_status varchar(1) );");
+
+        sqLiteDatabase.execSQL("CREATE TABLE " + TBL_EMPLOYEE + " ("
+                + "emp_id varchar(50), "
+                + "imei varchar(100), "
+                + "reports_to varchar(50), "
+                + "emp_name varchar(50), "
+                + "emp_username varchar(50), "
+                + "emp_password varchar(50), "
+                + "created_date varchar(50), "
+                + "modified_date varchar(50), "
+                + "created_by varchar(50), "
+                + "modified_by varchar(50), "
+                + "emp_login_time varchar(50), "
+                + "emp_logout_time varchar(50), "
+                + "upload_status varchar(1) );");
 
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_LOCATION_HIERARCHY + " ("
                 + "loc_id varchar(50), "
                 + "loc_name varchar(50), "
                 + "hier_level varchar(50), "
+                + "full_hier_level varchar(50), "
                 + "parent_loc_id varchar(50), "
                 + "upload_status varchar(1) );");
 
@@ -687,27 +1050,20 @@ public class LoginActivity extends AppCompatActivity
                 + "description varchar(50), "
                 + "sku_category varchar(50), "
                 + "sku_sub_category varchar(50), "
+                + "sku_category_description varchar(50), "
+                + "sku_sub_category_description varchar(50), "
                 + "new_sku varchar(1), "
                 + "promotional_sku varchar(1), "
                 + "sku_photo_source varchar(50), "
+                + "sku_video_source varchar(100), "
+                + "sku_catalogue_source varchar(100), "
                 + "created_date varchar(50), "
                 + "modified_date varchar(50), "
                 + "created_by varchar(50), "
                 + "modified_by varchar(50), "
                 + "upload_status varchar(1) );");
 
-        sqLiteDatabase.execSQL("CREATE TABLE " + TBL_EMPLOYEE + " ("
-                + "emp_id varchar(50), "
-                + "imei varchar(100), "
-                + "reports_to varchar(50), "
-                + "emp_name varchar(50), "
-                + "emp_username varchar(50), "
-                + "emp_password varchar(50), "
-                + "created_date varchar(50), "
-                + "modified_date varchar(50), "
-                + "created_by varchar(50), "
-                + "modified_by varchar(50), "
-                + "upload_status varchar(1) );");
+
 
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_RETAILER_VISIT + " ("
                 + "visit_id varchar(50), "
@@ -757,6 +1113,7 @@ public class LoginActivity extends AppCompatActivity
 
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SALES_ORDER_DETAILS + " ("
                 + "order_detail_id  INTEGER PRIMARY KEY, "
+                + "server_order_detail_id  INTEGER , "
                 + "order_id varchar(50), "
                 + "sku_id varchar(50), "
                 + "sku_name varchar(50), "
@@ -769,6 +1126,7 @@ public class LoginActivity extends AppCompatActivity
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SALES_ORDER_SKU_ATTRIBUTES + " ("
                 + "sosa_id INTEGER PRIMARY KEY, " //sosa_id - sales_order_sku_attribute_id
                 + "order_detail_id INTEGER, "
+                + "server_order_detail_id  INTEGER , "
                 + "attribute_id INTEGER, "
                 + "attribute_name varchar(50), "
                 + "attribute_value varchar(100), "
@@ -778,15 +1136,7 @@ public class LoginActivity extends AppCompatActivity
                 + "modified_by varchar(50), "
                 + "upload_status varchar(1) );");
 
-        sqLiteDatabase.execSQL("CREATE TABLE " + TBL_CONFIG + " ("
-                + "config_id INTEGER PRIMARY KEY, "
-                + "config_for varchar(100), "
-                + "config_value varchar(50), "
-              /*  + "created_date varchar(50), "
-                + "modified_date varchar(50), "
-                + "created_by varchar(50), "
-                + "modified_by varchar(50), "*/
-                + "upload_status varchar(1) );");
+
 
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SCHEME + " ("
                 + "scheme_id varchar(50), "
@@ -800,13 +1150,66 @@ public class LoginActivity extends AppCompatActivity
                 + "modified_by varchar(50), "*/
                 + "is_viewed varchar(1), "
                 + "upload_status varchar(1) );");
+
+
+
+/*
+        sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SKU_CATEGORY + " ("
+                + "attribute_id INTEGER, " *//*PRIMARY KEY*//*
+                + "attribute_type varchar(50), "
+                + "attribute_name varchar(50), "
+                + "attribute_value varchar(100), "
+                + "created_date varchar(50), "
+                + "modified_date varchar(50), "
+                + "created_by varchar(50), "
+                + "modified_by varchar(50), "
+                + "upload_status varchar(1) );");
+        */
+
+
+        sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SKU_CATEGORY + " ("
+                + "category_id INTEGER PRIMARY KEY, " //sosa_id - sales_order_sku_attribute_id
+                + "category_name varchar(50), "
+                + "category_description TEXT, "
+                + "created_date varchar(50), "
+                + "modified_date varchar(50), "
+                + "created_by varchar(50), "
+                + "modified_by varchar(50), "
+                + "is_active varchar(1), "
+                + "company_id varchar(1), "
+                + "upload_status varchar(1) );");
+
+
+        sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SKU_SUBCATEGORY + " ("
+                + "sub_category_id INTEGER PRIMARY KEY, " //sosa_id - sales_order_sku_attribute_id
+                + "category_id INTEGER, "
+                + "sub_category_name varchar(50), "
+                + "sub_category_description TEXT, "
+                + "created_date varchar(50), "
+                + "modified_date varchar(50), "
+                + "created_by varchar(50), "
+                + "modified_by varchar(50), "
+                + "is_active varchar(1), "
+                + "company_id varchar(1), "
+                + "upload_status varchar(1) );");
+
+
+        sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SKU_NO_ORDERREASON + " ("
+                + "reason_id INTEGER PRIMARY KEY, "
+                + "reasondesc TEXT, "
+                + "created_date varchar(50), "
+                + "modified_date varchar(50), "
+                + "created_by varchar(50), "
+                + "modified_by varchar(50), "
+                + "upload_status varchar(1) );");
     }
 
-    private void insertDummyData() {
-        insertDummyLocationData();
+    private void insertDummyData()
+    {
+        //insertDummyLocationData();
 
 
-        ContentValues suryaValues = new ContentValues();
+       /* ContentValues suryaValues = new ContentValues();
         suryaValues.put("emp_id", "1");
         suryaValues.put("imei", Utils.getDeviceId(LoginActivity.this));
         suryaValues.put("reports_to", "abhinav");
@@ -842,10 +1245,11 @@ public class LoginActivity extends AppCompatActivity
         etaValues.put("created_date", getTodayDate());
         etaValues.put("modified_date", getTodayDate());
         etaValues.put("upload_status", 0);
-        sqLiteDatabase.insert(TBL_EMPLOYEE, null, etaValues);
+        sqLiteDatabase.insert(TBL_EMPLOYEE, null, etaValues);*/
 
-        for (int i = 1; i <= 9; i++) {
-            ContentValues employeeValues = new ContentValues();
+        for (int i = 1; i <= 9; i++)
+        {
+           /* ContentValues employeeValues = new ContentValues();
             employeeValues.put("emp_id", "emp_id" + i);
             employeeValues.put("imei", "IMEI-" + i);
             employeeValues.put("reports_to", "emp_id0");
@@ -855,7 +1259,7 @@ public class LoginActivity extends AppCompatActivity
             employeeValues.put("created_date", getTodayDate());
             employeeValues.put("modified_date", getTodayDate());
             employeeValues.put("upload_status", 0);
-            sqLiteDatabase.insert(TBL_EMPLOYEE, null, employeeValues);
+            sqLiteDatabase.insert(TBL_EMPLOYEE, null, employeeValues);*/
 
           /*  ContentValues retailerValues = new ContentValues();
             retailerValues.put("retailer_id", "retailer_id" + i);
@@ -922,7 +1326,7 @@ public class LoginActivity extends AppCompatActivity
             skuValues.put("sku_sub_category", "sku_sub_category" + catAndSubCat);
             skuValues.put("new_sku", 1);
             skuValues.put("promotional_sku", 1);
-            skuValues.put("sku_photo_source", "sku_photo_source" + j);
+            skuValues.put("sku_photo_source", "sku_photo_source" + j);6+
             skuValues.put("upload_status", 0);
             sqLiteDatabase.insert(TBL_SKU, null, skuValues);
         }*/
@@ -969,11 +1373,13 @@ public class LoginActivity extends AppCompatActivity
         sqLiteDatabase.insert(TBL_CONFIG, null, configValues3);
     }
 
-    void insertDummyLocationData() {
+    void insertDummyLocationData()
+    {
         String districtID;
         String talukID;
 
-        for (int state = 1; state <= 3; state++) {
+        for (int state = 1; state <= 3; state++)
+        {
             ContentValues stateValues = new ContentValues();
             stateValues.put("loc_id", state);
             stateValues.put("loc_name", "state" + state);
@@ -982,7 +1388,8 @@ public class LoginActivity extends AppCompatActivity
             stateValues.put("upload_status", 0);
             sqLiteDatabase.insert(TBL_LOCATION_HIERARCHY, null, stateValues);
 
-            for (int district = 1; district <= 3; district++) {
+            for (int district = 1; district <= 3; district++)
+            {
                 districtID = String.valueOf(state) + String.valueOf(district);
 
                 ContentValues districtValues = new ContentValues();
@@ -993,7 +1400,8 @@ public class LoginActivity extends AppCompatActivity
                 districtValues.put("upload_status", 0);
                 sqLiteDatabase.insert(TBL_LOCATION_HIERARCHY, null, districtValues);
 
-                for (int taluk = 1; taluk <= 3; taluk++) {
+                for (int taluk = 1; taluk <= 3; taluk++)
+                {
                     talukID = String.valueOf(state) + String.valueOf(district) + String.valueOf
                             (taluk);
 
@@ -1005,7 +1413,8 @@ public class LoginActivity extends AppCompatActivity
                     talukValues.put("upload_status", 0);
                     sqLiteDatabase.insert(TBL_LOCATION_HIERARCHY, null, talukValues);
 
-                    for (int area = 1; area <= 3; area++) {
+                    for (int area = 1; area <= 3; area++)
+                    {
                         String areaID = String.valueOf(state) + String.valueOf(district) + String
                                 .valueOf(taluk) + String.valueOf(area);
 
@@ -1022,7 +1431,8 @@ public class LoginActivity extends AppCompatActivity
         }
     }
 
-    void insetIntoSkuAttrMappingTable(int skuIdNumber, int attributeID) {
+    void insetIntoSkuAttrMappingTable(int skuIdNumber, int attributeID)
+    {
         ContentValues skuAttrMappingValues = new ContentValues();
         skuAttrMappingValues.put("sku_id", "sku_id" + skuIdNumber);
         skuAttrMappingValues.put("attribute_id", attributeID);
@@ -1031,12 +1441,71 @@ public class LoginActivity extends AppCompatActivity
     }
 
     void insertIntoGlobalAttrTable(String attributeType, String attributeName, String
-            attributeValuesSet) {
+            attributeValuesSet)
+    {
         ContentValues globalAttributeValues = new ContentValues();
         globalAttributeValues.put("attribute_type", attributeType);
         globalAttributeValues.put("attribute_name", attributeName);
         globalAttributeValues.put("attribute_value", attributeValuesSet);
         globalAttributeValues.put("upload_status", 0);
         sqLiteDatabase.insert(TBL_GLOBAL_ATTRIBUTES, null, globalAttributeValues);
+    }
+
+    private class setUpDatabaseAsyncTask extends AsyncTask<Void, Void, String>
+    {
+        private ProgressDialog progressDialog ;
+
+        public setUpDatabaseAsyncTask(LoginActivity loginActivity)
+        {
+
+            progressDialog = new ProgressDialog(loginActivity);
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            //super.onPreExecute();
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setTitle("Downloading Database. Please wait");
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setProgressNumberFormat(null);
+            progressDialog.setProgressPercentFormat(null);
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params)
+        {
+
+            try {
+                Thread.sleep(5000);
+                createTables();
+
+                insertDummyData();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            /*try
+            {
+                createTables();
+
+                insertDummyData();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+*/
+            return "not applicable";
+        }
+
+        @Override
+        protected void onPostExecute(String s)
+        {
+            //super.onPostExecute(s);
+            progressDialog.dismiss();
+        }
     }
 }

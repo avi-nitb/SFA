@@ -1,45 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="in.etaminepgg.sfa.Activities.SkuListByGenreActivity">
+    android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white">
+        android:background="@color/white">
 
-        <!--<android.support.v7.widget.AppCompatAutoCompleteTextView
-            android:textColor="@color/pink500"
-            android:padding="@dimen/four_dp"
-            android:textColorHint="@color/pink500"
-            android:background="@drawable/shape_rectangle"
-            android:layout_margin="@dimen/four_dp"
-            android:hint="Search SKUs"
+        <android.support.v7.widget.Toolbar
+            android:id="@id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="50dp"/>-->
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/colorAccent"
+            android:visibility="visible"
+            app:contentInsetStartWithNavigation="0dp"/>
 
         <android.support.design.widget.TabLayout
-            app:tabSelectedTextColor="@color/pink500"
-            app:tabTextColor="@android:color/black"
-            android:background="#00BCD4"
             android:id="@+id/skuGenre_tabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
             app:tabGravity="center"
-            app:tabIndicatorColor="@color/pink500"
+            app:tabIndicatorColor="@color/white"
             app:tabIndicatorHeight="@dimen/four_dp"
-            app:tabMode="scrollable"/>
+            app:tabMode="scrollable"
+            app:tabSelectedTextColor="@color/white"
+            app:tabTextColor="@android:color/black"/>
+
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.view.ViewPager
-        android:paddingTop="@dimen/eight_dp"
-        android:id="@+id/skuList_ViewPager"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        android:background="@android:color/white"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+
+        <LinearLayout
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:weightSum="4">
+
+            <AutoCompleteTextView
+                android:drawableLeft="@android:drawable/ic_menu_search"
+                android:id="@+id/act_searchsku"
+                android:layout_width="0dp"
+                android:hint="Enter sku name"
+                android:textColor="@color/black"
+                android:singleLine="true"
+                android:fontFamily="@font/lato_regular"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"/>
+
+            <Button
+
+                android:id="@+id/btn_category"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/mybutton"
+                android:text="Filter"
+                android:textAllCaps="false"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+
+
+        <ExpandableListView
+            android:id="@+id/el_category"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/rectangle">
+
+        </ExpandableListView>
+
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/skuList_ViewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:paddingTop="@dimen/eight_dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+    </LinearLayout>
+
 
 </android.support.design.widget.CoordinatorLayout>
+
+
+    <!--<android.support.v7.widget.AppCompatAutoCompleteTextView
+        android:textColor="@color/pink500"
+        android:padding="@dimen/four_dp"
+        android:textColorHint="@color/pink500"
+        android:background="@drawable/shape_rectangle"
+        android:layout_margin="@dimen/four_dp"
+        android:hint="Search SKUs"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"/>-->
+
+

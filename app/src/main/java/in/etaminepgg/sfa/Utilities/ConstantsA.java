@@ -14,6 +14,10 @@ public interface ConstantsA
     int ORDER_TYPE_NEW_REGULAR_ORDER = 2;
     int ORDER_TYPE_NO_ORDER = 3;
 
+
+    public static int sCorner = 15;
+    public static int sMargin = 2;
+
     String NEW_ORDER = "NEW_ORDER";
     String REGULAR_ORDER = "REGULAR_ORDER";
 
@@ -31,4 +35,5 @@ public interface ConstantsA
 
     String RS = "Rs. ";
     String NO_INTERNET_CONNECTION = "Failed, Please check your internet!";
+
 }

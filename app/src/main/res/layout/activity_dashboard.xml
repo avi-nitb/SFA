@@ -14,88 +14,225 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:weightSum="2">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
             android:background="@color/colorAccent"
-            android:visibility="visible"/>
+            android:visibility="visible"
+            app:contentInsetStartWithNavigation="0dp"/>
 
-        <FrameLayout
-            android:id="@+id/promoSchemes_FrameLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_margin="@dimen/sixteen_dp">
 
-            <ImageView
-                android:id="@+id/promoSchemesBell_ImageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_bell"/>
-
-            <TextView
-                android:textStyle="bold"
-                android:id="@+id/noOfPromoSchemes_TextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="10"
-                android:textColor="@android:color/black"
-                android:textSize="20sp"/>
-        </FrameLayout>
-
-        <ProgressBar
-            android:id="@+id/retailerVisits_ProgressBar"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="300dp"
-            android:layout_height="15dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/thirty_two_dp"
-            android:indeterminate="false"
-            android:max="15"
-            android:progress="0"
-            android:scaleY="4"/>
-
-        <LinearLayout
-            android:id="@+id/retailerVisits_LinearLayout"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/eight_dp"
-            android:background="@android:drawable/list_selector_background"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
+            android:layout_height="0dp"
+            android:layout_weight="0.8">
 
-            <TextView
+            <FrameLayout
+                android:visibility="invisible"
+                android:id="@+id/promoSchemes_FrameLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/you_made"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/text_size_small"/>
+                android:layout_alignParentRight="true"
+                android:layout_gravity="end"
+                android:layout_margin="@dimen/sixteen_dp">
 
-            <TextView
-                android:id="@+id/noOfRetailerVisits_TextView"
-                android:layout_width="wrap_content"
+                <ImageView
+                    android:id="@+id/promoSchemesBell_ImageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_bell"/>
+
+                <TextView
+
+                    android:id="@+id/noOfPromoSchemes_TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="10"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold"/>
+            </FrameLayout>
+
+            <ProgressBar
+                android:id="@+id/retailerVisits_ProgressBar"
+
+                style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="300dp"
+                android:layout_height="15dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center_horizontal"
+                android:indeterminate="false"
+                android:max="15"
+                android:progress="0"
+                android:scaleY="4"/>
+
+            <LinearLayout
+                android:id="@+id/retailerVisits_LinearLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:text="0"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/text_size_small"
-                android:textStyle="bold"/>
+                android:layout_below="@+id/retailerVisits_ProgressBar"
+                android:layout_marginTop="@dimen/eight_dp"
+                android:background="@android:drawable/list_selector_background"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/retailer_visits_today"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/text_size_small"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato_regular_font"
+                    android:text="@string/you_made"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/text_size_small"/>
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/noOfRetailerVisits_TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:fontFamily="@font/lato_regular_font"
+                    android:text="0"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold"/>
 
-        <android.support.constraint.ConstraintLayout
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato_regular_font"
+                    android:text="@string/retailer_visits_today"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/text_size_small"/>
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:layout_margin="30dp"
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+
+                    <ImageView
+                        android:src="@drawable/new_img"
+                        android:scaleType="fitXY"
+                        android:id="@+id/newProducts_TextView"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/rectangel_yellow"
+                        android:fontFamily="@font/lato_bold"
+                        android:gravity="center"
+                        android:padding="@dimen/four_dp"
+                        android:text="@string/label_new_products"
+                        android:textAlignment="center"
+                        android:textAllCaps="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_size_small"
+                        />
+
+                    <ImageView
+                        android:src="@drawable/promo_img2"
+                        android:scaleType="fitXY"
+                        android:id="@+id/promotionalProducts_TextView"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/rectangel_yellow"
+                        android:fontFamily="@font/lato_bold"
+                        android:gravity="center"
+                        android:padding="@dimen/four_dp"
+                        android:text="@string/label_promotional_products"
+                        android:textAlignment="center"
+                        android:textAllCaps="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_size_small"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:src="@drawable/frequent1"
+                        android:scaleType="fitXY"
+                        android:id="@+id/regularlyOrderedProducts_TextView"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/rectangel_yellow"
+                        android:fontFamily="@font/lato_bold"
+                        android:gravity="center"
+                        android:padding="@dimen/four_dp"
+                        android:text="@string/label_frequently_ordered_products"
+                        android:textAlignment="center"
+                        android:textAllCaps="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_size_small"
+                        />
+
+                    <ImageView
+                        android:src="@drawable/allproduct"
+                        android:scaleType="fitXY"
+                        android:layout_weight="1"
+                        android:id="@+id/allProducts_TextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/rectangel_yellow"
+                        android:fontFamily="@font/lato_bold"
+                        android:gravity="center"
+                        android:padding="@dimen/four_dp"
+                        android:text="@string/label_all_products"
+                        android:textAlignment="center"
+                        android:textAllCaps="true"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_size_small"
+                        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+
+        <!--<android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/sixteen_dp"
@@ -103,7 +240,6 @@
             android:layout_marginTop="@dimen/thirty_two_dp">
 
             <TextView
-                android:textColor="@android:color/black"
                 android:id="@+id/newProducts_TextView"
                 android:layout_width="@dimen/quadrant_width"
                 android:layout_height="@dimen/quadrant_height"
@@ -111,6 +247,7 @@
                 android:background="@color/colorAccent"
                 android:padding="@dimen/four_dp"
                 android:text="@string/label_new_products"
+                android:textColor="@android:color/black"
                 android:textSize="@dimen/text_size_small"
                 app:layout_constraintBottom_toTopOf="@+id/regularlyOrderedProducts_TextView"
                 app:layout_constraintHorizontal_chainStyle="spread"
@@ -118,7 +255,6 @@
                 app:layout_constraintRight_toLeftOf="@+id/promotionalProducts_TextView"/>
 
             <TextView
-                android:textColor="@android:color/black"
                 android:id="@+id/promotionalProducts_TextView"
                 android:layout_width="@dimen/quadrant_width"
                 android:layout_height="@dimen/quadrant_height"
@@ -126,45 +262,50 @@
                 android:background="@color/colorAccent"
                 android:padding="@dimen/four_dp"
                 android:text="@string/label_promotional_products"
+                android:textColor="@android:color/black"
                 android:textSize="@dimen/text_size_small"
                 app:layout_constraintBottom_toTopOf="@+id/allProducts_TextView"
                 app:layout_constraintLeft_toRightOf="@+id/newProducts_TextView"
                 app:layout_constraintRight_toRightOf="parent"/>
 
             <TextView
-                android:textColor="@android:color/black"
                 android:id="@+id/regularlyOrderedProducts_TextView"
                 android:layout_width="@dimen/quadrant_width"
                 android:layout_height="@dimen/quadrant_height"
                 android:background="@color/colorAccent"
                 android:padding="@dimen/four_dp"
                 android:text="@string/label_frequently_ordered_products"
+                android:textColor="@android:color/black"
                 android:textSize="@dimen/text_size_small"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/allProducts_TextView"
                 app:layout_constraintTop_toBottomOf="@+id/newProducts_TextView"/>
 
             <TextView
-                android:textColor="@android:color/black"
                 android:id="@+id/allProducts_TextView"
                 android:layout_width="@dimen/quadrant_width"
                 android:layout_height="@dimen/quadrant_height"
                 android:background="@color/colorAccent"
                 android:padding="@dimen/four_dp"
                 android:text="@string/label_all_products"
+                android:textColor="@android:color/black"
                 android:textSize="@dimen/text_size_small"
                 app:layout_constraintLeft_toRightOf="@+id/regularlyOrderedProducts_TextView"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/promotionalProducts_TextView"/>
-        </android.support.constraint.ConstraintLayout>
+        </android.support.constraint.ConstraintLayout>-->
 
     </LinearLayout>
 
     <android.support.design.widget.NavigationView
+        android:background="#76000000"
         android:id="@+id/navigationView"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        app:headerLayout="@layout/headerlay"
+        app:itemTextColor="@android:color/white"
+        app:itemIconTint="@android:color/white"
         app:menu="@menu/nav_drawer_menu"/>
 </android.support.v4.widget.DrawerLayout>

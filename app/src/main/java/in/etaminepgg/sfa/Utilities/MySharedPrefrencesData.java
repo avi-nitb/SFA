@@ -10,6 +10,21 @@ public class MySharedPrefrencesData
     public static final String PREFS_NAME = "MyPrefsFile";
 
 
+    public void setSkulistUpdateDate(Context mContext, String authToken)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("skuupdatedate", authToken);
+        editor.commit(); // commit changes
+    }
+
+    public String getSkulistUpdateDate(Context mContext)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        return pref.getString("skuupdatedate", "");
+    }
+
+
     public void setEmployee_AuthKey(Context mContext, String authToken)
     {
         SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
@@ -81,6 +96,34 @@ public class MySharedPrefrencesData
         return pref.getString("user_id", "");
     }
 
+    public void setUser_LocationId(Context mContext, String location_id)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("location_id", location_id);
+        editor.commit(); // commit changes
+    }
+
+    public String getUser_LocationId(Context mContext)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        return pref.getString("location_id", "");
+    }
+
+    public void setRetailerVisit_LocationId(Context mContext, String location_id)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("MRVlocation_id", location_id);
+        editor.commit(); // commit changes
+    }
+
+    public String getRetailerVisit_LocationId(Context mContext)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        return pref.getString("MRVlocation_id", "");
+    }
+
 
     public void setEmail(Context mContext, String party_email)
     {
@@ -110,6 +153,20 @@ public class MySharedPrefrencesData
         return pref.getString("mobile", "");
     }
 
+    public void set_User_CompanyId(Context mContext, String party_mobile)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("company_id", party_mobile);
+        editor.commit(); // commit changes
+    }
+
+    public String get_User_CompanyId(Context mContext)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        return pref.getString("company_id", "");
+    }
+
 
     public void clearPreference(Context context)
     {
@@ -131,6 +188,64 @@ public class MySharedPrefrencesData
     {
         SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
         return pref.getString("DeviceId", "");
+    }
+
+
+    public void setfirsttimeflagforAll(Context mContext, boolean all)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("flag_for_All", all);
+        editor.commit(); // commit changes
+    }
+
+    public boolean getfirsttimeflagforAll(Context mContext)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        return pref.getBoolean("flag_for_All", false);
+    }
+
+
+    public void setfirsttimeflagfornew(Context mContext, boolean newflag)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("flag_for_new", newflag);
+        editor.commit(); // commit changes
+    }
+
+    public boolean getfirsttimeflagfornew(Context mContext)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        return pref.getBoolean("flag_for_new", false);
+    }
+
+    public void setfirsttimeflagforPromotional(Context mContext, boolean authToken)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("flag_for_promotional", authToken);
+        editor.commit(); // commit changes
+    }
+
+    public boolean getfirsttimeflagforPromotional(Context mContext)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        return pref.getBoolean("flag_for_promotional", false);
+    }
+
+    public void setApiCallForCategoryListOnce(Context mContext, boolean authToken)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("flag_for_categoryApiCall", authToken);
+        editor.commit(); // commit changes
+    }
+
+    public boolean getApiCallForCategoryListOnce(Context mContext)
+    {
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", MODE_PRIVATE);
+        return pref.getBoolean("flag_for_categoryApiCall", false);
     }
 
 

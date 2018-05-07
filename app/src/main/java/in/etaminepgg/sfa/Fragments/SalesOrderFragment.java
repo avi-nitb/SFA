@@ -1,7 +1,6 @@
 package in.etaminepgg.sfa.Fragments;
 
 import android.content.ContentValues;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -21,211 +20,124 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import in.etaminepgg.sfa.Adapters.SalesOrderAdapter;
 import in.etaminepgg.sfa.Models.SalesOrderSku;
 import in.etaminepgg.sfa.R;
+import in.etaminepgg.sfa.Utilities.Constants;
+import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.Utils;
 
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_DETAILS;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_SKU_ATTRIBUTES;
-import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
-import static in.etaminepgg.sfa.Utilities.ConstantsA.NEW_ORDER;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
+import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NONE;
-import static in.etaminepgg.sfa.Utilities.ConstantsA.REGULAR_ORDER;
-import static in.etaminepgg.sfa.Utilities.DbUtils.getItemCount;
-import static in.etaminepgg.sfa.Utilities.DbUtils.getOrderTotal;
 
-/**
- * A simple {@link Fragment} subclass.
- */
-
-public class SalesOrderFragment extends Fragment
-{
-    //String selectedOrderType;
-
-    RecyclerView salesOrder_RecyclerView;
-    CheckBox setOrderAsRegularOrder_CheckBox;
-    Button submitSalesOrder_Button;
+public class SalesOrderFragment extends Fragment {
+    TextView emptyAdapter_TextView;
+    boolean isRegularOrderCopied = false;
+    TextView orderSummary_TextView;
     SalesOrderAdapter salesOrderAdapter;
     LinearLayout salesOrder_LinearLayout;
     LinearLayout salesOrder_LinearLayout_outer;
-    TextView orderSummary_TextView, emptyAdapter_TextView;
+    RecyclerView salesOrder_RecyclerView;
+    CheckBox setOrderAsRegularOrder_CheckBox;
+    Button submitSalesOrder_Button;
 
-    //every time sales order tab is selected, regular order was being copied to active order
-    //this variable  helps us to prevent above mentioned issue
-    boolean isRegularOrderCopied = false;
 
-    public SalesOrderFragment()
-    {
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_retailer_sales_order, container, false);
-        salesOrder_LinearLayout = (LinearLayout) view.findViewById(R.id.salesOrder_LinearLayout);
-        salesOrder_LinearLayout_outer = (LinearLayout) view.findViewById(R.id.salesOrder_LinearLayout_outer);
-        salesOrder_RecyclerView = (RecyclerView) view.findViewById(R.id.salesOrder_RecyclerView);
-        orderSummary_TextView = (TextView) view.findViewById(R.id.orderSummary_TextView);
-        setOrderAsRegularOrder_CheckBox = (CheckBox) view.findViewById(R.id.setOrderAsRegularOrder_CheckBox);
-        submitSalesOrder_Button = (Button) view.findViewById(R.id.submitSalesOrder_Button);
-        emptyAdapter_TextView = (TextView) view.findViewById(R.id.emptyAdapter_TextView);
-
-        salesOrder_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        salesOrder_RecyclerView.setItemAnimator(new DefaultItemAnimator());
-        salesOrder_RecyclerView.setNestedScrollingEnabled(false);
-
+        this.salesOrder_LinearLayout = (LinearLayout) view.findViewById(R.id.salesOrder_LinearLayout);
+        this.salesOrder_LinearLayout_outer = (LinearLayout) view.findViewById(R.id.salesOrder_LinearLayout_outer);
+        this.salesOrder_RecyclerView = (RecyclerView) view.findViewById(R.id.salesOrder_RecyclerView);
+        this.orderSummary_TextView = (TextView) view.findViewById(R.id.orderSummary_TextView);
+        this.setOrderAsRegularOrder_CheckBox = (CheckBox) view.findViewById(R.id.setOrderAsRegularOrder_CheckBox);
+        this.submitSalesOrder_Button = (Button) view.findViewById(R.id.submitSalesOrder_Button);
+        this.emptyAdapter_TextView = (TextView) view.findViewById(R.id.emptyAdapter_TextView);
+        this.salesOrder_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        this.salesOrder_RecyclerView.setItemAnimator(new DefaultItemAnimator());
+        this.salesOrder_RecyclerView.setNestedScrollingEnabled(false);
         showCorrectSalesOrder();
-
         return view;
     }
 
-    public void showCorrectSalesOrder()
-    {
+    public void showCorrectSalesOrder() {
         String activeOrderID = DbUtils.getActiveOrderID();
-        List<SalesOrderSku> skuList;
-
-        //if there is active Order
-        if(!activeOrderID.equals(NONE))
-        {
-            Resources resources = getResources();
-            String intentExtraKey = resources.getString(R.string.key_selected_order_type);
-            String selectedOrderType = getArguments().getString(intentExtraKey);
-
-            if(selectedOrderType.equals(NEW_ORDER))
-            {
-                //get sku list from active order and display
+        if (!activeOrderID.equals(NONE)) {
+            String selectedOrderType = getArguments().getString(getResources().getString(R.string.key_selected_order_type));
+            if (selectedOrderType.equals(ConstantsA.NEW_ORDER)) {
                 setSalesOrderAdapter(activeOrderID);
-            }
-            else if(selectedOrderType.equals(REGULAR_ORDER))
-            {
+            } else if (selectedOrderType.equals(ConstantsA.REGULAR_ORDER)) {
                 String retailerID = DbUtils.getRetailerID();
-
-                if(!retailerID.equals(NONE))
-                {
-                    String regularOrderID = DbUtils.getRegularOrderIdFor(retailerID);
-
-                    if(!regularOrderID.equals(NONE))
-                    {
-                        //get sku list from regular order
-                        String SQL_SELECT_SKUs_IN_REGULAR_ORDER = "SELECT order_detail_id, sku_id, sku_name, sku_price, sku_qty FROM " + TBL_SALES_ORDER_DETAILS + " WHERE order_id = ?" + " ;";
-                        String[] selectionArgs = new String[]{regularOrderID};
-                        skuList = DbUtils.getSKUsInSalesOrder(SQL_SELECT_SKUs_IN_REGULAR_ORDER, selectionArgs);
-
-                        if(!isRegularOrderCopied)
-                        {
-                            //copy all SKUs in regular order to active order
-                            for(SalesOrderSku sku : skuList)
-                            {
-                                long orderDetailId = DbUtils.insertIntoSalesOrderDetailsTable(activeOrderID, sku.getSkuID(), sku.getSkuName(), sku.getSkuPrice(), sku.getSkuQty());
-
-                                insertIntoSalesOrderSkuAttributes(orderDetailId, getSalesOrderAttributesMapFor(sku.getOrderDetailId()));
-                            }
-
-                            isRegularOrderCopied = true;
-                        }
-
-                        //get sku list from active order and display
-                        setSalesOrderAdapter(activeOrderID);
-                    }
-                    // but if there is active order
-                    else
-                    {
-                        setSalesOrderAdapter(activeOrderID);
-                    }
-                }
-                else
-                {
+                if (retailerID.equals(NONE)) {
                     Utils.showErrorDialog(getActivity(), "retailer ID is: " + retailerID);
+                    return;
                 }
-            }
-            // if launched from Dashboard
-            else
-            {
-                //get sku list from active order and display
+                if (DbUtils.getRegularOrderIdFor(retailerID).equals(NONE)) {
+                    setSalesOrderAdapter(activeOrderID);
+                    return;
+                }
+                String regularOrderID = DbUtils.getRegularOrderIdFor(retailerID);
+                List<SalesOrderSku> skuList = DbUtils.getSKUsInSalesOrder("SELECT order_detail_id, sku_id, sku_name, sku_price, sku_qty FROM " + Constants.TBL_SALES_ORDER_DETAILS + " WHERE order_id = ? ;", new String[]{regularOrderID});
+                if (!this.isRegularOrderCopied) {
+                    for (SalesOrderSku sku : skuList) {
+                        insertIntoSalesOrderSkuAttributes(DbUtils.insertIntoSalesOrderDetailsTable(activeOrderID, sku.getSkuID(), sku.getSkuName(), sku.getSkuPrice(), sku.getSkuQty()), getSalesOrderAttributesMapFor(sku.getOrderDetailId()));
+                    }
+                    this.isRegularOrderCopied = true;
+                }
+                setSalesOrderAdapter(activeOrderID);
+            } else {
                 setSalesOrderAdapter(activeOrderID);
             }
         }
     }
 
-    private void setSalesOrderAdapter(String activeOrderID)
-    {
-        String SQL_SELECT_SKUs_IN_SALES_ORDER = "SELECT order_detail_id, sku_id, sku_name, sku_price, sku_qty FROM " + TBL_SALES_ORDER_DETAILS + " WHERE order_id = ?" + " ;";
-        String[] selectionArgs = new String[]{activeOrderID};
-
-        List<SalesOrderSku> skuList = DbUtils.getSKUsInSalesOrder(SQL_SELECT_SKUs_IN_SALES_ORDER, selectionArgs);
-
-        if(skuList.size() < 1)
-        {
-            emptyAdapter_TextView.setVisibility(View.VISIBLE);
-            salesOrder_LinearLayout.setVisibility(View.GONE);
+    private void setSalesOrderAdapter(String activeOrderID) {
+        List<SalesOrderSku> skuList = DbUtils.getSKUsInSalesOrder("SELECT order_detail_id, sku_id, sku_name, sku_price, sku_qty FROM " + Constants.TBL_SALES_ORDER_DETAILS + " WHERE order_id = ? ;", new String[]{activeOrderID});
+        if (skuList.size() < 1) {
+            this.emptyAdapter_TextView.setVisibility(View.VISIBLE);
+            this.salesOrder_LinearLayout.setVisibility(View.GONE);
+            return;
         }
-        else
-        {
-            emptyAdapter_TextView.setVisibility(View.GONE);
-            salesOrder_LinearLayout.setVisibility(View.VISIBLE);
-
-            salesOrderAdapter = new SalesOrderAdapter(skuList, salesOrder_LinearLayout_outer, setOrderAsRegularOrder_CheckBox);
-            salesOrder_RecyclerView.setAdapter(salesOrderAdapter);
-
-            String orderSummary = getItemCount(activeOrderID) + " items \n" + "Total:  Rs. " + getOrderTotal(activeOrderID);
-            orderSummary_TextView.setText(orderSummary);
-        }
+        this.emptyAdapter_TextView.setVisibility(View.GONE);
+        this.salesOrder_LinearLayout.setVisibility(View.VISIBLE);
+        this.salesOrderAdapter = new SalesOrderAdapter(skuList, this.salesOrder_LinearLayout_outer, this.setOrderAsRegularOrder_CheckBox);
+        this.salesOrder_RecyclerView.setAdapter(this.salesOrderAdapter);
+        this.orderSummary_TextView.setText(DbUtils.getItemCount(activeOrderID) + " items \nTotal:  Rs. " + DbUtils.getOrderTotal(activeOrderID)+"\nOrder for "+DbUtils.getActiveRetailer(activeOrderID));
     }
 
-    Map<Integer, String> getSalesOrderAttributesMapFor(long orderDetailID)
-    {
-        Map<Integer, String> soAttributesMap = new HashMap<>();
 
-        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
-        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
+    Map<Integer, String> getSalesOrderAttributesMapFor(long orderDetailID) {
+        Map<Integer, String> soAttributesMap = new HashMap();
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(Constants.dbFileFullPath));
         String SQL_SELECT_SALES_ORDER_ATTRIBUTES_SET = "SELECT attribute_id, attribute_value FROM sales_order_sku_attributes WHERE order_detail_id = ? ;";
         String[] selectionArgs = {String.valueOf(orderDetailID)};
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_ORDER_ATTRIBUTES_SET, selectionArgs);
-
-        while(cursor.moveToNext())
-        {
+        while (cursor.moveToNext()) {
             int attributeId = cursor.getInt(cursor.getColumnIndexOrThrow("attribute_id"));
-
-            String attributeValue = cursor.getString(cursor.getColumnIndexOrThrow("attribute_value"));
-
-            //String attributeName = new Utils().getAttributeName(attributeId);
-
-            soAttributesMap.put(attributeId, attributeValue);
+            soAttributesMap.put(Integer.valueOf(attributeId), cursor.getString(cursor.getColumnIndexOrThrow("attribute_value")));
         }
-
         cursor.close();
         sqLiteDatabase.close();
-
         Log.e("attributesOfSku", soAttributesMap.toString());
-
-        //CharSequence skuAttributesWithoutCommaAtTheEnd = attributesOfSku.subSequence(0, attributesOfSku.length()-2);
-
         return soAttributesMap;
     }
 
-    void insertIntoSalesOrderSkuAttributes(long salesOrderDetailID, Map<Integer, String> skuAttributesMap)
-    {
-        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
-        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
-
-        for(Map.Entry<Integer, String> entry : skuAttributesMap.entrySet())
-        {
+    void insertIntoSalesOrderSkuAttributes(long salesOrderDetailID, Map<Integer, String> skuAttributesMap) {
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(Constants.dbFileFullPath));
+        for (Entry<Integer, String> entry : skuAttributesMap.entrySet()) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put("order_detail_id", salesOrderDetailID);
-            contentValues.put("attribute_id", entry.getKey());
-            contentValues.put("attribute_name", new Utils().getAttributeName(entry.getKey()));
-            contentValues.put("attribute_value", entry.getValue());
-            contentValues.put("upload_status", 0);
-            sqLiteDatabase.insert(TBL_SALES_ORDER_SKU_ATTRIBUTES, null, contentValues);
+            contentValues.put("order_detail_id", Long.valueOf(salesOrderDetailID));
+            contentValues.put("attribute_id", (Integer) entry.getKey());
+            contentValues.put("attribute_name", new Utils().getAttributeName(((Integer) entry.getKey()).intValue()));
+            contentValues.put("attribute_value", (String) entry.getValue());
+            contentValues.put("upload_status", Integer.valueOf(0));
+            sqLiteDatabase.insert(Constants.TBL_SALES_ORDER_SKU_ATTRIBUTES, null, contentValues);
         }
-
         sqLiteDatabase.close();
     }
 }
