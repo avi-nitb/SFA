@@ -114,6 +114,8 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
         return pos != -1 ? str.substring(pos, str.length()) : str;
     }
 
+
+
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
