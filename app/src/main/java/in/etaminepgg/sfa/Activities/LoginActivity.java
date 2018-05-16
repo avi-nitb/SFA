@@ -222,6 +222,8 @@ public class LoginActivity extends AppCompatActivity
                 usernameEntered = username_EditText.getText().toString().trim();
                 passwordEntered = password_EditText.getText().toString().trim();
 
+                b=0;
+
                 callWebApi();
 
          /*       if (isValidUser(usernameEntered, passwordEntered)) {
@@ -353,7 +355,7 @@ public class LoginActivity extends AppCompatActivity
             {
                 if (response.isSuccessful())
                 {
-
+                    Utils.dismissProgressDialog(progressDialog);
                     Utils.showToast(LoginActivity.this, "Logged out successfully.");
                 }
 
@@ -444,7 +446,6 @@ public class LoginActivity extends AppCompatActivity
         Utils.startProgressDialog(LoginActivity.this, progressDialog);
 
         IM_Login IMLogin = new IM_Login(imei, usernameEntered, passwordEntered,"1");
-
 
         Log.i("authuser_input", new Gson().toJson(IMLogin));
 

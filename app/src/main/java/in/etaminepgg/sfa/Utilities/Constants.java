@@ -62,6 +62,9 @@ public class Constants
     public  static final String MOD_TYPE_SKU_ATTR_AND_MULTIMEDIA = "attributes,multimedia";
     public  static final String MOD_TYPE_SKU_MULTIMEDIA_AND_INFO = "multimedia,properties";
     public  static final String MOD_TYPE_SKU_INFO_AND_MULTIMEDIA = "properties,multimedia";
+    public  static final int FLAG_BCR_PHOTO = 1;
+    public  static final int FLAG_RETAILER_PHOTO = 2;
+
 
     public static String  search_skuId="";
 

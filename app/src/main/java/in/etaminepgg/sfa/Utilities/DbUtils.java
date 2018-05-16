@@ -10,6 +10,7 @@ import java.util.List;
 import in.etaminepgg.sfa.Activities.LoginActivity;
 import in.etaminepgg.sfa.Models.SalesOrderSku;
 import in.etaminepgg.sfa.Models.Sku;
+import in.etaminepgg.sfa.Models.SkuGroupHistory;
 
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_LOCATION_HIERARCHY;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
@@ -758,6 +759,39 @@ public class DbUtils
         cursor.close();
         sqLiteDatabase.close();
         return active_retailer_name;
+    }
+
+
+    public static List<SkuGroupHistory> getCustomSkuList()
+    {
+        String SQL_SELECT_SKUs=null;
+     /*  Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.skuList_ViewPager + ":" + skuList_ViewPager.getCurrentItem());
+
+        if(skuList_ViewPager.getCurrentItem()==1){
+            SQL_SELECT_SKUs = "select sku_id, sku_name from " + TBL_SKU + " WHERE new_sku=1;";
+        }
+        else if(skuList_ViewPager.getCurrentItem()==3 )
+        {*/
+        SQL_SELECT_SKUs = "select sku_id, sku_name from " + TBL_SKU + " ;";
+//        }
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SKUs, null);
+
+        List<SkuGroupHistory> skuList = new ArrayList<>();
+
+        while (cursor.moveToNext())
+        {
+            String skuID = cursor.getString(cursor.getColumnIndexOrThrow("sku_id"));
+            String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
+
+            skuList.add(new SkuGroupHistory(skuID,skuName));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return skuList;
     }
 
 }

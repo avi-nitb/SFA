@@ -101,9 +101,11 @@ public class SkuListByGenreActivity extends AppCompatActivity
 
         setListenersToViews();
 
-        ArrayAdapter<SkuGroupHistory> skuAdapter = new ArrayAdapter<SkuGroupHistory>(this, android.R.layout.simple_dropdown_item_1line, getCustomSkuList());
+        setAdapterForSearch();
+
+        /*ArrayAdapter<SkuGroupHistory> skuAdapter = new ArrayAdapter<SkuGroupHistory>(this, android.R.layout.simple_dropdown_item_1line, getCustomSkuList());
         act_searchsku.setThreshold(1);
-        act_searchsku.setAdapter(skuAdapter);
+        act_searchsku.setAdapter(skuAdapter);*/
 
         // Setting group indicator null for custom indicator
         el_category.setGroupIndicator(null);
@@ -117,6 +119,14 @@ public class SkuListByGenreActivity extends AppCompatActivity
 
     }
 
+    public  void setAdapterForSearch()
+    {
+
+        ArrayAdapter<SkuGroupHistory> skuAdapter = new ArrayAdapter<SkuGroupHistory>(this, android.R.layout.simple_dropdown_item_1line, DbUtils.getCustomSkuList());
+        act_searchsku.setThreshold(1);
+        act_searchsku.setAdapter(skuAdapter);
+    }
+
     @Override
     public void onBackPressed()
     {
@@ -126,16 +136,16 @@ public class SkuListByGenreActivity extends AppCompatActivity
     }
 
 
-    private List<SkuGroupHistory> getCustomSkuList()
+  /*  private List<SkuGroupHistory> getCustomSkuList()
     {
         String SQL_SELECT_SKUs=null;
-     /*  Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.skuList_ViewPager + ":" + skuList_ViewPager.getCurrentItem());
+     *//*  Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.skuList_ViewPager + ":" + skuList_ViewPager.getCurrentItem());
 
         if(skuList_ViewPager.getCurrentItem()==1){
             SQL_SELECT_SKUs = "select sku_id, sku_name from " + TBL_SKU + " WHERE new_sku=1;";
         }
         else if(skuList_ViewPager.getCurrentItem()==3 )
-        {*/
+        {*//*
             SQL_SELECT_SKUs = "select sku_id, sku_name from " + TBL_SKU + " ;";
 //        }
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
@@ -156,7 +166,7 @@ public class SkuListByGenreActivity extends AppCompatActivity
         sqLiteDatabase.close();
 
         return skuList;
-    }
+    }*/
 
     private void categoryInactive()
     {

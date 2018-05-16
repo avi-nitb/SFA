@@ -1,5 +1,6 @@
 package in.etaminepgg.sfa.Fragments;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -37,6 +39,7 @@ import in.etaminepgg.sfa.Models.GetSkuInfo.SkuIds;
 import in.etaminepgg.sfa.Models.GetSkuListAfter;
 import in.etaminepgg.sfa.Models.GetSkuThumbImage;
 import in.etaminepgg.sfa.Models.IsSkuListUpdate;
+import in.etaminepgg.sfa.Models.SkuGroupHistory;
 import in.etaminepgg.sfa.Network.API_Call_Retrofit;
 import in.etaminepgg.sfa.Network.ApiUrl;
 import in.etaminepgg.sfa.Network.Apimethods;
@@ -852,6 +855,10 @@ public class NewSKUsFragment extends Fragment {
 
                                             Utils.dismissProgressDialog(progressDialog);
 
+
+                                            /// search adapter in activity
+                                            ((SkuListByGenreActivity) getActivity()).setAdapterForSearch();
+
                                         }
 
                                         return;
@@ -864,6 +871,8 @@ public class NewSKUsFragment extends Fragment {
                                     if(a==b){
 
                                         Utils.dismissProgressDialog(progressDialog);
+                                        /// search adapter in activity
+                                        ((SkuListByGenreActivity) getActivity()).setAdapterForSearch();
 
                                     }
                                 }

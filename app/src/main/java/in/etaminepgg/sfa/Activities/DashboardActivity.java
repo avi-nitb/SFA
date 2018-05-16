@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
 import android.media.MediaPlayer;
+import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Bundle;
@@ -104,6 +105,9 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
     String usernameInSharedPreferences;
     int valueFromOpenDatabase;
 
+
+
+
     public static String substringAfterLastSeparator(String str, String separator)
     {
         if (MyDb.isEmpty(str) || MyDb.isEmpty(separator))
@@ -113,6 +117,8 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
         int pos = str.lastIndexOf(separator);
         return pos != -1 ? str.substring(pos, str.length()) : str;
     }
+
+
 
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -136,7 +142,16 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
         actionBarDrawerToggle.syncState();
         askUserToGrantPermissions();
         updateIMEI(Utils.loggedInUserID);
+
+
+        Menu menu = navigationView.getMenu();
+        MenuItem green = menu.findItem(R.id.navItem_logout);
+        green.setTitle(getResources().getString(R.string.nav_item_logout)+"     Ver : "+BuildConfig.VERSION_NAME);
+
+
     }
+
+
 
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -660,6 +675,13 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
                 }
                 else
                 {
+                    Utils.dismissProgressDialog(progressDialog);
+
+                   /* mySharedPrefrencesData.setUsername(DashboardActivity.this,"");
+                    mySharedPrefrencesData.setUser_pwd(DashboardActivity.this,"");
+                    LoginActivity.is_config_inserted_to_db = true;
+                    Utils.launchActivity(DashboardActivity.this, LoginActivity.class);
+                    finish();*/
                     networkcall_for_authtoken();
                     // Utils.showToast(DashboardActivity.this, "Unsuccessful api call for isvalid auth key ");
                 }

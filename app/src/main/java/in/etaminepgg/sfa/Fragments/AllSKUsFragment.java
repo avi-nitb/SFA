@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import com.google.gson.Gson;
 
 import in.etaminepgg.sfa.Activities.DashboardActivity;
+import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
 import in.etaminepgg.sfa.Adapters.AllSKUsAdapter;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuInfo;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuListAfter;
@@ -1131,6 +1132,9 @@ public class AllSKUsFragment extends Fragment
 
                                             Utils.dismissProgressDialog(progressDialog);
 
+                                            /// search adapter in activity
+                                            ((SkuListByGenreActivity) getActivity()).setAdapterForSearch();
+
                                         }
 
                                         return;
@@ -1142,6 +1146,9 @@ public class AllSKUsFragment extends Fragment
                                     if(a==b){
 
                                         Utils.dismissProgressDialog(progressDialog);
+
+                                        /// search adapter in activity
+                                        ((SkuListByGenreActivity) getActivity()).setAdapterForSearch();
 
                                     }
                                 }
