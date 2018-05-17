@@ -56,7 +56,7 @@
 
             <TextView
                 android:id="@+id/sku_SO_Attr_TextView"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/skuPrice_TextView"
                 android:layout_marginTop="5dp"
@@ -65,20 +65,65 @@
                 android:textSize="@dimen/text_size"/>
 
             <TextView
+                android:id="@+id/sku_total_after_discount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/skuPrice_TextView"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="40dp"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="@font/lato_regular_font"
+                android:text="Attribute Set"
+                android:textSize="@dimen/text_size"/>
+
+            <TextView
+                android:id="@+id/text_qty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@+id/skuQuantity_TextInputEditText"
                 android:layout_below="@+id/skuName_TextView"
-                android:layout_toLeftOf="@+id/skuQuantity_TextInputEditText"
+                android:layout_toRightOf="@+id/skuPrice_TextView"
                 android:fontFamily="@font/lato_regular"
                 android:paddingRight="5dp"
+                android:layout_marginLeft="10dp"
                 android:text="Qty : "
                 android:textColor="@color/black"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 android:textStyle="bold"/>
 
             <EditText
                 android:id="@+id/skuQuantity_TextInputEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/skuName_TextView"
+                android:layout_marginBottom="5dp"
+                android:layout_toRightOf="@+id/text_qty"
+                android:digits="0123456789"
+                android:focusable="auto"
+                android:inputType="number"
+                android:textSize="15dp"
+                android:textStyle="bold">
+                <requestFocus/>
+            </EditText>
+
+
+            <TextView
+                android:id="@+id/text_discount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/skuQuantity_TextInputEditText"
+                android:layout_below="@+id/skuName_TextView"
+                android:layout_toLeftOf="@+id/skuDiscount_TextInputEditText"
+                android:fontFamily="@font/lato_regular"
+                android:paddingRight="5dp"
+                android:layout_marginLeft="10dp"
+                android:text="Discount : "
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <EditText
+                android:id="@+id/skuDiscount_TextInputEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/skuName_TextView"
@@ -100,7 +145,7 @@
                 android:layout_alignRight="@+id/skuPrice_TextView"
                 android:layout_below="@+id/skuName_TextView"
                 android:layout_marginLeft="20dp"
-                android:layout_marginRight="40dp"
+                android:layout_marginRight="20dp"
                 android:src="@drawable/ic_delete"/>
         </RelativeLayout>
     </LinearLayout>

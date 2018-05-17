@@ -69,8 +69,8 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
         TextView skuName_TextView;
         ImageView skuPhoto_ImageView;
         TextView skuPrice_TextView;
-        EditText skuQuantity_TextInputEditText;
-        TextView sku_SO_Attr_TextView;
+        EditText skuQuantity_TextInputEditText, skuDiscount_TextInputEditText;
+        TextView sku_SO_Attr_TextView, sku_totalAfterDiscount_TextView;
 
         SkuInfoViewHolder(final View itemView) {
             super(itemView);
@@ -79,6 +79,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             this.skuPrice_TextView = (TextView) itemView.findViewById(R.id.skuPrice_TextView);
             this.sku_SO_Attr_TextView = (TextView) itemView.findViewById(R.id.sku_SO_Attr_TextView);
             this.skuQuantity_TextInputEditText = (EditText) itemView.findViewById(R.id.skuQuantity_TextInputEditText);
+            this.skuDiscount_TextInputEditText = (EditText) itemView.findViewById(R.id.skuDiscount_TextInputEditText);
             this.deleteSKU_ImageButton = (ImageView) itemView.findViewById(R.id.deleteSKU_ImageButton);
             this.skuQuantity_TextInputEditText.addTextChangedListener(new TextWatcher() {
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
