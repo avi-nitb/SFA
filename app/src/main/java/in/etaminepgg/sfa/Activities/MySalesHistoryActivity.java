@@ -446,7 +446,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
         //COUNT(sod.sku_id) as skuCount, SUM(sod.sku_final_price) as orderTotal
         //select so.order_id, so.retailer_id, so.order_date, sod.sku_id from sales_orders so INNER JOIN sales_order_details sod ON so.order_id = sod.order_id WHERE date(so.order_date) BETWEEN date('2017-10-07') AND date('2017-11-06');
 
-        SQL_SELECT_MY_SALES_HISTORY = "select DISTINCT so.order_id, so.retailer_id, so.order_date,sod.order_detail_id, sod.sku_id, sod.sku_name, sod.sku_qty, sod.sku_final_price" +
+        SQL_SELECT_MY_SALES_HISTORY = "select DISTINCT so.order_id, so.retailer_id,so.total_order_value,so.total_discount, so.order_date,sod.order_detail_id, sod.sku_id, sod.sku_name, sod.sku_qty, sod.sku_final_price" +
                 " from sales_orders so INNER JOIN sales_order_details sod " +
                 "ON so.order_id = sod.order_id";
 
@@ -529,6 +529,8 @@ public class MySalesHistoryActivity extends AppCompatActivity
             String orderID = cursor.getString(cursor.getColumnIndexOrThrow("order_id"));
             String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
             String orderDate = cursor.getString(cursor.getColumnIndexOrThrow("order_date"));
+            String total_discount = cursor.getString(cursor.getColumnIndexOrThrow("total_discount"));
+            String total_order_value = cursor.getString(cursor.getColumnIndexOrThrow("total_order_value"));
             String order_detail_id = cursor.getString(cursor.getColumnIndexOrThrow("order_detail_id"));
 
             if (!orderidlist.contains(orderID))
@@ -540,9 +542,10 @@ public class MySalesHistoryActivity extends AppCompatActivity
                 ArrayList<MySalesHistory.SkuDetails_Ordered> myskulis = new ArrayList<>();
 
                 String totalItems = String.valueOf(DbUtils.getItemCount(orderID));
-                String orderTotal = String.valueOf(DbUtils.getOrderTotal(orderID));
+               // String orderTotal = String.valueOf(DbUtils.getOrderTotal(orderID));
+                String orderTotal = total_order_value;
 
-                String SQL_SELECT_Sales_order_Detail = "select  order_id,order_detail_id, sku_id, sku_name,sku_qty,sku_final_price" +
+                String SQL_SELECT_Sales_order_Detail = "select  order_id,order_detail_id, sku_id, sku_name,sku_qty,sku_final_price,sku_price_before_discount,sku_free_qty,sku_discount" +
                         " from sales_order_details " +
                         " WHERE order_id = ?";
 
@@ -555,15 +558,17 @@ public class MySalesHistoryActivity extends AppCompatActivity
                     String skuid = cursor1.getString(cursor1.getColumnIndexOrThrow("sku_id"));
                     String skuname = cursor1.getString(cursor1.getColumnIndexOrThrow("sku_name"));
                     String skuqty = cursor1.getString(cursor1.getColumnIndexOrThrow("sku_qty"));
+                    String sku_free_qty = cursor1.getString(cursor1.getColumnIndexOrThrow("sku_free_qty"));
+                    String sku_discount = cursor1.getString(cursor1.getColumnIndexOrThrow("sku_discount"));
                     String sku_finalprice = cursor1.getString(cursor1.getColumnIndexOrThrow("sku_final_price"));
 
-                    myskulis.add(new MySalesHistory().new SkuDetails_Ordered(skuid, skuname, skuqty, sku_finalprice));
+                    myskulis.add(new MySalesHistory().new SkuDetails_Ordered(skuid, skuname, skuqty,sku_free_qty,sku_discount, sku_finalprice));
 
 
                 }
 
 
-                salesHistoryList.add(new MySalesHistory(orderID, retailerID, orderDate, totalItems, orderTotal, myskulis));
+                salesHistoryList.add(new MySalesHistory(orderID, retailerID, orderDate, totalItems, orderTotal,total_discount, myskulis));
 
             }
 

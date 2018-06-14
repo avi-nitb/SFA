@@ -2,13 +2,86 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:weightSum="3"
-
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <TextView
-        android:layout_weight="1.5"
+        android:gravity="center_vertical"
+        android:drawableLeft="@drawable/dot"
+        android:drawablePadding="8dp"
+        android:fontFamily="@font/lato_bold"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="@dimen/text_size_small"
+        android:id="@+id/sku_order_item_name"
+        android:layout_width="match_parent"
+        android:layout_marginTop="@dimen/dim_6"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:text="x"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/dim_6"
+        android:weightSum="2">
+
+        <TextView
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:fontFamily="@font/lato_regular"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_small"
+            android:id="@+id/sku_order_item_qty"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="y"/>
+        <TextView
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:fontFamily="@font/lato_regular"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_small"
+            android:id="@+id/sku_order_item_freeQty"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="y"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/dim_6"
+        android:weightSum="2">
+
+        <TextView
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:fontFamily="@font/lato_regular"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_small"
+            android:id="@+id/sku_order_item_discount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="y"/>
+        <TextView
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:fontFamily="@font/lato_regular"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_small"
+            android:id="@+id/sku_order_item_price"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="y"/>
+
+    </LinearLayout>
+
+ <!--   <TextView
+        android:layout_weight="1.2"
         android:gravity="center_vertical"
         android:drawableLeft="@drawable/bullet"
         android:fontFamily="@font/lato_bold"
@@ -18,10 +91,10 @@
         android:layout_width="0dp"
         android:layout_marginTop="2dp"
         android:layout_height="wrap_content"
-        android:text=""/>
+        android:text="x"/>
 
     <TextView
-        android:layout_weight=".5"
+        android:layout_weight=".8"
         android:gravity="center_vertical"
         android:fontFamily="@font/lato_regular"
         android:textColor="@android:color/black"
@@ -30,7 +103,7 @@
         android:layout_width="0dp"
         android:layout_marginTop="2dp"
         android:layout_height="wrap_content"
-        android:text=""/>
+        android:text="y"/>
 
     <TextView
         android:layout_weight="1"
@@ -42,5 +115,5 @@
         android:layout_width="0dp"
         android:layout_marginTop="2dp"
         android:layout_height="wrap_content"
-        android:text=""/>
+        android:text="z"/>-->
 </LinearLayout>

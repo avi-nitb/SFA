@@ -3,6 +3,7 @@ package in.etaminepgg.sfa.Adapters;
 import android.content.Context;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -58,7 +59,7 @@ public class NoOrderReasonAdapter extends RecyclerView.Adapter<NoOrderReasonAdap
 
                 holder.noreason_header.setVisibility(View.VISIBLE);
                 holder.whyNoOrder_TextInputEditText.setVisibility(View.VISIBLE);
-                holder.txtlay_noreason.setVisibility(View.VISIBLE);
+                //holder.txtlay_noreason.setVisibility(View.VISIBLE);
 
                 selected_Reason_hashmap.put(noReasonModel.getReason_id(),"other_"+holder.whyNoOrder_TextInputEditText.getText().toString());
             }
@@ -66,7 +67,7 @@ public class NoOrderReasonAdapter extends RecyclerView.Adapter<NoOrderReasonAdap
             {
                 holder.noreason_header.setVisibility(View.GONE);
                 holder.whyNoOrder_TextInputEditText.setVisibility(View.GONE);
-                holder.txtlay_noreason.setVisibility(View.GONE);
+               // holder.txtlay_noreason.setVisibility(View.GONE);
 
                 selected_Reason_hashmap.put(noReasonModel.getReason_id(),noReasonModel.getReason_desc());
             }
@@ -79,7 +80,7 @@ public class NoOrderReasonAdapter extends RecyclerView.Adapter<NoOrderReasonAdap
             holder.tv_noreason.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_box_outline_blank_black_24dp, 0, 0, 0);
             holder.noreason_header.setVisibility(View.GONE);
             holder.whyNoOrder_TextInputEditText.setVisibility(View.GONE);
-            holder.txtlay_noreason.setVisibility(View.GONE);
+          //  holder.txtlay_noreason.setVisibility(View.GONE);
 
             if(selected_Reason_hashmap.containsKey(noReasonModel.getReason_id())){
 
@@ -136,16 +137,17 @@ public class NoOrderReasonAdapter extends RecyclerView.Adapter<NoOrderReasonAdap
     {
         TextView tv_noreason;
         TextView noreason_header;
-        TextInputEditText whyNoOrder_TextInputEditText;
-        TextInputLayout txtlay_noreason;
+        AppCompatEditText whyNoOrder_TextInputEditText;
+       // TextInputEditText whyNoOrder_TextInputEditText;
+      //  TextInputLayout txtlay_noreason;
 
         public ReasonInfoViewHolder(View itemView)
         {
             super(itemView);
             tv_noreason = (TextView) itemView.findViewById(R.id.tv_noreason);
             noreason_header = (TextView) itemView.findViewById(R.id.noreason_header);
-            whyNoOrder_TextInputEditText = (TextInputEditText) itemView.findViewById(R.id.whyNoOrder_TextInputEditText);
-            txtlay_noreason = (TextInputLayout) itemView.findViewById(R.id.txtlay_noreason);
+            whyNoOrder_TextInputEditText = (AppCompatEditText) itemView.findViewById(R.id.whyNoOrder_TextInputEditText);
+          //  txtlay_noreason = (TextInputLayout) itemView.findViewById(R.id.txtlay_noreason);
         }
     }
 }

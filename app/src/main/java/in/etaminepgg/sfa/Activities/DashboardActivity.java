@@ -1,6 +1,7 @@
 package in.etaminepgg.sfa.Activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,8 +13,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
 import android.media.MediaPlayer;
-import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -46,17 +45,21 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
 import in.etaminepgg.sfa.BuildConfig;
+import in.etaminepgg.sfa.Fragments.AllSKUsFragment;
+import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuListAfter;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_IsValidAuthKey;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_Login;
 import in.etaminepgg.sfa.Models.AuthUser_Model;
 import in.etaminepgg.sfa.Models.GetSkuCategorySubCategorylist;
+import in.etaminepgg.sfa.Models.GetSkuListAfterNew;
+import in.etaminepgg.sfa.Models.IsSkuListUpdate;
 import in.etaminepgg.sfa.Models.ValidAuthModel;
 import in.etaminepgg.sfa.Network.API_Call_Retrofit;
+import in.etaminepgg.sfa.Network.ApiUrl;
 import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.Constants;
@@ -74,12 +77,13 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_EMPLOYEE;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_CATEGORY;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_SUBCATEGORY;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.NOT_PRESENT;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.REGULAR_ORDER;
 
 public class DashboardActivity extends AppCompatActivity implements OnNavigationItemSelectedListener
 {
     public static boolean wasShown = false;
     public static boolean wasShown_month = false;
-    ImageView allProducts_TextView;
     DrawerLayout drawerLayout;
     View headerLayout;
     TextView header_email;
@@ -88,15 +92,24 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
     boolean isValidAuthkey = false;
     MySharedPrefrencesData mySharedPrefrencesData = new MySharedPrefrencesData();
     NavigationView navigationView;
-    ImageView newProducts_TextView;
     TextView noOfPromoSchemes_TextView;
     int noOfRetailerVisits = 0;
     TextView noOfRetailerVisits_TextView;
     String passwordInSharedPreferences;
     ImageView promoSchemesBell_ImageView;
     FrameLayout promoSchemes_FrameLayout;
+
+    boolean isUpdated = false;
+
+
+    /*ImageView allProducts_TextView;
+    ImageView newProducts_TextView;
     ImageView promotionalProducts_TextView;
-    ImageView regularlyOrderedProducts_TextView;
+    ImageView regularlyOrderedProducts_TextView;*/
+
+
+    LinearLayout ll_newpro, ll_allpro, ll_promopro, ll_frequentpro;
+
     LinearLayout retailerVisits_LinearLayout;
     ProgressBar retailerVisits_ProgressBar;
     SQLiteDatabase sqLiteDatabase;
@@ -105,7 +118,7 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
     String usernameInSharedPreferences;
     int valueFromOpenDatabase;
 
-
+    String intentExtraKey_selectedOrderType, activeorderid;
 
 
     public static String substringAfterLastSeparator(String str, String separator)
@@ -119,16 +132,24 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
     }
 
 
-
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dashboard);
+        setContentView(R.layout.activity_dashboard_new);
+
+        float density = getResources().getDisplayMetrics().density;
+
+        Log.d("density", "" + density);
+
+        intentExtraKey_selectedOrderType = getResources().getString(R.string.key_selected_order_type);
+
+        activeorderid = DbUtils.getActiveOrderID();
+
         findViewsByIDs();
         setListenersToViews();
         this.header_username.setText(new MySharedPrefrencesData().getUsername(this));
         this.header_email.setText(new MySharedPrefrencesData().getEmail(this));
-        this.header_mob.setText(new MySharedPrefrencesData().get_User_mobile(this)+"\n"+"App Version: "+ BuildConfig.VERSION_NAME);
+        this.header_mob.setText(new MySharedPrefrencesData().get_User_mobile(this) + "\n" + "App Version: " + BuildConfig.VERSION_NAME);
         Utils.loggedInUserID = new MySharedPrefrencesData().getUser_Id(this);
         setSupportActionBar(this.toolbar);
         getSupportActionBar().setTitle((CharSequence) "Dashboard");
@@ -143,14 +164,7 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
         askUserToGrantPermissions();
         updateIMEI(Utils.loggedInUserID);
 
-
-        Menu menu = navigationView.getMenu();
-        MenuItem green = menu.findItem(R.id.navItem_logout);
-        green.setTitle(getResources().getString(R.string.nav_item_logout)+"     Ver : "+BuildConfig.VERSION_NAME);
-
-
     }
-
 
 
     public boolean onCreateOptionsMenu(Menu menu)
@@ -167,7 +181,8 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
                 Toast.makeText(getApplicationContext(), "Developement under process.", Toast.LENGTH_LONG).show();
                 return true;
             case R.id.schemes_menu:
-                Utils.launchActivity(DashboardActivity.this, SchemesActivity.class);
+                Toast.makeText(getApplicationContext(), "Developement under process.", Toast.LENGTH_LONG).show();
+              //  Utils.launchActivity(DashboardActivity.this, SchemesActivity.class);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -177,6 +192,9 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
     protected void onPostResume()
     {
         super.onPostResume();
+
+        activeorderid = DbUtils.getActiveOrderID();
+
         if (Utils.loggedInUserID == null)
         {
             throw new NullPointerException("loggedInUserID is null");
@@ -192,12 +210,12 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
 
 
         int mandatory_retailer_per_month = getRetalierCountPerMonth();
-        if (this.noOfRetailerVisits >= mandatory_visits_per_day && !wasShown && this.noOfRetailerVisits!=0)
+        if (this.noOfRetailerVisits >= mandatory_visits_per_day && !wasShown && this.noOfRetailerVisits != 0)
         {
             showCongratulatoryMessage(this.noOfRetailerVisits);
             playJingle();
         }
-        if (mandatory_retailer_per_month >= mandatory_retailer_creation_per_month && !wasShown_month && mandatory_retailer_per_month!=0)
+        if (mandatory_retailer_per_month >= mandatory_retailer_creation_per_month && !wasShown_month && mandatory_retailer_per_month != 0)
         {
             showCongratulatoryMessage_Retailecreation(mandatory_retailer_per_month);
         }
@@ -279,25 +297,28 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
 
         String userlocationid = new MySharedPrefrencesData().getRetailerVisit_LocationId(getBaseContext());
 
-       if(userlocationid.contains(",")){
+        if (userlocationid.contains(","))
+        {
 
-           String location_id_arr[]=userlocationid.split(",");
+            String location_id_arr[] = userlocationid.split(",");
 
-           int sum = 0;
+            int sum = 0;
 
-           for (String i : location_id_arr)
-           {
-               sum += Integer.parseInt(i);
-           }
+            for (String i : location_id_arr)
+            {
+                sum += Integer.parseInt(i);
+            }
 
-           mandatory_visits_per_day=String.valueOf(sum);
+            mandatory_visits_per_day = String.valueOf(sum);
 
 
-       }else {
+        }
+        else
+        {
 
-           mandatory_visits_per_day=userlocationid;
+            mandatory_visits_per_day = userlocationid;
 
-       }
+        }
         return Integer.parseInt(mandatory_visits_per_day);
     }
 
@@ -316,10 +337,16 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
         this.retailerVisits_ProgressBar = (ProgressBar) findViewById(R.id.retailerVisits_ProgressBar);
         this.retailerVisits_LinearLayout = (LinearLayout) findViewById(R.id.retailerVisits_LinearLayout);
         this.noOfRetailerVisits_TextView = (TextView) findViewById(R.id.noOfRetailerVisits_TextView);
-        this.newProducts_TextView = (ImageView) findViewById(R.id.newProducts_TextView);
+       /* this.newProducts_TextView = (ImageView) findViewById(R.id.newProducts_TextView);
         this.promotionalProducts_TextView = (ImageView) findViewById(R.id.promotionalProducts_TextView);
         this.regularlyOrderedProducts_TextView = (ImageView) findViewById(R.id.regularlyOrderedProducts_TextView);
-        this.allProducts_TextView = (ImageView) findViewById(R.id.allProducts_TextView);
+        this.allProducts_TextView = (ImageView) findViewById(R.id.allProducts_TextView);*/
+
+
+        this.ll_allpro = (LinearLayout) findViewById(R.id.ll_allpro);
+        this.ll_frequentpro = (LinearLayout) findViewById(R.id.ll_frequentpro);
+        this.ll_newpro = (LinearLayout) findViewById(R.id.ll_newpro);
+        this.ll_promopro = (LinearLayout) findViewById(R.id.ll_promopro);
     }
 
     private void setListenersToViews()
@@ -342,14 +369,28 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
                 Utils.launchActivity(DashboardActivity.this, SalesSummaryActivity.class);
             }
         });
-        this.newProducts_TextView.setOnClickListener(new OnClickListener()
+        this.ll_newpro.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
             {
-                Utils.launchActivityWithExtra(DashboardActivity.this, SkuListByGenreActivity.class, intentExtraKey_TabToShow, ConstantsA.NEW_SKUs_TAB);
+
+
+                if (activeorderid.equalsIgnoreCase(ConstantsA.NONE))
+                {
+
+                    Utils.launchActivityWithExtra(DashboardActivity.this, PickRetailerActivity.class,Constants.SHOW_UPDATE_BUTTON,"NO");
+                }
+                else
+                {
+
+
+                    Utils.launchActivityWithExtra(DashboardActivity.this, SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, REGULAR_ORDER);
+                }
+
+
             }
         });
-        this.promotionalProducts_TextView.setOnClickListener(new OnClickListener()
+        this.ll_promopro.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
             {
@@ -367,18 +408,47 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
 
             }
         });
-        this.regularlyOrderedProducts_TextView.setOnClickListener(new OnClickListener()
+        this.ll_frequentpro.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
             {
-                Utils.launchActivityWithExtra(DashboardActivity.this, SkuListByGenreActivity.class, intentExtraKey_TabToShow, ConstantsA.FREQUENT_SKUs_TAB);
+
+                if (activeorderid.equalsIgnoreCase(ConstantsA.NONE))
+                {
+
+                    Utils.launchActivityWithExtra(DashboardActivity.this, PickRetailerActivity.class,Constants.SHOW_UPDATE_BUTTON,"NO");
+                    //Utils.launchActivityWithExtra(DashboardActivity.this, SkuListByGenreActivity.class, intentExtraKey_TabToShow, ConstantsA.FREQUENT_SKUs_TAB);
+
+                }
+                else
+                {
+
+
+                    Utils.launchActivityWithExtra(DashboardActivity.this, SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, REGULAR_ORDER);
+                }
+
+
             }
         });
-        this.allProducts_TextView.setOnClickListener(new OnClickListener()
+        this.ll_allpro.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
             {
-                Utils.launchActivityWithExtra(DashboardActivity.this, SkuListByGenreActivity.class, intentExtraKey_TabToShow, ConstantsA.All_SKUs_TAB);
+
+                if (activeorderid.equalsIgnoreCase(ConstantsA.NONE))
+                {
+
+
+                    Utils.launchActivityWithExtra(DashboardActivity.this, PickRetailerActivity.class,Constants.SHOW_UPDATE_BUTTON,"NO");
+
+                }
+                else
+                {
+
+
+                    Utils.launchActivityWithExtra(DashboardActivity.this, SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, REGULAR_ORDER);
+                }
+
             }
         });
     }
@@ -412,10 +482,10 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
                 Utils.launchActivity(this, CreateRetailerActivity.class);
                 break;
             case R.id.navItem_NewSalesOrder:
-                Utils.launchActivityWithExtra(this, PickRetailerActivity.class,SHOW_UPDATE_BUTTON,"NO");
+                Utils.launchActivityWithExtra(this, PickRetailerActivity.class, SHOW_UPDATE_BUTTON, "NO");
                 break;
             case R.id.navItem_UpdateRetailer:
-                Utils.launchActivityWithExtra(this, PickRetailerActivity.class,SHOW_UPDATE_BUTTON,"YES");
+                Utils.launchActivityWithExtra(this, PickRetailerActivity.class, SHOW_UPDATE_BUTTON, "YES");
                 break;
             case R.id.navItem_logout:
                 Editor editor = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, 0).edit();
@@ -444,10 +514,286 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
             case R.id.navItem_profile:
                 Utils.launchActivity(this, ProfileActivity.class);
                 break;
+            case R.id.navItem_userManual:
+                Utils.launchActivity(this, HelpActivity.class);
+                break;
+
+            case R.id.navItem_downloadData:
+
+                if (Utils.isNetworkConnected(DashboardActivity.this))
+                {
+
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(DashboardActivity.this);
+
+                    // Setting Dialog Title
+                    alertDialog.setTitle("Confirm Download data...");
+
+                    // Setting Dialog Message
+                    alertDialog.setMessage("Are you sure you want to download data?");
+
+                    // Setting Icon to Dialog
+                    alertDialog.setIcon(R.drawable.ic_check_circle);
+
+                    // Setting Positive "Yes" Button
+                    alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int which) {
+
+                            // Write your code here to invoke YES event
+                            networkcall_for_isskulistUpdated();
+
+                        }
+                    });
+
+                    // Setting Negative "NO" Button
+                    alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Write your code here to invoke NO event
+                            Toast.makeText(DashboardActivity.this, "You clicked on NO", Toast.LENGTH_SHORT).show();
+                            dialog.cancel();
+                        }
+                    });
+
+                    // Showing Alert Message
+                    alertDialog.show();
+
+
+
+
+                }
+
+                break;
         }
         this.drawerLayout.closeDrawer((int) GravityCompat.START);
         return true;
     }
+
+
+    ///sku update
+
+    private void networkcall_for_isskulistUpdated()
+    {
+
+
+        final ProgressDialog progressDialog = new ProgressDialog(DashboardActivity.this);
+        Utils.startProgressDialog(DashboardActivity.this, progressDialog);
+
+        Apimethods apimethods = (Apimethods) API_Call_Retrofit.getretrofit(DashboardActivity.this).create(Apimethods.class);
+        IM_GetSkuListAfter IM_getSkuListAfter = new IM_GetSkuListAfter(this.mySharedPrefrencesData.getEmployee_AuthKey(DashboardActivity.this), this.type, this.mySharedPrefrencesData.getSkulistUpdateDate(DashboardActivity.this));
+        Call<IsSkuListUpdate> call = apimethods.isSkuListUpdated(IM_getSkuListAfter);
+        Log.i("isSkulistUpdate_ip", new Gson().toJson(IM_getSkuListAfter));
+
+        call.enqueue(new Callback<IsSkuListUpdate>()
+        {
+            public void onResponse(Call<IsSkuListUpdate> call, Response<IsSkuListUpdate> response)
+            {
+                Log.d("Response", "" + response.code());
+                Log.d("respones", "" + response);
+                if (response.isSuccessful())
+                {
+                    IsSkuListUpdate isSkuListUpdate = (IsSkuListUpdate) response.body();
+                    Log.i("isSkulistUpdate_op", new Gson().toJson(isSkuListUpdate));
+                    if (isSkuListUpdate.getIsUpdated().intValue() == 1)
+                    {
+                        Utils.dismissProgressDialog(progressDialog);
+                        isUpdated = true;
+                        networkcall_for_getSKUlistAfter(mySharedPrefrencesData.getEmployee_AuthKey(DashboardActivity.this),true);
+                        return;
+                    }
+                    return;
+                }
+                Utils.dismissProgressDialog(progressDialog);
+
+            }
+
+            public void onFailure(Call<IsSkuListUpdate> call, Throwable t)
+            {
+                Utils.dismissProgressDialog(progressDialog);
+                Utils.showToast(DashboardActivity.this, ConstantsA.NO_INTERNET_CONNECTION);
+            }
+        });
+
+    }
+
+
+    private void networkcall_for_getSKUlistAfter(final String authToken, final boolean isUpdated)
+    {
+        final ProgressDialog progressDialog = new ProgressDialog(DashboardActivity.this);
+        Utils.startProgressDialog(DashboardActivity.this, progressDialog);
+        progressDialog.setCancelable(false);
+        String intentExtraKey_TabToShow = getResources().getString(R.string.key_tab_to_show);
+        final Apimethods methods = (Apimethods) API_Call_Retrofit.getretrofit(DashboardActivity.this)
+                .create(Apimethods.class);
+        String date_str = "";
+        if (this.mySharedPrefrencesData.getfirsttimeflagforAll(DashboardActivity.this))
+        {
+            date_str = "2016-05-25";
+        }
+        else
+        {
+            date_str = this.mySharedPrefrencesData.getSkulistUpdateDate(DashboardActivity.this);
+        }
+        IM_GetSkuListAfter IM_getSkuListAfter = new IM_GetSkuListAfter(authToken, this.type,
+                date_str);
+        Call<GetSkuListAfterNew> call = methods.getSkuListAfter(IM_getSkuListAfter);
+        Log.i("GetSkuListAfter_ip_new", new Gson().toJson(IM_getSkuListAfter));
+        Log.d("url", "url=" + call.request().url().toString());
+
+        call.enqueue(new Callback<GetSkuListAfterNew>()
+        {
+            @Override
+            public void onResponse(Call<GetSkuListAfterNew> call, Response<GetSkuListAfterNew> response)
+            {
+
+
+                Log.d("Response", "" + response.code());
+                Log.d("respones", "" + response);
+
+                if (response.isSuccessful())
+                {
+
+                    GetSkuListAfterNew getSkuListAfter = (GetSkuListAfterNew) response.body();
+                    Log.i("GetSkuListAfter_op_new", new Gson().toJson(getSkuListAfter));
+
+                    mySharedPrefrencesData.setfirsttimeflagforAll(DashboardActivity.this,false);
+
+                    if (getSkuListAfter.getApiStatus().intValue() == 1)
+                    {
+
+                        for (GetSkuListAfterNew.SkuId skuId_Info : getSkuListAfter.getSkuIds())
+                        {
+
+                            ContentValues skuValues = new ContentValues();
+                            skuValues.put(ConstantsA.KEY_SKU_ID, skuId_Info.getSkuId());
+                            skuValues.put("sku_name", skuId_Info.getSkuName());
+                            skuValues.put("sku_price", skuId_Info.getSkuPrice());
+                            skuValues.put("description", skuId_Info.getSkuDescription());
+                            skuValues.put("sku_category", skuId_Info.getSkuCategory());
+                            skuValues.put("sku_sub_category", skuId_Info.getSkuSubCategory());
+                            skuValues.put("sku_category_description", skuId_Info.getCategoryDescription());
+                            skuValues.put("sku_sub_category_description", skuId_Info.getSubCategoryDescription());
+                            skuValues.put("new_sku", skuId_Info.getSkuNewFlag());
+                            skuValues.put("upload_status", Integer.valueOf(1));
+
+
+                            for (GetSkuListAfterNew.SkuId.SkuMedium skuMedia : skuId_Info.getSkuMedia())
+                            {
+                                String selection = "sku_id = ?";
+                                String[] selectionArgs = new String[]{skuMedia.getSkuId()};
+                                if (skuMedia.getMediaType().equalsIgnoreCase("photo"))
+                                {
+
+                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2)
+                                    {
+
+
+                                        String sku_photourl_from_server = skuMedia.getMediaFile();
+
+                                        skuValues.put("sku_photo_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
+
+
+                                    }
+                                    else
+                                    {
+
+                                        skuValues.put("sku_photo_source", NOT_PRESENT);
+
+
+                                    }
+                                }
+                                else if (skuMedia.getMediaType().equalsIgnoreCase
+                                        ("catalogue"))
+                                {
+
+                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2)
+                                    {
+
+                                        String sku_photourl_from_server = skuMedia.getMediaFile();
+
+                                        skuValues.put("sku_catalogue_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
+
+
+                                    }
+                                    else
+                                    {
+
+                                        skuValues.put("sku_catalogue_source", NOT_PRESENT);
+
+
+                                    }
+
+
+                                }
+                                else if (skuMedia.getMediaType().equalsIgnoreCase
+                                        ("video"))
+                                {
+
+                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2)
+                                    {
+
+
+                                        String sku_photourl_from_server = skuMedia.getMediaFile();
+
+                                        skuValues.put("sku_video_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
+
+
+                                    }
+                                    else
+                                    {
+
+                                        skuValues.put("sku_video_source", NOT_PRESENT);
+
+
+                                    }
+
+                                }
+                                else
+                                {
+
+                                }
+                            }
+
+                            if(!DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && !isUpdated){
+
+                                sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
+
+                            }else if(DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && isUpdated){
+
+                                delete_sku_row_from_db(skuId_Info.getSkuId());
+
+                                sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
+                            }
+
+
+                        }
+
+                        Utils.dismissProgressDialog(progressDialog);
+
+                    }
+
+
+                }
+
+                Utils.dismissProgressDialog(progressDialog);
+
+            }
+
+            @Override
+            public void onFailure(Call<GetSkuListAfterNew> call, Throwable t)
+            {
+                Utils.dismissProgressDialog(progressDialog);
+                Utils.showToast(DashboardActivity.this, ConstantsA.NO_INTERNET_CONNECTION);
+            }
+        });
+    }
+
+    private void delete_sku_row_from_db(String sku_id) {
+        String selection = "sku_id = ?";
+        String[] selectionArgs = new String[]{sku_id};
+        this.sqLiteDatabase.delete(Constants.TBL_SKU, selection, selectionArgs);
+    }
+
+
+
 
     void setColorsDependingOnRetailerVisits()
     {

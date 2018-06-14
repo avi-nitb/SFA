@@ -66,6 +66,7 @@ import java.util.Random;
 
 import in.etaminepgg.sfa.Activities.LoginActivity;
 import in.etaminepgg.sfa.Activities.PickRetailerActivity;
+import in.etaminepgg.sfa.Models.QuantityDiscountModel;
 import in.etaminepgg.sfa.R;
 
 import static in.etaminepgg.sfa.Utilities.Constants.REQUEST_TURN_ON_LOCATION;
@@ -75,7 +76,7 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_ATTRIBUTE_MAPPING;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NONE;
 import static in.etaminepgg.sfa.Utilities.DbUtils.getActiveOrderID;
-import static in.etaminepgg.sfa.Utilities.DbUtils.getSkuQuantity;
+import static in.etaminepgg.sfa.Utilities.DbUtils.getSkuQuantityDiscount;
 import static in.etaminepgg.sfa.Utilities.DbUtils.isSkuPresent;
 
 /**
@@ -89,7 +90,7 @@ public class Utils
     public static String loggedInUserID;
 
     private Map<Integer, String> selectedSkuAttributesMap = new HashMap<>();
-    private Map<Integer, String> selectedSkuQuantityMap ;
+    private Map<String, String> selectedSkuQuantityMap;
 
     public static void launchActivity(Context context, Class<?> activityClassToLaunch)
     {
@@ -450,7 +451,7 @@ public class Utils
     //dynamically builds View For alert dialog depending on attributes of SKU
 
     @SuppressLint("ResourceType")
-    public View constructViewForAttributesDialog(String skuID, Context context)
+    public View constructViewForAttributesDialog(String skuID, final Context context)
     {
         LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
@@ -473,7 +474,7 @@ public class Utils
         textView1.setLayoutParams(lp2);
         textView1.setText("Quantity");
         textView1.setTextSize(Dimension.SP, 20);
-        textView1.setTextColor(Color.RED);
+        textView1.setTextColor(context.getResources().getColor(R.color.colorPrimaryDark));
         textView1.setGravity(Gravity.CENTER_VERTICAL);
         linearLayout.addView(textView1);
 
@@ -497,17 +498,66 @@ public class Utils
         qty_edit.setLayoutParams(lp2);
         qty_edit.setBackgroundColor(context.getResources().getColor(R.color.lightgray));
         qty_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
-        qty_edit.setPadding(10,0,0,0);
+        qty_edit.setPadding(10, 0, 0, 0);
         qty_edit.setText("1");
         qty_edit.setId(R.string.tag_sky_qty_id);
         qty_edit.setTextSize(Dimension.SP, 13);
         qty_edit.setTextColor(Color.BLACK);
         qty_edit.setGravity(Gravity.CENTER_VERTICAL);
-
-        selectedSkuQuantityMap= new HashMap<>();
-        selectedSkuQuantityMap.put(Integer.parseInt(qty_edit.getText().toString().trim()), qty_edit.getText().toString().trim());
-
         linearLayout.addView(qty_edit);
+
+
+        ///for free quantity
+
+        TextView freeQty_tv = new TextView(context);
+        freeQty_tv.setLayoutParams(lp2);
+        freeQty_tv.setText("Free Quantity");
+        freeQty_tv.setTextSize(Dimension.SP, 20);
+        freeQty_tv.setTextColor(context.getResources().getColor(R.color.colorPrimaryDark));
+        freeQty_tv.setGravity(Gravity.CENTER_VERTICAL);
+        linearLayout.addView(freeQty_tv);
+
+        EditText freeQty_edit = new EditText(context);
+        freeQty_edit.setLayoutParams(lp2);
+        freeQty_edit.setBackgroundColor(context.getResources().getColor(R.color.lightgray));
+        freeQty_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+        freeQty_edit.setPadding(10, 0, 0, 0);
+        freeQty_edit.setText("1");
+        freeQty_edit.setId(R.string.tag_sky_freeQty_id);
+        freeQty_edit.setTextSize(Dimension.SP, 13);
+        freeQty_edit.setTextColor(Color.BLACK);
+        freeQty_edit.setGravity(Gravity.CENTER_VERTICAL);
+        linearLayout.addView(freeQty_edit);
+
+        //for sku discount
+
+        TextView discount_tv = new TextView(context);
+        discount_tv.setLayoutParams(lp2);
+        discount_tv.setText("SKU Discount(Rs.)");
+        discount_tv.setTextSize(Dimension.SP, 20);
+        discount_tv.setTextColor(context.getResources().getColor(R.color.colorPrimaryDark));
+        discount_tv.setGravity(Gravity.CENTER_VERTICAL);
+        linearLayout.addView(discount_tv);
+
+        EditText discount_edit = new EditText(context);
+        discount_edit.setLayoutParams(lp2);
+        discount_edit.setBackgroundColor(context.getResources().getColor(R.color.lightgray));
+        discount_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+        discount_edit.setPadding(10, 0, 0, 0);
+        discount_edit.setText("1");
+        discount_edit.setId(R.string.tag_sky_discount_id);
+        discount_edit.setTextSize(Dimension.SP, 13);
+        discount_edit.setTextColor(Color.BLACK);
+        discount_edit.setGravity(Gravity.CENTER_VERTICAL);
+        linearLayout.addView(discount_edit);
+
+        selectedSkuQuantityMap = new HashMap<>();
+
+        selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_qty_id), qty_edit.getText().toString().trim());
+        selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_freeQty_id), qty_edit.getText().toString().trim());
+        selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_discount_id), qty_edit.getText().toString().trim());
+
+        //linearLayout.addView(qty_edit);
 
 
 
@@ -548,9 +598,10 @@ public class Utils
 
         linearLayout.addView(linearLayout_quantity);*/
 
-        boolean is_Attribute=DbUtils.getConfigValue(Constants.SKU_ATTRIBUTE_REQUIRED);
+        boolean is_Attribute = DbUtils.getConfigValue(Constants.SKU_ATTRIBUTE_REQUIRED);
 
-        if(is_Attribute){
+        if (is_Attribute)
+        {
 
 
             for (final int attributeID : attributeIDsList)
@@ -631,36 +682,85 @@ public class Utils
             }
         });*/
 
-     qty_edit.addTextChangedListener(new TextWatcher()
-     {
-         @Override
-         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
-         {
+        qty_edit.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
 
-         }
+            }
 
-         @Override
-         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
-         {
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
 
-         }
+            }
 
-         @Override
-         public void afterTextChanged(Editable editable)
-         {
-             selectedSkuQuantityMap= new HashMap<>();
-             if(!editable.toString().isEmpty()){
+            @Override
+            public void afterTextChanged(Editable editable)
+            {
+                //selectedSkuQuantityMap= new HashMap<>();
 
-                 selectedSkuQuantityMap.put(Integer.parseInt(editable.toString().trim()), editable.toString().trim());
-             }else if(editable.toString().trim().equalsIgnoreCase("0")){
-                 Utils.showToast(LoginActivity.baseContext,"Quantity can not be 0.");
-             }else {
-                 Utils.showToast(LoginActivity.baseContext,"Please enter valid quantity.");
-             }
+                selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_qty_id), editable.toString().trim());
 
-             Log.e("Sku Quantity Value", editable.toString().trim() + " : " +  editable.toString().trim());
-         }
-     });
+
+                Log.e("Sku Quantity Value", editable.toString().trim() + " : " + editable.toString().trim());
+            }
+        });
+
+        //for free qty listener
+        freeQty_edit.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable)
+            {
+                //selectedSkuQuantityMap= new HashMap<>();
+
+                selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_freeQty_id), editable.toString().trim());
+
+                Log.e("Sku Free Quantity Value", editable.toString().trim() + " : " + editable.toString().trim());
+            }
+        });
+
+        //for sku discount listener
+
+        discount_edit.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable)
+            {
+                //selectedSkuQuantityMap= new HashMap<>();
+
+                selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_discount_id), editable.toString().trim());
+
+
+                Log.e("Sku discount Value", editable.toString().trim() + " : " + editable.toString().trim());
+            }
+        });
 
 
      /*spinner_qty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -701,31 +801,138 @@ public class Utils
         }
         else
         {
-            Utils.launchActivityWithExtra(context, PickRetailerActivity.class,Constants.SHOW_UPDATE_BUTTON,"NO");
+            Utils.launchActivityWithExtra(context, PickRetailerActivity.class, Constants.SHOW_UPDATE_BUTTON, "NO");
         }
     }
 
-    void showSelectAttributesDialog(View alertDialogView, final String salesOrderID, final String skuID, final String skuName, final String skuPrice, Context context)
+    void showSelectAttributesDialog(final View alertDialogView, final String salesOrderID, final String skuID, final String skuName, final String skuPrice, final Context context)
     {
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
         dialogBuilder.setView(alertDialogView);
+        dialogBuilder.setPositiveButton("Add To Cart", null);
+        dialogBuilder.setNegativeButton("Cancel", null);
 
-        dialogBuilder.setPositiveButton("add to cart", new DialogInterface.OnClickListener()
+
+        final AlertDialog mAlertDialog = dialogBuilder.create();
+
+
+        mAlertDialog.setOnShowListener(new DialogInterface.OnShowListener()
+        {
+
+            @Override
+            public void onShow(DialogInterface dialog)
+            {
+
+                Button addToCart = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+
+                Button cancel = mAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+
+                addToCart.setOnClickListener(new View.OnClickListener()
+                {
+
+                    @Override
+                    public void onClick(View view)
+                    {
+                        // TODO Do something
+
+                        if (!selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_qty_id)).isEmpty())
+                        {
+                            if (!selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_freeQty_id)).isEmpty())
+                            {
+
+                                if (!selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_discount_id)).isEmpty())
+                                {
+
+                                    insertSkuOrIncreaseQuantity(mAlertDialog, context, salesOrderID, skuID, skuName, skuPrice);
+
+
+                                }
+                                else
+                                {
+                                    Utils.showToast(LoginActivity.baseContext, "Discount can not be empty.");
+                                }
+
+                            }
+                            else
+                            {
+
+                                Utils.showToast(LoginActivity.baseContext, "Free Quantity can not be empty.");
+                            }
+
+                        }
+                        else
+                        {
+                            Utils.showToast(LoginActivity.baseContext, "Quantity can not be empty.");
+
+                        }
+
+
+                    }
+                });
+
+
+                cancel.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        mAlertDialog.dismiss();
+                    }
+                });
+            }
+        });
+
+
+   /*     dialogBuilder.setPositiveButton("add to cart", new DialogInterface.OnClickListener()
         {
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
-                if(selectedSkuQuantityMap.isEmpty()){
 
-                    Utils.showToast(LoginActivity.baseContext,"Quantity can not be empty.");
+                if (!selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_qty_id)).isEmpty())
+                {
+                    if (!selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_freeQty_id)).isEmpty())
+                    {
 
-                }else {
+                        if (!selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_discount_id)).isEmpty())
+                        {
 
-                    insertSkuOrIncreaseQuantity(salesOrderID, skuID, skuName, skuPrice);
+                            insertSkuOrIncreaseQuantity(context, salesOrderID, skuID, skuName, skuPrice);
+
+                        }
+                        else
+                        {
+                            Utils.showToast(LoginActivity.baseContext, "Discount can not be empty.");
+                        }
+
+                    }
+                    else
+                    {
+
+                        Utils.showToast(LoginActivity.baseContext, "Free Quantity can not be empty.");
+                    }
+
                 }
+                else
+                {
+                    Utils.showToast(LoginActivity.baseContext, "Quantity can not be empty.");
+
+                }
+
+
+               *//* if (selectedSkuQuantityMap.isEmpty())
+                {
+
+                    Utils.showToast(LoginActivity.baseContext, "Quantity can not be empty.");
+
+                }
+                else
+                {
+
+                    insertSkuOrIncreaseQuantity(context,salesOrderID, skuID, skuName, skuPrice);
+                }*//*
             }
         });
-
 
 
         dialogBuilder.setNegativeButton("cancel", new DialogInterface.OnClickListener()
@@ -735,37 +942,67 @@ public class Utils
             {
 
             }
-        });
+        });*/
 
-        dialogBuilder.show();
+        //dialogBuilder.show();
+
+        mAlertDialog.show();
     }
 
-    void insertSkuOrIncreaseQuantity(String salesOrderID, String skuID, String skuName, String skuPrice)
+    void insertSkuOrIncreaseQuantity(AlertDialog mAlertDialog, final Context context, String salesOrderID, String skuID, String skuName, String skuPrice)
     {
 
-        String finalqty=NONE;
+        String finalqty = NONE;
+        String finalFreeQty = NONE;
+        String finalDiscount = NONE;
 
-        for (Map.Entry<Integer, String> entry : selectedSkuQuantityMap.entrySet())
+        finalqty = selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_qty_id));
+        finalFreeQty = selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_freeQty_id));
+        finalDiscount = selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_discount_id));
+
+      /*  for (Map.Entry<String, String> entry : selectedSkuQuantityMap.entrySet())
         {
-            finalqty=entry.getValue();
 
-        }
+            finalqty = entry.getValue();
+
+        }*/
 
 
         //if Sku doesn't exists in the sales order details table, insert new row for that Sku
         if (!isSkuPresent(skuID, salesOrderID))
         {
+            long rowID=0;
 
-            long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, finalqty);
+            int newSkuQuantity = Integer.parseInt(finalqty);
+            int newSkuFreeQuantity = Integer.parseInt(finalFreeQty);
+            float newSkuDisc = Float.parseFloat(finalDiscount);
 
-            if (rowID != -1L)
+            float skuPriceBeforeDiscount = Float.parseFloat(skuPrice) * newSkuQuantity;
+
+            if (newSkuDisc < skuPriceBeforeDiscount)
             {
-                long salesOrderDetailID = rowID;
 
-                insertIntoSalesOrderSkuAttributes(salesOrderDetailID);
+                rowID= DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, finalqty, finalFreeQty, finalDiscount);
 
-                Utils.showPopUp(LoginActivity.baseContext, "SKU added to cart for 1st time");
+                if (rowID != -1L)
+                {
+                    long salesOrderDetailID = rowID;
+
+                    insertIntoSalesOrderSkuAttributes(salesOrderDetailID);
+
+                    mAlertDialog.dismiss();
+
+                    Utils.showPopUp(LoginActivity.baseContext, "SKU added to cart for 1st time");
+                }
+
+
             }
+            else
+            {
+                Utils.showPopUp(LoginActivity.baseContext, "SKU Discount should be less than SKU Total Price.");
+
+            }
+
         }
         else
         {
@@ -775,21 +1012,45 @@ public class Utils
 
             if (orderDetailIdWithSameAttributes > 0)
             {
-                int currentSkuQuantity = getSkuQuantity(orderDetailIdWithSameAttributes);
-                int newSkuQuantity = currentSkuQuantity + Integer.parseInt(finalqty);
-                DbUtils.increaseSkuQuantity(orderDetailIdWithSameAttributes, newSkuQuantity);
+                ArrayList<QuantityDiscountModel> quantityDiscountModelArrayList = new ArrayList<>();
 
-                Utils.showPopUp(LoginActivity.baseContext, "SKU quantity increased");
+                quantityDiscountModelArrayList = getSkuQuantityDiscount(orderDetailIdWithSameAttributes);
+
+                int currentSkuQuantity = quantityDiscountModelArrayList.get(0).getSkuQty();
+                int currentSkuFreeQuantity = quantityDiscountModelArrayList.get(0).getSkuFreeQty();
+                float currentSkuDiscount = quantityDiscountModelArrayList.get(0).getSkuDiscount();
+
+                int newSkuQuantity = currentSkuQuantity + Integer.parseInt(finalqty);
+                int newSkuFreeQuantity = currentSkuFreeQuantity + Integer.parseInt(finalFreeQty);
+                float newSkuDisc = currentSkuDiscount + Float.parseFloat(finalDiscount);
+
+                float skuPriceBeforeDiscount = quantityDiscountModelArrayList.get(0).getSkuUnitPrice() * newSkuQuantity;
+
+                if (newSkuDisc < skuPriceBeforeDiscount)
+                {
+
+                    DbUtils.increaseSkuQuantityFreeQuantityDiscount(orderDetailIdWithSameAttributes, quantityDiscountModelArrayList.get(0).getSkuUnitPrice(), newSkuQuantity, newSkuFreeQuantity, newSkuDisc);
+                    mAlertDialog.dismiss();
+                    Utils.showPopUp(LoginActivity.baseContext, "SKU quantity increased");
+                }
+                else
+                {
+                    Utils.showPopUp(LoginActivity.baseContext, "SKU Discount should be less than SKU Total Price.");
+
+                }
+
             }
             else if (orderDetailIdWithSameAttributes == -1L)
             {
-                long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, finalqty);
+                long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, finalqty, finalFreeQty, finalDiscount);
 
                 if (rowID != -1L)
                 {
                     long salesOrderDetailID = rowID;
 
                     insertIntoSalesOrderSkuAttributes(salesOrderDetailID);
+
+                    mAlertDialog.dismiss();
 
                     Utils.showPopUp(LoginActivity.baseContext, "SKU with different attributes added to cart");
 
@@ -885,11 +1146,11 @@ public class Utils
         return -1L;
     }
 
-    public String getModifiedkeyValueString(String key,String Value)
+    public String getModifiedkeyValueString(String key, String Value)
     {
-        String name_string=key+Value;
+        String name_string = key + Value;
         String replacedWith1 = "<font color='blue'>" + key + "</font>";
-        String modified_string_name = name_string.replaceAll(key,replacedWith1);
+        String modified_string_name = name_string.replaceAll(key, replacedWith1);
         return modified_string_name;
     }
 

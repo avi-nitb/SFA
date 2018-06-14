@@ -17,7 +17,7 @@ public class splashActivity extends AppCompatActivity
 {
 
     boolean moveToNextScreen = false;
-    int SPLASH_TIMEOUT = 1000;
+    int SPLASH_TIMEOUT = 3000;
     Handler handler = new Handler();
 
     @Override

@@ -9,6 +9,7 @@ public interface ConstantsA
     String NONE = "NONE";
 
     String NOT_PRESENT = "NOT_PRESENT";
+    String EMPTY = "";
 
     int ORDER_TYPE_NEW_ORDER = 1;
     int ORDER_TYPE_NEW_REGULAR_ORDER = 2;
@@ -35,5 +36,9 @@ public interface ConstantsA
 
     String RS = "Rs. ";
     String NO_INTERNET_CONNECTION = "Failed, Please check your internet!";
+
+    String INTRO="intro";
+    String INTRO_CRT="intro_crt";
+    String INTRO_SO="intro_so";
 
 }

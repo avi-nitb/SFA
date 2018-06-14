@@ -16,6 +16,14 @@
             android:id="@+id/navItem_NewSalesOrder"
             android:icon="@drawable/new_order"
             android:title="@string/nav_item_new_sales_order"/>
+
+
+        <item
+            android:id="@+id/navItem_downloadData"
+            android:icon="@drawable/ic_file_download"
+            android:title="@string/nav_item_download_data"/>
+
+
         <item
             android:id="@+id/navItem_mySalesHistory"
             android:icon="@drawable/newsalesordericon"
@@ -24,6 +32,12 @@
             android:id="@+id/navItem_profile"
             android:icon="@drawable/nav_profile1"
             android:title="@string/nav_item_Profile"/>
+
+        <item
+            android:id="@+id/navItem_userManual"
+            android:icon="@drawable/help"
+            android:title="@string/nav_item_UserManual"/>
+
         <item
             android:id="@+id/navItem_logout"
             android:icon="@drawable/logouticon"

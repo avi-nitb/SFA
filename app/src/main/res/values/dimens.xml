@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="one_dp">1dp</dimen>
+    <dimen name="two_dp">2dp</dimen>
+    <dimen name="four_dp">4dp</dimen>
+    <dimen name="eight_dp">8dp</dimen>
+    <dimen name="sixteen_dp">16dp</dimen>
+    <dimen name="thirty_two_dp">32dp</dimen>
+    <dimen name="sixty_four_dp">64dp</dimen>
+
+    <dimen name="text_size">14sp</dimen>
+
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_medium">14sp</dimen>
+    <dimen name="text_size_large">16sp</dimen>
+
+    <dimen name="text_size_medium_double">18sp</dimen>
+
+    <dimen name="width_large">160dp</dimen>
+
+    <dimen name="height_large">60dp</dimen>
+
+    <dimen name="dim_64">64.0px</dimen>
+
+    <dimen name="dim_130">130.0px</dimen>
+    <dimen name="dim_180">180.0px</dimen>
+
+    <dimen name="dim_10">10.0px</dimen>
+    <dimen name="dim_11">11.0px</dimen>
+    <dimen name="dim_12">12.0px</dimen>
+    <dimen name="dim_13">13.0px</dimen>
+    <dimen name="dim_14">14.0px</dimen>
+    <dimen name="dim_15">15.0px</dimen>
+    <dimen name="dim_16">16.0px</dimen>
+    <dimen name="dim_17">17.0px</dimen>
+    <dimen name="dim_18">18.0px</dimen>
+    <dimen name="dim_19">19.0px</dimen>
+    <dimen name="dim_20">20.0px</dimen>
+    <dimen name="dim_21">21.0px</dimen>
+    <dimen name="dim_22">22.0px</dimen>
+    <dimen name="dim_23">23.0px</dimen>
+    <dimen name="dim_24">24.0px</dimen>
+    <dimen name="dim_25">25.0px</dimen>
+    <dimen name="dim_26">26.0px</dimen>
+    <dimen name="dim_27">27.0px</dimen>
+    <dimen name="dim_28">28.0px</dimen>
+    <dimen name="dim_29">29.0px</dimen>
+    <dimen name="dim_30">30.0px</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+
+
+    <!--  <dimen name="text_size_large">25sp</dimen>
+    <dimen name="text_size_medium">18sp</dimen>
+    <dimen name="text_size_small">16sp</dimen>
+    <dimen name="button_width_large">160dp</dimen--><![CDATA[>
+    ]]>
+</resources>

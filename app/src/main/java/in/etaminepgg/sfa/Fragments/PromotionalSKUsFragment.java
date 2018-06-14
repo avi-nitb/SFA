@@ -97,7 +97,7 @@ public class PromotionalSKUsFragment extends Fragment
         promotionalSKUs_RecyclerView.setAdapter(promotionalSKUsAdapter);
     }
 
-    private void networkcall_for_getSKUlistAfter(final String authToken)
+   /* private void networkcall_for_getSKUlistAfter(final String authToken)
     {
         final ProgressDialog progressDialog=new ProgressDialog(getActivity());
         Utils.startProgressDialog(getActivity(),progressDialog);
@@ -364,6 +364,6 @@ public class PromotionalSKUsFragment extends Fragment
         });
 
 
-    }
+    }*/
 
 }

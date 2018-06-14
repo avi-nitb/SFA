@@ -65,26 +65,36 @@
     <LinearLayout
         android:layout_marginTop="5dp"
         android:orientation="horizontal"
+        android:weightSum="3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
-            android:layout_weight="1"
+            android:layout_weight=".7"
             android:fontFamily="@font/lato_bold"
             android:textColor="@android:color/black"
             android:textSize="@dimen/text_size_small"
             android:id="@+id/skuCount_TextView"
-            android:layout_width="120dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Total Items:"/>
+        <TextView
+            android:layout_weight="1.1"
+            android:fontFamily="@font/lato_bold"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_small"
+            android:id="@+id/tv_sku_overall_disc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Overall Disc :"/>
 
         <TextView
-            android:layout_weight="1"
+            android:layout_weight="1.2"
             android:fontFamily="@font/lato_bold"
             android:textColor="@android:color/black"
             android:textSize="@dimen/text_size_small"
             android:id="@+id/orderTotal_TextView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Order Total:"/>
     </LinearLayout>

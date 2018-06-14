@@ -1,6 +1,7 @@
 package in.etaminepgg.sfa.Network;
 
 import in.etaminepgg.sfa.InputModel_For_Network.IM_CreateRetailer;
+import in.etaminepgg.sfa.InputModel_For_Network.IM_GenerateReportSummary;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuInfo;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_IsValidAuthKey;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuListAfter;
@@ -21,6 +22,7 @@ import in.etaminepgg.sfa.Models.GetSkuAttribute;
 import in.etaminepgg.sfa.Models.GetSkuCategorySubCategorylist;
 import in.etaminepgg.sfa.Models.GetSkuInfo;
 import in.etaminepgg.sfa.Models.GetSkuListAfter;
+import in.etaminepgg.sfa.Models.GetSkuListAfterNew;
 import in.etaminepgg.sfa.Models.GetSkuThumbImage;
 import in.etaminepgg.sfa.Models.IsSkuListUpdate;
 import in.etaminepgg.sfa.Models.Location_Model;
@@ -68,7 +70,7 @@ public interface Apimethods
 
 
     @POST(ApiUrl.LOG_URL_GETSKULISTAFTER)
-    Call<GetSkuListAfter> getSkuListAfter(@Body IM_GetSkuListAfter IM_getSkuListAfter);
+    Call<GetSkuListAfterNew> getSkuListAfter(@Body IM_GetSkuListAfter IM_getSkuListAfter);
 
     @POST(ApiUrl.LOG_URL_GETSKUINFO)
     Call<GetSkuInfo> getSkuInfo(@Body IM_GetSkuInfo im_getSkuInfo);
@@ -119,5 +121,9 @@ public interface Apimethods
 
     @POST(ApiUrl.LOG_URL_GETNOORDER_REASONLIST)
     Call<NoOrderReasonList> getNoOrderReasonList(@Body IM_IsValidAuthKey im_isValidAuthKey);
+
+
+    @POST(ApiUrl.LOG_URL_PUTSUMMARYREPORT)
+    Call<ValidAuthModel> setSummaryReport(@Body IM_GenerateReportSummary im_generateReportSummary);
 }
 

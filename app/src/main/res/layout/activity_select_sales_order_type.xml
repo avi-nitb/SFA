@@ -13,7 +13,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorAccent"
+        android:background="@drawable/main_gradient_bg"
         app:contentInsetStartWithNavigation="0dp"/>
 
     <ScrollView
@@ -33,26 +33,28 @@
         android:layout_marginBottom="@dimen/eight_dp"
         android:text="@string/label_sales_order_for"
         android:fontFamily="@font/lato_bold_font"
-        android:textColor="@android:color/holo_blue_dark"
+        android:textColor="@color/colorPrimaryDark"
         android:textSize="@dimen/text_size_large"/>
 
 
         <CheckBox
+            android:layout_marginTop="@dimen/dim_8"
             android:checked="false"
             android:id="@+id/cb_telephone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Order by Telephone"/>
+            android:text="Order by Telephone"
+            android:textSize="@dimen/text_size_medium"/>
 
     <TextView
-        android:layout_marginTop="@dimen/eight_dp"
+        android:layout_marginTop="@dimen/dim_8"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/eight_dp"
         android:text="@string/label_select_order_type"
-        android:textColor="@android:color/black"
-        android:fontFamily="@font/lato_regular"
-        android:textSize="@dimen/text_size_medium"/>
+        android:textColor="@color/colorPrimaryDark"
+        android:fontFamily="@font/lato_bold"
+        android:textSize="@dimen/text_size_large"/>
 
     <RadioGroup
         android:id="@+id/orderTypes_RadioGroup"
@@ -60,34 +62,37 @@
         android:layout_height="wrap_content">
 
         <RadioButton
+            android:layout_marginTop="@dimen/dim_8"
             android:checked="false"
             android:id="@+id/newOrder_RadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/label_new_order"
-            android:textColor="@color/pink500"
+            android:textColor="@color/black"
             android:fontFamily="@font/lato_regular"
-            android:textSize="@dimen/text_size_small"/>
+            android:textSize="@dimen/text_size_medium"/>
 
         <RadioButton
+            android:layout_marginTop="@dimen/dim_8"
             android:checked="false"
             android:id="@+id/newRegularOrder_RadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/label_new_regular_order"
-            android:textColor="@color/pink500"
+            android:textColor="@color/black"
             android:fontFamily="@font/lato_regular"
-            android:textSize="@dimen/text_size_small"/>
+            android:textSize="@dimen/text_size_medium"/>
 
         <RadioButton
+            android:layout_marginTop="@dimen/dim_8"
             android:checked="false"
             android:id="@+id/noOrder_RadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/label_no_order"
-            android:textColor="@color/pink500"
+            android:textColor="@color/black"
             android:fontFamily="@font/lato_regular"
-            android:textSize="@dimen/text_size_small"/>
+            android:textSize="@dimen/text_size_medium"/>
     </RadioGroup>
 
     <LinearLayout
@@ -112,9 +117,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/label_why_enter_reason_below"
-            android:textColor="@android:color/black"
-            android:fontFamily="@font/lato_regular"
-            android:textSize="@dimen/text_size_medium"/>
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="@dimen/text_size_large"
+            android:fontFamily="@font/lato_bold"
+            />
 
         <android.support.design.widget.TextInputLayout
             android:visibility="gone"
@@ -129,7 +135,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/shape_rectangle"
-                android:textColor="@color/pink500"/>
+                android:textColor="@color/black"/>
         </android.support.design.widget.TextInputLayout>
 
     </LinearLayout>

@@ -2,12 +2,17 @@
     <string name="app_name">SFA</string>
 
     <!--tools:context="in.etaminepgg.sfa.Activities.DashboardActivity"-->
+    <string name="pref_previously_started">once installation</string>
+
+
     <string name="nav_item_new_retailer">New Retailer</string>
     <string name="nav_item_update_retailer">Update Retailer</string>
     <string name="nav_item_new_sales_order">New Sales Order</string>
+    <string name="nav_item_download_data">Download Data</string>
     <string name="nav_item_logout">Logout</string>
     <string name="nav_item_my_sales_history">My Sales History</string>
     <string name="nav_item_Profile">Profile</string>
+    <string name="nav_item_UserManual">Help</string>
 
     <string name="open">open</string>
     <string name="close">close</string>
@@ -18,6 +23,9 @@
     <string name="label_frequently_ordered_products">Regular </string>
     <string name="label_all_products">All</string>
 
+
+    <string name="CheckRetailerLocation">Are you at retailer location ?</string>
+
     <string name="key_tab_to_show">TAB</string>
 
     <!--tools:context="in.etaminepgg.sfa.Activities.LoginActivity"-->
@@ -26,8 +34,8 @@
     <string name="input_hint_password">Enter Password</string>
 
     <!--tools:contein.etaminepgg.sfa.Activities.Sameer_SalesSummaryActivityctivityvity"-->
-    <string name="label_retailer_visits_done">Unique Retailer Visits Done&#160;</string>
-    <string name="label__duplicate_retailer_visits_done">Duplicate Retailer Visits Done&#160;</string>
+    <string name="label_retailer_visits_done">Unique Retailer Visits &#160;</string>
+    <string name="label__duplicate_retailer_visits_done">Duplicate Retailer Visits &#160;</string>
     <string name="label_sales_orders_from_retailer_visits">No. of Sales Orders&#160;</string>
     <string name="label_sales_conversion">Sales Conversion&#160;</string>
     <string name="label_sales_value_for_the_day">Sales Value for the Day&#160;</string>
@@ -55,6 +63,8 @@
     <string name="tag_order_id">orderID</string>
 
     <string name="tag_sky_qty_id">sku_qty</string>
+    <string name="tag_sky_freeQty_id">sku_freeQty</string>
+    <string name="tag_sky_discount_id">sku_discount</string>
 
 
     <!--Sameer's Code Below-->
@@ -67,8 +77,9 @@
     <string name="state">State </string>
     <string name="district">District </string>
     <string name="area">Area </string>
-    <string name="capture">Capture Photo</string>
+    <string name="capture">Capture Shop Photo</string>
 
     <string name="low_storage_error">low_storage_error</string>
+    <string name="title_activity_help">HelpActivity</string>
 
 </resources>

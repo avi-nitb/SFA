@@ -11,6 +11,10 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Selection;
+import android.text.SpanWatcher;
+import android.text.Spannable;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +41,7 @@ import in.etaminepgg.sfa.Models.GetSkuAttribute.SkuAttr;
 import in.etaminepgg.sfa.Models.GetSkuInfo;
 import in.etaminepgg.sfa.Models.GetSkuInfo.SkuIds;
 import in.etaminepgg.sfa.Models.GetSkuListAfter;
+import in.etaminepgg.sfa.Models.GetSkuListAfterNew;
 import in.etaminepgg.sfa.Models.GetSkuThumbImage;
 import in.etaminepgg.sfa.Models.IsSkuListUpdate;
 import in.etaminepgg.sfa.Models.SkuGroupHistory;
@@ -98,13 +103,20 @@ public class NewSKUsFragment extends Fragment {
             setAdapter(this.layout);
         } else if (this.mySharedPrefrencesData.getfirsttimeflagfornew(getActivity())) {
             this.mySharedPrefrencesData.setSkulistUpdateDate(getActivity(), Utils.getTodayDate());
-            networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey
-                    (getActivity()));
+
+            if(DbUtils.getSkuRowsSize()<1){
+
+                networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()),false);
+            }
+
         } else {
-            networkcall_for_isskulistUpdated();
+            //networkcall_for_isskulistUpdated();
         }
 
         setAdapter_Category();
+
+
+
 
         return this.layout;
     }
@@ -134,9 +146,7 @@ public class NewSKUsFragment extends Fragment {
 
                         Utils.dismissProgressDialog(progressDialog);
                         NewSKUsFragment.this.isUpdated = true;
-                        NewSKUsFragment.this.networkcall_for_getSKUlistAfter(NewSKUsFragment.this
-                                .mySharedPrefrencesData.getEmployee_AuthKey(NewSKUsFragment.this
-                                        .getActivity()));
+                        NewSKUsFragment.this.networkcall_for_getSKUlistAfter(NewSKUsFragment.this.mySharedPrefrencesData.getEmployee_AuthKey(NewSKUsFragment.this.getActivity()),true);
                         return;
                     }
                     return;
@@ -147,7 +157,7 @@ public class NewSKUsFragment extends Fragment {
 
             public void onFailure(Call<IsSkuListUpdate> call, Throwable t) {
                 Utils.dismissProgressDialog(progressDialog);
-                Utils.showToast(NewSKUsFragment.this.getActivity(), ConstantsA.NO_INTERNET_CONNECTION);
+                Utils.showToast(getContext(), ConstantsA.NO_INTERNET_CONNECTION);
             }
         });
 
@@ -201,7 +211,8 @@ public class NewSKUsFragment extends Fragment {
         newSKUsAdapter.notifyDataSetChanged();*/
     }
 
-    private void networkcall_for_getSKUlistAfter(final String authToken) {
+    private void networkcall_for_getSKUlistAfter(final String authToken, final boolean isUpdated)
+    {
         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
         Utils.startProgressDialog(getActivity(), progressDialog);
         progressDialog.setCancelable(false);
@@ -209,713 +220,177 @@ public class NewSKUsFragment extends Fragment {
         final Apimethods methods = (Apimethods) API_Call_Retrofit.getretrofit(getActivity())
                 .create(Apimethods.class);
         String date_str = "";
-        if (this.mySharedPrefrencesData.getfirsttimeflagfornew(getActivity())) {
+        if (this.mySharedPrefrencesData.getfirsttimeflagforAll(getActivity()))
+        {
             date_str = "2016-05-25";
-        } else {
+        }
+        else
+        {
             date_str = this.mySharedPrefrencesData.getSkulistUpdateDate(getActivity());
         }
         IM_GetSkuListAfter IM_getSkuListAfter = new IM_GetSkuListAfter(authToken, this.type,
                 date_str);
-        Call<GetSkuListAfter> call = methods.getSkuListAfter(IM_getSkuListAfter);
+        Call<GetSkuListAfterNew> call = methods.getSkuListAfter(IM_getSkuListAfter);
         Log.i("GetSkuListAfter_ip_new", new Gson().toJson(IM_getSkuListAfter));
         Log.d("url", "url=" + call.request().url().toString());
 
-
-        call.enqueue(new Callback<GetSkuListAfter>() {
+        call.enqueue(new Callback<GetSkuListAfterNew>()
+        {
             @Override
-            public void onResponse(Call<GetSkuListAfter> call, Response<GetSkuListAfter> response) {
+            public void onResponse(Call<GetSkuListAfterNew> call, Response<GetSkuListAfterNew> response)
+            {
+
+
                 Log.d("Response", "" + response.code());
                 Log.d("respones", "" + response);
-                if (response.isSuccessful()) {
-                    NewSKUsFragment.this.mySharedPrefrencesData.setfirsttimeflagfornew
-                            (NewSKUsFragment.this.getActivity(), false);
-                    GetSkuListAfter getSkuListAfter = (GetSkuListAfter) response.body();
+
+                if (response.isSuccessful())
+                {
+
+                    GetSkuListAfterNew getSkuListAfter = (GetSkuListAfterNew) response.body();
                     Log.i("GetSkuListAfter_op_new", new Gson().toJson(getSkuListAfter));
-                    if (getSkuListAfter.getApiStatus().intValue() == 1) {
-                        NewSKUsFragment.this.a = getSkuListAfter.getSkuIds().size();
-                        for (GetSkuListAfter.SkuInfo skuInfo : getSkuListAfter.getSkuIds()) {
 
-                            if (skuInfo.getOp_type() == null) {
+                    mySharedPrefrencesData.setfirsttimeflagfornew(getActivity(),false);
 
-                                if (!DbUtils.isSKUPresentInDb(skuInfo.getSku_id())) {
+                    if (getSkuListAfter.getApiStatus().intValue() == 1)
+                    {
 
-                                    networkcall_for_sku_info(skuInfo.getSku_id(), authToken, skuInfo.getMod_type());
-                                }else{
+                        for (GetSkuListAfterNew.SkuId skuId_Info : getSkuListAfter.getSkuIds())
+                        {
 
-                                    a--;
+                            ContentValues skuValues = new ContentValues();
+                            skuValues.put(ConstantsA.KEY_SKU_ID, skuId_Info.getSkuId());
+                            skuValues.put("sku_name", skuId_Info.getSkuName());
+                            skuValues.put("sku_price", skuId_Info.getSkuPrice());
+                            skuValues.put("description", skuId_Info.getSkuDescription());
+                            skuValues.put("sku_category", skuId_Info.getSkuCategory());
+                            skuValues.put("sku_sub_category", skuId_Info.getSkuSubCategory());
+                            skuValues.put("sku_category_description", skuId_Info.getCategoryDescription());
+                            skuValues.put("sku_sub_category_description", skuId_Info.getSubCategoryDescription());
+                            skuValues.put("new_sku", skuId_Info.getSkuNewFlag());
+                            skuValues.put("upload_status", Integer.valueOf(1));
+
+
+                            for (GetSkuListAfterNew.SkuId.SkuMedium skuMedia : skuId_Info.getSkuMedia())
+                            {
+                                String selection = "sku_id = ?";
+                                String[] selectionArgs = new String[]{skuMedia.getSkuId()};
+                                if (skuMedia.getMediaType().equalsIgnoreCase("photo"))
+                                {
+
+                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2)
+                                    {
+
+
+                                        String sku_photourl_from_server = skuMedia.getMediaFile();
+
+                                        skuValues.put("sku_photo_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
+
+
+                                    }
+                                    else
+                                    {
+
+                                        skuValues.put("sku_photo_source", NOT_PRESENT);
+
+
+                                    }
                                 }
+                                else if (skuMedia.getMediaType().equalsIgnoreCase
+                                        ("catalogue"))
+                                {
 
-                            } else if (skuInfo.getOp_type().equalsIgnoreCase(Constants.OP_TYPE_SKU_NEW)) {
+                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2)
+                                    {
 
-                                if (!DbUtils.isSKUPresentInDb(skuInfo.getSku_id())) {
+                                        String sku_photourl_from_server = skuMedia.getMediaFile();
 
-                                    networkcall_for_sku_info(skuInfo.getSku_id(), authToken, skuInfo.getMod_type());
-                                }else{
+                                        skuValues.put("sku_catalogue_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
 
-                                    a--;
+
+                                    }
+                                    else
+                                    {
+
+                                        skuValues.put("sku_catalogue_source", NOT_PRESENT);
+
+
+                                    }
+
+
                                 }
-                            } else if (skuInfo.getOp_type().equalsIgnoreCase(Constants.OP_TYPE_SKU_MODIFICATION)) {
+                                else if (skuMedia.getMediaType().equalsIgnoreCase
+                                        ("video"))
+                                {
 
-                                networkcall_for_sku_info(skuInfo.getSku_id(), authToken, skuInfo.getMod_type());
+                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2)
+                                    {
 
 
-                            } else {
+                                        String sku_photourl_from_server = skuMedia.getMediaFile();
 
+                                        skuValues.put("sku_video_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
+
+
+                                    }
+                                    else
+                                    {
+
+                                        skuValues.put("sku_video_source", NOT_PRESENT);
+
+
+                                    }
+
+                                }
+                                else
+                                {
+
+                                }
+                            }
+
+                            if(!DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && !isUpdated){
+
+                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
+
+                            }else if(DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && isUpdated){
+
+                                delete_sku_row_from_db(skuId_Info.getSkuId());
+
+                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
                             }
 
 
-                           /* if (DbUtils.isSKUPresentInDb(skuInfo.getSku_id()))
-                            {
-                                updatesku_new(skuInfo.getSku_id());
-
-                                a--;
-                            }
-                            else
-                            {
-                                networkcall_for_sku_info(skuInfo.getSku_id(), authToken);
-                            }*/
                         }
-                        Log.d("ab value",a+" :"+b);
-                        if(a==0 && b==0){
 
-                            Utils.dismissProgressDialog(progressDialog);
-                        }
-                        NewSKUsFragment.this.setAdapter(NewSKUsFragment.this.layout);
-                        return;
+
+                        ((SkuListByGenreActivity)getActivity()).setAdapterForSearch();
+
+                        Utils.dismissProgressDialog(progressDialog);
+
                     }
-                    return;
+
+
                 }
+
                 Utils.dismissProgressDialog(progressDialog);
                 NewSKUsFragment.this.setAdapter(NewSKUsFragment.this.layout);
             }
 
-            private void networkcall_for_sku_Attr(String sku_id, String authToken, final String modificationtype) {
-                Call<GetSkuAttribute> call = methods.getSkuAttr(new IM_GetSkuInfo(authToken, sku_id));
-
-                final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-                Utils.startProgressDialog(getActivity(), progressDialog);
-
-
-                Log.d("url", "url=" + call.request().url().toString());
-                call.enqueue(new Callback<GetSkuAttribute>() {
-                    public void onResponse(Call<GetSkuAttribute> call, Response<GetSkuAttribute>
-                            response) {
-                        Log.d("Response", "" + response.code());
-                        Log.d("respones", "" + response);
-                        if (response.isSuccessful()) {
-
-                            Utils.dismissProgressDialog(progressDialog);
-                            GetSkuAttribute getSkuAttribute = (GetSkuAttribute) response.body();
-                            if (getSkuAttribute.getApiStatus().intValue() == 1) {
-
-                                    for (int j = 0; j < getSkuAttribute.getSkuAttr().size(); j++) {
-                                        SkuAttr skuAttr = (SkuAttr) getSkuAttribute.getSkuAttr().get(j);
-
-                                        ContentValues skuAttrMappingValues = new ContentValues();
-                                        skuAttrMappingValues.put(ConstantsA.KEY_SKU_ID, skuAttr.getSkuId());
-                                        skuAttrMappingValues.put("attribute_id", skuAttr.getGlobalAttributeId());
-                                        skuAttrMappingValues.put("upload_status", Integer.valueOf(0));
-
-                                        String[] attributevalue_array = skuAttr.getAttributeValue().split(",");
-                                        StringBuilder builder = new StringBuilder();
-                                        for (String s : attributevalue_array) {
-                                            builder.append(s);
-                                            builder.append("`");
-                                        }
-                                        String attributevalueset = builder.toString();
-                                        String attr_value_set_final = attributevalueset.substring(0, attributevalueset.length() - 1);
-
-                                        ContentValues globalAttributeValues = new ContentValues();
-                                        globalAttributeValues.put("attribute_id", skuAttr.getGlobalAttributeId());
-                                        globalAttributeValues.put("attribute_type", skuAttr.getAttributeType());
-                                        globalAttributeValues.put("attribute_name", skuAttr.getAttributeName());
-                                        globalAttributeValues.put("attribute_value", attr_value_set_final);
-                                        globalAttributeValues.put("created_date", skuAttr.getCreatedOn());
-                                        globalAttributeValues.put("upload_status", Integer.valueOf(0));
-
-                                        if(modificationtype==null){
-
-                                            NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU_ATTRIBUTE_MAPPING, null, skuAttrMappingValues);
-                                            NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_GLOBAL_ATTRIBUTES, null, globalAttributeValues);
-
-                                        }else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR) || modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR)){
-
-
-                                            if (DbUtils.isAttribute_IDPresentInDb(skuAttr.getAttributeId())) {
-
-                                                NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU_ATTRIBUTE_MAPPING, skuAttrMappingValues, " attribute_id =  ? ", new String[]{skuAttr.getAttributeId()});
-
-                                                NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_GLOBAL_ATTRIBUTES, globalAttributeValues, " attribute_id = ?", new String[]{skuAttr.getGlobalAttributeId()});
-                                            }else {
-
-                                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU_ATTRIBUTE_MAPPING, null, skuAttrMappingValues);
-                                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_GLOBAL_ATTRIBUTES, null, globalAttributeValues);
-                                            }
-                                        }else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_MULTIMEDIA_AND_INFO) || modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_INFO_AND_MULTIMEDIA)){
-
-                                        }else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_INFO_AND_ATTR) || modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR_AND_INFO)){
-
-
-                                            if (DbUtils.isAttribute_IDPresentInDb(skuAttr.getAttributeId())) {
-
-                                                NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU_ATTRIBUTE_MAPPING, skuAttrMappingValues, " attribute_id =  ? ", new String[]{skuAttr.getAttributeId()});
-
-                                                NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_GLOBAL_ATTRIBUTES, globalAttributeValues, " attribute_id = ?", new String[]{skuAttr.getGlobalAttributeId()});
-                                            }else {
-
-                                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU_ATTRIBUTE_MAPPING, null, skuAttrMappingValues);
-                                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_GLOBAL_ATTRIBUTES, null, globalAttributeValues);
-                                            }
-                                        }else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_MULTIMEDIA_AND_ATTR) || modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR_AND_MULTIMEDIA)){
-
-                                            if (DbUtils.isAttribute_IDPresentInDb(skuAttr.getAttributeId())) {
-
-                                                NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU_ATTRIBUTE_MAPPING, skuAttrMappingValues, " attribute_id =  ? ", new String[]{skuAttr.getAttributeId()});
-
-                                                NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_GLOBAL_ATTRIBUTES, globalAttributeValues, " attribute_id = ?", new String[]{skuAttr.getGlobalAttributeId()});
-                                            }else {
-
-                                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU_ATTRIBUTE_MAPPING, null, skuAttrMappingValues);
-                                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_GLOBAL_ATTRIBUTES, null, globalAttributeValues);
-                                            }
-
-                                        }else if(modificationtype.contains(Constants.MOD_TYPE_SKU_ATTR) && modificationtype.contains(Constants.MOD_TYPE_SKU_MULTIMEDIA) && modificationtype.contains(Constants.MOD_TYPE_SKU_INFO) ){
-                                            if (DbUtils.isAttribute_IDPresentInDb(skuAttr.getAttributeId())) {
-
-                                                NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU_ATTRIBUTE_MAPPING, skuAttrMappingValues, " attribute_id =  ? ", new String[]{skuAttr.getAttributeId()});
-
-                                                NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_GLOBAL_ATTRIBUTES, globalAttributeValues, " attribute_id = ?", new String[]{skuAttr.getGlobalAttributeId()});
-                                            }else {
-
-                                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU_ATTRIBUTE_MAPPING, null, skuAttrMappingValues);
-                                                NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_GLOBAL_ATTRIBUTES, null, globalAttributeValues);
-                                            }
-                                        }
-                                    }
-
-                                Utils.dismissProgressDialog(progressDialog);
-                               /* if (NewSKUsFragment.this.a == NewSKUsFragment.this.b) {
-                                    Utils.dismissProgressDialog(progressDialog);
-                                    NewSKUsFragment.this.setAdapter(NewSKUsFragment.this.layout);
-                                    return;
-                                }*/
-
-                                return;
-                            }
-                            return;
-                        }
-                        Utils.dismissProgressDialog(progressDialog);
-                        //Utils.showToast(NewSKUsFragment.this.getActivity(), "Unsuccessful api " + "call for GetSkuAttribute ");
-                    }
-
-                    public void onFailure(Call<GetSkuAttribute> call, Throwable t) {
-                        Utils.dismissProgressDialog(progressDialog);
-                        Utils.showToast(NewSKUsFragment.this.getActivity(), ConstantsA.NO_INTERNET_CONNECTION);
-                    }
-                });
-
-            }
-
-            private void networkcall_for_sku_info(final String sku_id, final String authToken, final String modificationtype) {
-
-
-
-                Call<GetSkuInfo> call = methods.getSkuInfo(new IM_GetSkuInfo(authToken, sku_id));
-                Log.d("url", "url=" + call.request().url().toString());
-                call.enqueue(new Callback<GetSkuInfo>() {
-                    public void onResponse(Call<GetSkuInfo> call, Response<GetSkuInfo> response) {
-                        Log.d("Response", "" + response.code());
-                        Log.d("respones", "" + response);
-                        if (response.isSuccessful()) {
-
-                            GetSkuInfo getSkuInfo = (GetSkuInfo) response.body();
-                            if (getSkuInfo.getApiStatus().intValue() == 1) {
-
-
-                                SkuIds skuId_Info = getSkuInfo.getSkuIds();
-                                ContentValues skuValues = new ContentValues();
-                                skuValues.put(ConstantsA.KEY_SKU_ID, skuId_Info.getSkuId());
-                                skuValues.put("sku_name", skuId_Info.getSkuName());
-                                skuValues.put("sku_price", skuId_Info.getSkuPrice());
-                                skuValues.put("description", skuId_Info.getSkuDescription());
-                                skuValues.put("sku_category", skuId_Info.getSkuCategory());
-                                skuValues.put("sku_sub_category", skuId_Info.getSkuSubCategory());
-                                skuValues.put("sku_category_description", skuId_Info.getCategory_description());
-                                skuValues.put("sku_sub_category_description", skuId_Info.getSub_category_description());
-                                skuValues.put("created_date", skuId_Info.getSkuCreatedOn());
-                                skuValues.put("modified_date", skuId_Info.getSkuModifiedOn());
-                                skuValues.put("created_by", skuId_Info.getSkuCreatedBy());
-                                skuValues.put("modified_by", skuId_Info.getSkuModifiedBy());
-                                skuValues.put("new_sku", skuId_Info.getSkuNewFlag());
-                                skuValues.put("upload_status", Integer.valueOf(1));
-
-                                if (modificationtype == null) {
-
-
-                                    NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
-                                    networkcall_for_sku_ThumbImage(skuId_Info.getSkuId(), authToken, modificationtype);
-
-                                } else if (modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_INFO)) {
-                                    if(DbUtils.isSKUPresentInDb(sku_id)){
-                                        a--;
-                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, skuValues, " sku_id = ? ", new String[]{skuId_Info.getSkuId()});
-                                    }else {
-
-                                        NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
-                                        networkcall_for_sku_ThumbImage(skuId_Info.getSkuId(), authToken, modificationtype);
-
-                                    }
-
-
-                                } else if (modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR)) {
-
-                                    if(DbUtils.isSKUPresentInDb(sku_id)){
-                                        networkcall_for_sku_ThumbImage(sku_id, authToken, modificationtype);
-                                    }else {
-
-                                        NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
-                                        networkcall_for_sku_ThumbImage(skuId_Info.getSkuId(), authToken, modificationtype);
-                                    }
-                                } else if (modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_MULTIMEDIA)) {
-
-                                    if(DbUtils.isSKUPresentInDb(sku_id)){
-                                        networkcall_for_sku_ThumbImage(sku_id, authToken, modificationtype);
-                                    }else {
-
-                                        NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
-                                        networkcall_for_sku_ThumbImage(skuId_Info.getSkuId(), authToken, modificationtype);
-                                    }
-                                } else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_MULTIMEDIA_AND_INFO)|| modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_INFO_AND_MULTIMEDIA)){
-
-                                    if(DbUtils.isSKUPresentInDb(sku_id)){
-                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, skuValues, " sku_id = ? ", new String[]{skuId_Info.getSkuId()});
-                                        networkcall_for_sku_ThumbImage(sku_id, authToken, modificationtype);
-                                    }else {
-
-                                        NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
-                                        networkcall_for_sku_ThumbImage(skuId_Info.getSkuId(), authToken, modificationtype);
-                                    }
-
-                                }else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_INFO_AND_ATTR)|| modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR_AND_INFO)){
-
-                                    if(DbUtils.isSKUPresentInDb(sku_id)){
-                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, skuValues, " sku_id = ? ", new String[]{skuId_Info.getSkuId()});
-                                        networkcall_for_sku_ThumbImage(sku_id, authToken, modificationtype);
-                                    }else {
-
-                                        NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
-                                        networkcall_for_sku_ThumbImage(skuId_Info.getSkuId(), authToken, modificationtype);
-                                    }
-
-                                }else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_MULTIMEDIA_AND_ATTR)|| modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR_AND_MULTIMEDIA)){
-                                    if(DbUtils.isSKUPresentInDb(sku_id)){
-
-                                        networkcall_for_sku_ThumbImage(sku_id, authToken, modificationtype);
-
-                                    }else {
-
-                                        NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
-                                        networkcall_for_sku_ThumbImage(skuId_Info.getSkuId(), authToken, modificationtype);
-                                    }
-                                }else if(modificationtype.contains(Constants.MOD_TYPE_SKU_ATTR) && modificationtype.contains(Constants.MOD_TYPE_SKU_MULTIMEDIA) && modificationtype.contains(Constants.MOD_TYPE_SKU_INFO) ){
-                                    if(DbUtils.isSKUPresentInDb(sku_id)){
-                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, skuValues, " sku_id = ? ", new String[]{skuId_Info.getSkuId()});
-                                        networkcall_for_sku_ThumbImage(sku_id, authToken, modificationtype);
-                                    }else {
-
-                                        NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
-                                        networkcall_for_sku_ThumbImage(skuId_Info.getSkuId(), authToken, modificationtype);
-                                    }
-                                }
-
-                                return;
-                            }
-                            return;
-                        }else {
-                            a--;
-                            Utils.showToast(NewSKUsFragment.this.getActivity(), "NEW : Unsuccessful " +
-                                    "api call for getskuinfo ");
-                        }
-
-                    }
-
-                    private void networkcall_for_sku_ThumbImage(final String sku_id, final String
-                            authToken, final String modificationtype) {
-                        Call<GetSkuThumbImage> call = methods.getSkuThumbImage(new IM_GetSkuInfo(authToken, sku_id));
-
-
-                        Log.d("url", "url=" + call.request().url().toString());
-                        call.enqueue(new Callback<GetSkuThumbImage>() {
-                            public void onResponse(Call<GetSkuThumbImage> call,
-                                                   Response<GetSkuThumbImage> response) {
-                                Log.d("Response", "" + response.code());
-                                Log.d("respones", "" + response);
-                                if (response.isSuccessful()) {
-
-                                    GetSkuThumbImage getSkuThumbImage = (GetSkuThumbImage) response.body();
-
-
-                                    if (getSkuThumbImage.getApiStatus().intValue() == 1) {
-
-                                        if (modificationtype == null || modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_MULTIMEDIA) || modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_INFO)) {
-
-
-                                            for (GetSkuThumbImage.SkuMedium skuMedia : getSkuThumbImage.getSkuMedia()) {
-                                                String selection = "sku_id = ?";
-                                                String[] selectionArgs = new String[]{skuMedia.getSkuId()};
-                                                if (skuMedia.getMediaType().equalsIgnoreCase("photo")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_photo_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_photo_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-                                                } else if (skuMedia.getMediaType().equalsIgnoreCase
-                                                        ("catalogue")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_catalogue_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_catalogue_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-
-
-                                                } else if (skuMedia.getMediaType().equalsIgnoreCase
-                                                        ("video")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_video_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_video_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-
-                                                } else {
-
-                                                }
-                                            }
-
-
-
-                                            if(is_Attribute){
-
-                                                networkcall_for_sku_Attr(sku_id, authToken, modificationtype);
-                                            }
-
-
-                                        } else if (modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR)) {
-
-
-
-                                            if(is_Attribute){
-
-                                                networkcall_for_sku_Attr(sku_id, authToken, modificationtype);
-                                            }
-
-                                        } else if(modificationtype.equalsIgnoreCase(MOD_TYPE_SKU_MULTIMEDIA_AND_INFO) || modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_INFO_AND_MULTIMEDIA)){
-
-
-                                            for (GetSkuThumbImage.SkuMedium skuMedia : getSkuThumbImage.getSkuMedia()) {
-                                                String selection = "sku_id = ?";
-                                                String[] selectionArgs = new String[]{skuMedia.getSkuId()};
-                                                if (skuMedia.getMediaType().equalsIgnoreCase("photo")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_photo_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_photo_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-                                                } else if (skuMedia.getMediaType().equalsIgnoreCase
-                                                        ("catalogue")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_catalogue_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_catalogue_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-
-
-                                                } else if (skuMedia.getMediaType().equalsIgnoreCase
-                                                        ("video")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_video_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_video_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-
-                                                } else {
-
-                                                }
-                                            }
-
-                                        }else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_INFO_AND_ATTR)|| modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR_AND_INFO)){
-                                            if(is_Attribute){
-
-                                                networkcall_for_sku_Attr(sku_id, authToken, modificationtype);
-                                            }
-
-                                        }else if(modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_MULTIMEDIA_AND_ATTR)|| modificationtype.equalsIgnoreCase(Constants.MOD_TYPE_SKU_ATTR_AND_MULTIMEDIA)){
-
-
-
-                                            for (GetSkuThumbImage.SkuMedium skuMedia : getSkuThumbImage.getSkuMedia()) {
-                                                String selection = "sku_id = ?";
-                                                String[] selectionArgs = new String[]{skuMedia.getSkuId()};
-                                                if (skuMedia.getMediaType().equalsIgnoreCase("photo")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_photo_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_photo_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-                                                } else if (skuMedia.getMediaType().equalsIgnoreCase
-                                                        ("catalogue")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_catalogue_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_catalogue_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-
-
-                                                } else if (skuMedia.getMediaType().equalsIgnoreCase
-                                                        ("video")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_video_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_video_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-
-                                                } else {
-
-                                                }
-                                            }
-
-                                            if(is_Attribute){
-
-                                                networkcall_for_sku_Attr(sku_id, authToken, modificationtype);
-                                            }
-                                        }else if(modificationtype.contains(Constants.MOD_TYPE_SKU_ATTR) && modificationtype.contains(Constants.MOD_TYPE_SKU_MULTIMEDIA) && modificationtype.contains(Constants.MOD_TYPE_SKU_INFO) ){
-
-
-
-                                            for (GetSkuThumbImage.SkuMedium skuMedia : getSkuThumbImage.getSkuMedia()) {
-                                                String selection = "sku_id = ?";
-                                                String[] selectionArgs = new String[]{skuMedia.getSkuId()};
-                                                if (skuMedia.getMediaType().equalsIgnoreCase("photo")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_photo_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_photo_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-                                                } else if (skuMedia.getMediaType().equalsIgnoreCase
-                                                        ("catalogue")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_catalogue_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_catalogue_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-
-
-                                                } else if (skuMedia.getMediaType().equalsIgnoreCase
-                                                        ("video")) {
-
-                                                    if (skuMedia.getMediaFile() != null && skuMedia.getMediaFile().length() > 2) {
-
-
-                                                        String sku_photourl_from_server = skuMedia.getMediaFile();
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_video_source", ApiUrl.BASEURL_SKUTHUMBIMAGE + DashboardActivity.substringAfterLastSeparator(sku_photourl_from_server, "/"));
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    } else {
-                                                        ContentValues contentValues = new ContentValues();
-                                                        contentValues.put("sku_video_source", NOT_PRESENT);
-                                                        NewSKUsFragment.this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, selection, selectionArgs);
-
-                                                    }
-
-                                                } else {
-
-                                                }
-                                            }
-
-                                            if(is_Attribute){
-
-                                                networkcall_for_sku_Attr(sku_id, authToken, modificationtype);
-                                            }
-
-                                        }
-
-
-                                        NewSKUsFragment newSKUsFragment = NewSKUsFragment.this;
-                                        b++;
-
-                                        Log.d("ab value",a+" :"+b);
-
-                                        if(a==b){
-
-                                            Utils.dismissProgressDialog(progressDialog);
-
-
-                                            /// search adapter in activity
-                                            ((SkuListByGenreActivity) getActivity()).setAdapterForSearch();
-
-                                        }
-
-                                        return;
-                                    }
-                                    return;
-                                }else {
-
-                                    a--;
-
-                                    if(a==b){
-
-                                        Utils.dismissProgressDialog(progressDialog);
-                                        /// search adapter in activity
-                                        ((SkuListByGenreActivity) getActivity()).setAdapterForSearch();
-
-                                    }
-                                }
-                               // Utils.dismissProgressDialog(progressDialog);
-                             //   Utils.showToast(NewSKUsFragment.this.getActivity(), "Unsuccessful" + " api call for getskuinfo_thumbimage ");
-                            }
-
-                            public void onFailure(Call<GetSkuThumbImage> call, Throwable t) {
-                                a--;
-                                Utils.dismissProgressDialog(progressDialog);
-                                Utils.showToast(NewSKUsFragment.this.getActivity(), ConstantsA.NO_INTERNET_CONNECTION);
-                            }
-                        });
-                    }
-
-                    public void onFailure(Call<GetSkuInfo> call, Throwable t) {
-                        a--;
-                        Utils.dismissProgressDialog(progressDialog);
-                        Utils.showToast(NewSKUsFragment.this.getActivity(), ConstantsA.NO_INTERNET_CONNECTION);
-                    }
-                });
-            }
-
             @Override
-            public void onFailure(Call<GetSkuListAfter> call, Throwable t) {
+            public void onFailure(Call<GetSkuListAfterNew> call, Throwable t)
+            {
                 Utils.dismissProgressDialog(progressDialog);
                 Utils.showToast(NewSKUsFragment.this.getActivity(), ConstantsA.NO_INTERNET_CONNECTION);
             }
         });
-
     }
 
-    private void updatesku_new(String sku_id) {
-        String[] selectionArgs = new String[]{sku_id};
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("new_sku", "1");
-        this.sqLiteDatabase.update(Constants.TBL_SKU, contentValues, "sku_id = ?", selectionArgs);
-    }
+
 
     private void delete_sku_row_from_db(String sku_id) {
         String selection = "sku_id = ?";
         String[] selectionArgs = new String[]{sku_id};
-        Cursor cursor = this.sqLiteDatabase.rawQuery("SELECT attribute_id FROM " + Constants
+       /* Cursor cursor = this.sqLiteDatabase.rawQuery("SELECT attribute_id FROM " + Constants
                 .TBL_SKU_ATTRIBUTE_MAPPING + " WHERE sku_id = ?", selectionArgs);
         while (cursor.moveToNext()) {
             String[] selectionArgs1 = new String[]{cursor.getString(cursor.getColumnIndexOrThrow
@@ -923,7 +398,7 @@ public class NewSKUsFragment extends Fragment {
             this.sqLiteDatabase.delete(Constants.TBL_GLOBAL_ATTRIBUTES, "attribute_id = ?",
                     selectionArgs1);
         }
-        this.sqLiteDatabase.delete(Constants.TBL_SKU_ATTRIBUTE_MAPPING, selection, selectionArgs);
+        this.sqLiteDatabase.delete(Constants.TBL_SKU_ATTRIBUTE_MAPPING, selection, selectionArgs);*/
         this.sqLiteDatabase.delete(Constants.TBL_SKU, selection, selectionArgs);
     }
 }

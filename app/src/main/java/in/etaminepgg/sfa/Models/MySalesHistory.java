@@ -11,6 +11,7 @@ public class MySalesHistory
     private String orderDate;
     private String skuCount;
     private String orderTotal;
+    private String total_discount;
 
     private List<SkuDetails_Ordered> sku_Details_ordered;
 
@@ -28,13 +29,24 @@ public class MySalesHistory
     {
     }
 
-    public MySalesHistory(String orderId, String retailerId, String orderDate, String skuCount, String orderTotal, List<SkuDetails_Ordered> sku_Details_ordered)
+  /*  public MySalesHistory(String orderId, String retailerId, String orderDate, String skuCount, String orderTotal, List<SkuDetails_Ordered> sku_Details_ordered)
     {
         this.orderId = orderId;
         this.retailerId = retailerId;
         this.orderDate = orderDate;
         this.skuCount = skuCount;
         this.orderTotal = orderTotal;
+        this.sku_Details_ordered = sku_Details_ordered;
+    }*/
+
+    public MySalesHistory(String orderId, String retailerId, String orderDate, String skuCount, String orderTotal, String total_discount, List<SkuDetails_Ordered> sku_Details_ordered)
+    {
+        this.orderId = orderId;
+        this.retailerId = retailerId;
+        this.orderDate = orderDate;
+        this.skuCount = skuCount;
+        this.orderTotal = orderTotal;
+        this.total_discount = total_discount;
         this.sku_Details_ordered = sku_Details_ordered;
     }
 
@@ -98,19 +110,34 @@ public class MySalesHistory
         this.sku_Details_ordered = sku_Details_ordered;
     }
 
+    public String getTotal_discount()
+    {
+        return total_discount;
+    }
+
+    public void setTotal_discount(String total_discount)
+    {
+        this.total_discount = total_discount;
+    }
+
     public class SkuDetails_Ordered
     {
 
         private String sku_id;
         private String sku_name;
         private String sku_qty;
+        private String sku_free_qty;
+        private String sku_discount;
         private String sku_finalprice;
 
-        public SkuDetails_Ordered(String sku_id, String sku_name, String sku_qty, String sku_finalprice)
+
+        public SkuDetails_Ordered(String sku_id, String sku_name, String sku_qty, String sku_free_qty, String sku_discount, String sku_finalprice)
         {
             this.sku_id = sku_id;
             this.sku_name = sku_name;
             this.sku_qty = sku_qty;
+            this.sku_free_qty = sku_free_qty;
+            this.sku_discount = sku_discount;
             this.sku_finalprice = sku_finalprice;
         }
 
@@ -152,6 +179,26 @@ public class MySalesHistory
         public void setSku_finalprice(String sku_finalprice)
         {
             this.sku_finalprice = sku_finalprice;
+        }
+
+        public String getSku_free_qty()
+        {
+            return sku_free_qty;
+        }
+
+        public void setSku_free_qty(String sku_free_qty)
+        {
+            this.sku_free_qty = sku_free_qty;
+        }
+
+        public String getSku_discount()
+        {
+            return sku_discount;
+        }
+
+        public void setSku_discount(String sku_discount)
+        {
+            this.sku_discount = sku_discount;
         }
     }
 }

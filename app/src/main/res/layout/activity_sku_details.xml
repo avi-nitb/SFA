@@ -13,7 +13,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorAccent"
+        android:background="@drawable/main_gradient_bg"
         app:contentInsetStartWithNavigation="0dp"/>
 
     <LinearLayout
@@ -35,7 +35,7 @@
             android:text="Name: No SKU in DB"
             android:fontFamily="@font/lato_bold"
             android:textColor="@color/colorYellow"
-            android:textSize="@dimen/text_size_large"/>
+            android:textSize="@dimen/text_size_medium"/>
 
         <TextView
             android:id="@+id/skuPrice_TextView"
@@ -45,7 +45,7 @@
             android:text="Price: No SKU in DB"
             android:textColor="@color/black"
             android:layout_marginTop="5dp"
-            android:textSize="@dimen/text_size_large"/>
+            android:textSize="@dimen/text_size_medium"/>
 
         <TextView
             android:id="@+id/sku_SO_Attr_TextView"
@@ -92,7 +92,7 @@
             android:textColor="@android:color/black"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            android:textSize="@dimen/text_size_large"/>
+            android:textSize="@dimen/text_size_medium"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/similarSKUs_RecyclerView"

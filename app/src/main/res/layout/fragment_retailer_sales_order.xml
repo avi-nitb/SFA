@@ -3,9 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:fitsSystemWindows="true"
-    tools:context="in.etaminepgg.sfa.Fragments.NewSKUsFragment">
+    tools:context="in.etaminepgg.sfa.Fragments.SalesOrderFragment">
 
     <LinearLayout
         android:id="@+id/salesOrder_LinearLayout_outer"
@@ -16,9 +14,56 @@
         <LinearLayout
             android:id="@+id/salesOrder_LinearLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:visibility="gone">
+
+            <TextView
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="@dimen/dim_40"
+                android:layout_marginTop="@dimen/dim_8"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:drawableRight="@drawable/ic_delete"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_orderretailername_header"
+                android:fontFamily="@font/lato_bold"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/dim_20"
+                android:text=""/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="@dimen/dim_8"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_order_id"
+                    android:fontFamily="@font/lato_bold"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="@dimen/dim_14"
+                    android:text="Order ID :"/>
+
+                <TextView
+                    android:layout_alignParentRight="true"
+                    android:layout_alignBaseline="@+id/tv_order_id"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="@dimen/dim_8"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_order_date"
+                    android:fontFamily="@font/lato_bold"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="@dimen/dim_14"
+                    android:text="Order Date :"/>
+
+            </RelativeLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/salesOrder_RecyclerView"
@@ -27,60 +72,168 @@
                 tools:context="in.etaminepgg.sfa.Fragments.NewSKUsFragment"/>
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Discount"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="15sp"
-                    android:padding="5dp"/>
-
-                <EditText
-                    android:id="@+id/order_discount_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:focusable="auto"
-                    android:inputType="number"
-                    android:textSize="15dp"
-                    android:textStyle="bold"/>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/orderSummary_TextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/eight_dp"
-                android:gravity="center_horizontal"
-                android:textColor="@color/colorGreen"
-                android:textSize="@dimen/text_size_small"
-                android:textStyle="bold"/>
+                android:id="@+id/linlay_price"
+                android:orientation="vertical">
 
-            <CheckBox
-                android:id="@+id/setOrderAsRegularOrder_CheckBox"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/sixteen_dp"
-                android:text="@string/label_set_this_order_as_regular_order"/>
+                <TextView
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="@dimen/dim_16"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_orderretailername"
+                    android:fontFamily="@font/lato_bold"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="@dimen/dim_14"
+                    android:text=""/>
 
-            <Button
-                android:id="@+id/submitSalesOrder_Button"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/sixteen_dp"
-                android:layout_marginTop="@dimen/sixteen_dp"
-                android:text="@string/label_submit_sales_order"/>
+                <LinearLayout
+                    android:background="@drawable/border_rect"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:padding="3dp">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_margin="3dp"
+                        android:layout_width="match_parent"
+                        android:text="Pricing details"
+                        android:textColor="@color/black"
+                        android:fontFamily="@font/lato_bold"
+                        android:textSize="@dimen/dim_14"/>
+
+                    <RelativeLayout
+                        android:layout_height="wrap_content"
+                        android:layout_margin="3dp"
+                        android:layout_width="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:text="Total"
+                            android:fontFamily="@font/lato_regular"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/dim_14"/>
+
+                        <TextView
+                            android:layout_alignParentRight="true"
+                            android:id="@+id/orderSummary_TextView"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:layout_width="wrap_content"
+                            android:text="Rs. 0.00"
+                            android:textSize="@dimen/text_size_medium_double"
+                            android:fontFamily="@font/lato_bold"
+                            android:textColor="@color/black"/>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_height="wrap_content"
+                        android:layout_margin="3dp"
+                        android:layout_width="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:fontFamily="@font/lato_regular"
+                            android:textColor="@color/black"
+                            android:text="Overall Discount"
+                            android:textSize="@dimen/dim_14"/>
+
+                        <in.etaminepgg.sfa.Utilities.PrefixEditText
+                            android:layout_alignParentRight="true"
+                            android:inputType="number"
+                            android:id="@+id/order_overalldiscount_value"
+                            fontPath="@font/lato_regular"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_size_medium_double"
+                            android:fontFamily="@font/lato_bold"
+                            android:tag="-Rs. "
+                            android:focusable="true"
+                            android:text="0"
+                            />
+
+
+                    </RelativeLayout>
+
+
+                    <View
+                        android:layout_marginLeft="3dp"
+                        android:layout_marginRight="3dp"
+                        android:layout_marginBottom="3dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="@color/black"/>
+
+                    <LinearLayout
+                        android:layout_height="wrap_content"
+                        android:layout_margin="3dp"
+                        android:layout_width="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+                        <TextView
+                            android:id="@+id/tv_grandtoalitems"
+                            android:textColor="@color/colorRed"
+                            android:fontFamily="@font/lato_bold"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".7"
+                            android:layout_width="0dp"
+                            android:text="Grand Total "
+                            android:textSize="@dimen/dim_14"/>
+
+                        <TextView
+                            android:gravity="right|center"
+                            android:id="@+id/tv_grandtotal"
+                            android:layout_gravity="right"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".3"
+                            android:layout_width="0dp"
+                            android:text=""
+                            android:fontFamily="@font/lato_regular"
+                            android:textColor="@color/colorRed"
+                            android:textSize="@dimen/dim_14"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+                <CheckBox
+                    android:id="@+id/setOrderAsRegularOrder_CheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/sixteen_dp"
+                    android:text="@string/label_set_this_order_as_regular_order"/>
+
+                <Button
+                    android:id="@+id/submitSalesOrder_Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="@dimen/sixteen_dp"
+                    android:layout_marginTop="@dimen/sixteen_dp"
+                    android:text="@string/label_submit_sales_order"/>
+
+
+            </LinearLayout>
+
 
         </LinearLayout>
 
         <include
+            android:visibility="visible"
             layout="@layout/layout_empty_adapter"/>
 
     </LinearLayout>

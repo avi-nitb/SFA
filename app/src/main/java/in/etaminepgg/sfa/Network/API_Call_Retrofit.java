@@ -1,13 +1,16 @@
 package in.etaminepgg.sfa.Network;
 
 import android.content.Context;
+import android.os.Build;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.concurrent.TimeUnit;
 
+import in.etaminepgg.sfa.BuildConfig;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -23,8 +26,19 @@ public class API_Call_Retrofit
     public static Retrofit getretrofit(final Context ctx)
     {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        OkHttpClient client = builder.readTimeout(60, TimeUnit.SECONDS)
-                .connectTimeout(60, TimeUnit.SECONDS)
+
+        if(BuildConfig.DEBUG){
+
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            // httpClient.addInterceptor(httpLoggingInterceptor);
+            builder.addInterceptor(httpLoggingInterceptor);
+        }
+
+
+        OkHttpClient client = builder
+                .readTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(120, TimeUnit.SECONDS)
                 .build();
 
 

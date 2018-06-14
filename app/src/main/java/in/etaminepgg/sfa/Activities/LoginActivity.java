@@ -1045,7 +1045,7 @@ public class LoginActivity extends AppCompatActivity
                 + "upload_status varchar(1) );");
 
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SKU + " ("
-                + "sku_id varchar(50), "
+                + "sku_id varchar(50) PRIMARY KEY, "
                 + "sku_name varchar(50), "
                 + "sku_price varchar(50), "
                 + "description varchar(50), "
@@ -1104,6 +1104,8 @@ public class LoginActivity extends AppCompatActivity
                 + "retailer_id varchar(50), "
                 + "emp_id varchar(50), "
                 + "order_date varchar(50), "
+                + "total_order_value varchar(50), "
+                + "total_discount varchar(50), "
                 + "is_regular varchar(1), "
                 + "created_date varchar(50), "
                 + "modified_date varchar(50), "
@@ -1120,6 +1122,9 @@ public class LoginActivity extends AppCompatActivity
                 + "sku_name varchar(50), "
                 + "sku_price varchar(50), "
                 + "sku_qty varchar(50), "
+                + "sku_free_qty varchar(50), "
+                + "sku_discount varchar(50), "
+                + "sku_price_before_discount varchar(50), "
                 + "sku_final_price varchar(50), "
                 /*+ "scheme_id varchar(50), "*/
                 + "upload_status varchar(1) );");

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.LoginActivity;
+import in.etaminepgg.sfa.Models.QuantityDiscountModel;
 import in.etaminepgg.sfa.Models.SalesOrderSku;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.Models.SkuGroupHistory;
@@ -95,6 +96,8 @@ public class DbUtils
         return noOfVisitsMadeBySalesPerson;
     }
 
+
+
     public static void makeCurrentActiveOrderInactive()
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
@@ -127,6 +130,87 @@ public class DbUtils
         sqLiteDatabase.close();
 
         return activeOrderID;
+    }
+
+    //returns order_date  of active order, if active order exists
+    //returns getActiveOrderID() if there is no active order
+    public static String getActiveOrderIDDate(String activeOrderId)
+    {
+        String activeOrderDate = NONE;
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String SQL_SELECT_ACTIVE_SALES_ORDER_ID = "select order_date from " + TBL_SALES_ORDER + " WHERE " + "is_active = ? AND emp_id = ? AND order_id = ?";
+        String[] selectionArgs = new String[]{"1",new MySharedPrefrencesData().getUser_Id(LoginActivity.baseContext),activeOrderId};
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ACTIVE_SALES_ORDER_ID, selectionArgs);
+
+        if(cursor.moveToFirst())
+        {
+            activeOrderDate = cursor.getString(cursor.getColumnIndexOrThrow("order_date"));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+
+        return activeOrderDate;
+    }
+
+
+    public static int getNoOfSalesOrdersForsize() {
+
+        int noOfSalesOrders=0;
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Constants.TBL_SKU_NO_ORDERREASON ,null);
+
+        cursor.moveToFirst();
+
+        noOfSalesOrders = cursor.getInt(0);
+
+        cursor.close();
+        return noOfSalesOrders;
+    }
+
+
+    public static int getSkuRowsSize() {
+
+        int noOfSkuRows=0;
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + Constants.TBL_SKU ,null);
+
+        cursor.moveToFirst();
+
+        noOfSkuRows = cursor.getInt(0);
+
+        cursor.close();
+        return noOfSkuRows;
+    }
+
+
+
+    //delete order
+    public static void deleteOrder(String activeOrderId)
+    {
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        String SQL_SELECT_ACTIVE_SALES_ORDER_ID = "select order_date from " + TBL_SALES_ORDER + " WHERE " + "is_active = ? AND emp_id = ? AND order_id = ?";
+        String[] selectionArgs = new String[]{"1",new MySharedPrefrencesData().getUser_Id(LoginActivity.baseContext),activeOrderId};
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ACTIVE_SALES_ORDER_ID, selectionArgs);
+
+        sqLiteDatabase.delete(TBL_SALES_ORDER_DETAILS, "order_id = ?",new String[]{activeOrderId});
+        sqLiteDatabase.delete(TBL_SALES_ORDER, "order_id = ?",new String[]{activeOrderId});
+
+        cursor.close();
+        sqLiteDatabase.close();
+
+
     }
 
     //returns Retailer's Regular Order Id
@@ -193,14 +277,15 @@ public class DbUtils
         return retailername;
     }
 
-    public static long insertIntoSalesOrderDetailsTable(String orderID, String skuID, String skuName, String skuPrice, String skuQty)
+    public static long insertIntoSalesOrderDetailsTable(String orderID, String skuID, String skuName, String skuPrice, String skuQty,String skuFreeQty,String skuDiscount)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
         float skuPriceInt = Float.parseFloat(skuPrice);
         int skuQtyInt = Integer.parseInt(skuQty);
-        String skuFinalPrice = String.valueOf(skuPriceInt * skuQtyInt);
+        String skuPrice_beforeDiscount = String.valueOf(skuPriceInt * skuQtyInt);
+        String skuFinalPrice = String.valueOf((skuPriceInt * skuQtyInt)-Float.parseFloat(skuDiscount));
 
         ContentValues salesOrderDetailsValues = new ContentValues();
         salesOrderDetailsValues.put("order_id", orderID);
@@ -208,6 +293,9 @@ public class DbUtils
         salesOrderDetailsValues.put("sku_name", skuName);
         salesOrderDetailsValues.put("sku_price", skuPrice);
         salesOrderDetailsValues.put("sku_qty", skuQty);
+        salesOrderDetailsValues.put("sku_free_qty", skuFreeQty);
+        salesOrderDetailsValues.put("sku_discount", skuDiscount);
+        salesOrderDetailsValues.put("sku_price_before_discount", skuPrice_beforeDiscount);
         salesOrderDetailsValues.put("sku_final_price", skuFinalPrice);
         salesOrderDetailsValues.put("upload_status", 0);
 
@@ -264,11 +352,16 @@ public class DbUtils
         return isSkuPresent;
     }
 
-    public static int getSkuQuantity(Long orderDetailID)
+    public static ArrayList<QuantityDiscountModel> getSkuQuantityDiscount(Long orderDetailID)
     {
-        int skuQuantity = -100;
+        ArrayList<QuantityDiscountModel> discountModelArrayList=new ArrayList<>();
 
-        String sqlQuery = "SELECT sku_qty FROM sales_order_details WHERE order_detail_id = ? ;";
+        int skuQuantity = -100;
+        int skuFreeQuantity = -101;
+        float skuDiscount = 0;
+        float skuPrice = 0;
+
+        String sqlQuery = "SELECT sku_price,sku_qty,sku_free_qty,sku_discount FROM sales_order_details WHERE order_detail_id = ? ;";
         String[] selectionArgs = {String.valueOf(orderDetailID)};
 
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
@@ -279,21 +372,35 @@ public class DbUtils
         if(cursor.moveToNext())
         {
             skuQuantity = cursor.getInt(cursor.getColumnIndexOrThrow("sku_qty"));
+            skuFreeQuantity = cursor.getInt(cursor.getColumnIndexOrThrow("sku_free_qty"));
+            skuDiscount = cursor.getFloat(cursor.getColumnIndexOrThrow("sku_discount"));
+            skuPrice = cursor.getFloat(cursor.getColumnIndexOrThrow("sku_price"));
         }
+
+        discountModelArrayList.add(new QuantityDiscountModel(skuQuantity,skuFreeQuantity,skuDiscount,skuPrice));
 
         cursor.close();
         sqLiteDatabase.close();
 
-        return skuQuantity;
+        return discountModelArrayList;
     }
 
-    public static void increaseSkuQuantity(Long orderDetailID, int newSkuQuantity)
+    public static void increaseSkuQuantityFreeQuantityDiscount(Long orderDetailID,float skuUnitPrice, int newSkuQuantity,int newFreeQty,float newSkuDisc)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
+
+
+        String skuPrice_beforeDiscount = String.valueOf(skuUnitPrice * newSkuQuantity);
+        String skuFinalPrice = String.valueOf(Float.parseFloat(skuPrice_beforeDiscount)-newSkuDisc);
+
         ContentValues salesOrderDetailsValues = new ContentValues();
         salesOrderDetailsValues.put("sku_qty", newSkuQuantity);
+        salesOrderDetailsValues.put("sku_free_qty", newFreeQty);
+        salesOrderDetailsValues.put("sku_discount", newSkuDisc);
+        salesOrderDetailsValues.put("sku_price_before_discount", skuPrice_beforeDiscount);
+        salesOrderDetailsValues.put("sku_final_price", skuFinalPrice);
 
         sqLiteDatabase.update(TBL_SALES_ORDER_DETAILS, salesOrderDetailsValues, "order_detail_id = ?", new String[]{String.valueOf(orderDetailID)});
         sqLiteDatabase.close();
@@ -395,8 +502,12 @@ public class DbUtils
             String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
             String skuPrice = cursor.getString(cursor.getColumnIndexOrThrow("sku_price"));
             String skuQty = cursor.getString(cursor.getColumnIndexOrThrow("sku_qty"));
+            String sku_free_qty = cursor.getString(cursor.getColumnIndexOrThrow("sku_free_qty"));
+            String sku_discount = cursor.getString(cursor.getColumnIndexOrThrow("sku_discount"));
+            String sku_price_before_discount = cursor.getString(cursor.getColumnIndexOrThrow("sku_price_before_discount"));
+            String sku_final_price = cursor.getString(cursor.getColumnIndexOrThrow("sku_final_price"));
 
-            skuList.add(new SalesOrderSku(orderDetailId, skuID, skuName, skuPrice, skuQty));
+            skuList.add(new SalesOrderSku(orderDetailId, skuID, skuName, skuPrice, skuQty,sku_free_qty,sku_discount,sku_price_before_discount,sku_final_price));
         }
 
         cursor.close();
@@ -405,9 +516,9 @@ public class DbUtils
         return skuList;
     }
 
-    public static int getOrderTotal(String orderID)
+    public static float getOrderTotal(String orderID)
     {
-        int orderTotal = -1;
+        float orderTotal = -1;
         String SQL_SELECT_ORDER_TOTAL = "SELECT SUM(sku_final_price) total FROM sales_order_details WHERE order_id = ? ;";
         String[] selectionArgs = {orderID};
 
@@ -423,7 +534,51 @@ public class DbUtils
 
         cursor.close();
         sqLiteDatabase.close();
+        orderTotal=(float)orderTotal;
+        return orderTotal;
+    }
 
+  public static float getOrderTotalFromSalesOrderTBL(String orderID)
+    {
+        float orderTotal = -1;
+        String SQL_SELECT_ORDER_TOTAL = "SELECT total_order_value as total FROM "+TBL_SALES_ORDER+ " WHERE order_id = ? ;";
+        String[] selectionArgs = {orderID};
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ORDER_TOTAL, selectionArgs);
+
+        if(cursor.moveToNext())
+        {
+            orderTotal = cursor.getFloat(cursor.getColumnIndexOrThrow("total"));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+        //orderTotal=(float)orderTotal;
+        return orderTotal;
+    }
+
+    public static float getOrderTotal_beforeDiscount(String orderID)
+    {
+        float orderTotal = -1;
+        String SQL_SELECT_ORDER_TOTAL = "SELECT SUM(sku_price_before_discount) total FROM sales_order_details WHERE order_id = ? ;";
+        String[] selectionArgs = {orderID};
+
+        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_ORDER_TOTAL, selectionArgs);
+
+        if(cursor.moveToNext())
+        {
+            orderTotal = cursor.getInt(cursor.getColumnIndexOrThrow("total"));
+        }
+
+        cursor.close();
+        sqLiteDatabase.close();
+        orderTotal=(float)orderTotal;
         return orderTotal;
     }
 

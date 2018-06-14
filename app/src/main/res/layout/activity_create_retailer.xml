@@ -10,7 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorAccent"
+        android:background="@drawable/main_gradient_bg"
         app:contentInsetStartWithNavigation="0dp"/>
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -32,6 +32,7 @@
                 android:gravity="center_horizontal"
                 android:text="@string/new_retailer"
                 android:textColor="@color/colorGreen"
+                android:visibility="invisible"
                 android:textSize="23sp"
                 android:textStyle="bold" />
 
@@ -52,7 +53,185 @@
                     android:textSize="18sp" />
             </android.support.design.widget.TextInputLayout>
 
+
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/state"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spnState"
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/district"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spnDistrict"
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/textView11"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Taluk"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:visibility="gone"
+                android:id="@+id/spnTaluk"
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
+            <TextView
+                android:id="@+id/textView12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/area"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spnArea"
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:gravity="center_vertical"
+                android:padding="@dimen/two_dp">
+
+                <Button
+                    android:id="@+id/btnPhotoCapt"
+                    android:layout_width="0dp"
+                    android:layout_weight="2.5"
+                    android:layout_height="wrap_content"
+                    android:text="@string/capture" />
+
+                <ImageView
+                    android:scaleType="fitXY"
+                    android:id="@+id/ivPhotoPreview"
+                    android:layout_width="110dp"
+                    android:layout_height="100dp"
+                    android:layout_margin="10dp"
+                    app:srcCompat="@drawable/border_rect" />
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:gravity="center_vertical"
+                android:padding="@dimen/two_dp">
+
+                <Button
+                    android:id="@+id/btn_bcr_photo"
+                    android:layout_width="0dp"
+                    android:layout_weight="2.5"
+                    android:layout_height="wrap_content"
+                    android:text="CAPTURE BUSINESS CARD " />
+
+                <RelativeLayout
+                    android:id="@+id/badge_layout1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <RelativeLayout
+                        android:id="@+id/relative_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <ImageView
+                            android:adjustViewBounds="true"
+                            android:scaleType="centerCrop"
+                            android:id="@+id/iv_bcr_photo"
+                            android:layout_width="110dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="10dp"
+                            android:background="@drawable/border_rect"/>
+                    </RelativeLayout>
+                    <TextView
+                        android:id="@+id/bcr_count"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginRight="1dp"
+                        android:layout_alignRight="@id/relative_layout"
+                        android:background="@drawable/bcr_count"
+                        android:textColor="#FFF"
+                        android:textSize="14sp"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
+
+            </LinearLayout>
+
+
+            <Button
+
+                android:layout_gravity="center"
+                android:visibility="visible"
+                android:gravity="center"
+                android:id="@+id/btn_bcr_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CARD SCAN-FRONTSIDE"
+                />
+
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/border_rect"
+                android:padding="@dimen/four_dp"
+                android:text=""
+                android:visibility="gone"
+                android:fontFamily="@font/lato_regular"
+                android:id="@+id/tv_ocr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <Button
+
+                android:layout_gravity="center"
+                android:visibility="visible"
+                android:gravity="center"
+                android:id="@+id/btn_bcr_txt_back"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CARD SCAN-BACKSIDE"
+                />
+
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/border_rect"
+                android:padding="@dimen/four_dp"
+                android:text=""
+                android:visibility="gone"
+                android:fontFamily="@font/lato_regular"
+                android:id="@+id/tv_ocr_back"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+
             <android.support.design.widget.TextInputLayout
+                android:layout_marginTop="@dimen/sixteen_dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -123,155 +302,51 @@
                     android:inputType="textEmailAddress" />
             </android.support.design.widget.TextInputLayout>
 
-            <TextView
-                android:id="@+id/textView9"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/state"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <Spinner
-                android:id="@+id/spnState"
-                android:layout_width="match_parent"
-                android:layout_height="50dp" />
-
-            <TextView
-                android:id="@+id/textView10"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/district"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <Spinner
-                android:id="@+id/spnDistrict"
-                android:layout_width="match_parent"
-                android:layout_height="50dp" />
-
-            <TextView
-                android:visibility="gone"
-                android:id="@+id/textView11"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Taluk"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <Spinner
-                android:visibility="gone"
-                android:id="@+id/spnTaluk"
-                android:layout_width="match_parent"
-                android:layout_height="50dp" />
-
-            <TextView
-                android:id="@+id/textView12"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/area"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <Spinner
-                android:id="@+id/spnArea"
-                android:layout_width="match_parent"
-                android:layout_height="50dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="@dimen/two_dp">
-
-                <Button
-                    android:id="@+id/btnPhotoCapt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="@dimen/sixty_four_dp"
-                    android:layout_marginTop="@dimen/thirty_two_dp"
-                    android:text="@string/capture" />
-
-                <ImageView
-                    android:scaleType="fitXY"
-                    android:id="@+id/ivPhotoPreview"
-                    android:layout_width="110dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="10dp"
-                    app:srcCompat="@drawable/border_rect" />
-            </LinearLayout>
 
 
 
             <LinearLayout
+                android:layout_marginTop="16dp"
+                android:padding="@dimen/four_dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="@dimen/two_dp">
+                android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/btn_bcr_photo"
+                <TextView
+                    android:textSize="@dimen/text_size_medium"
+                    android:fontFamily="@font/lato_regular"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/sixty_four_dp"
-                    android:layout_marginTop="@dimen/thirty_two_dp"
-                    android:text="CAPTURE CARD " />
+                    android:layout_gravity="center_vertical"
+                    android:text="Are you at retailer location ?" />
 
-                <RelativeLayout
-                    android:id="@+id/badge_layout1"
+                <RadioGroup
+                    android:id="@+id/rg_location"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <RelativeLayout
-                        android:id="@+id/relative_layout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-                        <ImageView
-                            android:adjustViewBounds="true"
-                            android:scaleType="centerCrop"
-                            android:id="@+id/iv_bcr_photo"
-                            android:layout_width="110dp"
-                            android:layout_height="100dp"
-                            android:layout_margin="10dp"
-                            android:background="@drawable/border_rect"/>
-                    </RelativeLayout>
-                    <TextView
-                        android:id="@+id/bcr_count"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_marginRight="1dp"
-                        android:layout_alignRight="@id/relative_layout"
-                        android:background="@drawable/bcr_count"
-                        android:textColor="#FFF"
-                        android:textSize="14sp"
-                        android:text="0"
-                        android:textAlignment="center"
-                        android:textStyle="bold" />
-                </RelativeLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:orientation="horizontal"
+                    >
 
+                <RadioButton
+                    android:id="@+id/rb_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Yes"
+                    android:gravity="center"/>
+
+                <RadioButton
+                    android:id="@+id/rb_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:text="No"
+                    android:gravity="center"/>
+                </RadioGroup>
 
             </LinearLayout>
 
-
-            <Button
-
-                android:layout_gravity="center"
-                android:visibility="visible"
-                android:gravity="center"
-                android:id="@+id/btn_bcr_txt"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="SCAN BUSINESS CARD"
-                />
-
-            <TextView
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/border_rect"
-                android:padding="@dimen/four_dp"
-                android:text=""
-                android:visibility="gone"
-                android:fontFamily="@font/lato_regular"
-                android:id="@+id/tv_ocr"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
 
             <Button
                 android:id="@+id/btnCreateNewRetailer"

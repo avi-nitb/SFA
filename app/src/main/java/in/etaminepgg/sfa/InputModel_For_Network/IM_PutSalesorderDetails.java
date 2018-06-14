@@ -28,6 +28,12 @@ public class IM_PutSalesorderDetails
     @Expose
     private String total_discount;
 
+
+    @SerializedName("grand_total")
+    @Expose
+    private String grand_total;
+
+
     @SerializedName("company_id")
     @Expose
     private String companyId;
@@ -40,7 +46,7 @@ public class IM_PutSalesorderDetails
     {
     }
 
-    public IM_PutSalesorderDetails(String authToken, String ordNo, String totalAmount,String total_discount, String companyId, List<SalesDatum> salesData)
+    public IM_PutSalesorderDetails(String authToken, String ordNo, String totalAmount,String total_discount, String companyId, List<SalesDatum> salesData,String grand_total)
     {
         this.authToken = authToken;
         this.ordNo = ordNo;
@@ -48,6 +54,7 @@ public class IM_PutSalesorderDetails
         this.total_discount=total_discount;
         this.companyId = companyId;
         this.salesData = salesData;
+        this.grand_total = grand_total;
     }
 
     public String getAuthToken() {
@@ -100,6 +107,16 @@ public class IM_PutSalesorderDetails
         this.total_discount = total_discount;
     }
 
+    public String getGrand_total()
+    {
+        return grand_total;
+    }
+
+    public void setGrand_total(String grand_total)
+    {
+        this.grand_total = grand_total;
+    }
+
     public class SalesDatum {
 
         @SerializedName("sku_id")
@@ -118,9 +135,24 @@ public class IM_PutSalesorderDetails
         @Expose
         private String qtyOrdered;
 
+
+        @SerializedName("sku_free_qty")
+        @Expose
+        private String sku_free_qty;
+
+
+        @SerializedName("sku_discount")
+        @Expose
+        private String sku_discount;
+
+
+
         @SerializedName("required_by_date")
         @Expose
         private String requiredByDate;
+
+
+
 
         @SerializedName("sku_attribute")
         @Expose
@@ -130,7 +162,7 @@ public class IM_PutSalesorderDetails
         {
         }
 
-        public SalesDatum(String skuId, String skuListPrice,String skudiscountedprice, String qtyOrdered, String requiredByDate, List<SkuAttribute> skuAttribute)
+        public SalesDatum(String skuId, String skuListPrice,String skudiscountedprice, String qtyOrdered, String requiredByDate, List<SkuAttribute> skuAttribute,String sku_free_qty,String sku_discount)
         {
             this.skuId = skuId;
             this.skuListPrice = skuListPrice;
@@ -138,6 +170,8 @@ public class IM_PutSalesorderDetails
             this.qtyOrdered = qtyOrdered;
             this.requiredByDate = requiredByDate;
             this.skuAttribute = skuAttribute;
+            this.sku_free_qty = sku_free_qty;
+            this.sku_discount = sku_discount;
         }
 
         public String getSkuId() {
@@ -188,6 +222,26 @@ public class IM_PutSalesorderDetails
         public void setSkudiscountedprice(String skudiscountedprice)
         {
             this.skudiscountedprice = skudiscountedprice;
+        }
+
+        public String getSku_free_qty()
+        {
+            return sku_free_qty;
+        }
+
+        public void setSku_free_qty(String sku_free_qty)
+        {
+            this.sku_free_qty = sku_free_qty;
+        }
+
+        public String getSku_discount()
+        {
+            return sku_discount;
+        }
+
+        public void setSku_discount(String sku_discount)
+        {
+            this.sku_discount = sku_discount;
         }
 
 
@@ -241,8 +295,6 @@ public class IM_PutSalesorderDetails
         }
 
     }
-
-
 
 
 }

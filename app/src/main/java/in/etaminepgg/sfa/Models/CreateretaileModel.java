@@ -3,6 +3,8 @@ package in.etaminepgg.sfa.Models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+
 /**
  * Created by etamine on 9/1/18.
  */
@@ -26,6 +28,9 @@ public class CreateretaileModel
     @SerializedName("customer_picture_path")
     @Expose
     private String customer_picture_path;
+
+
+
 
     public Integer getApiStatus() {
         return apiStatus;
@@ -68,4 +73,6 @@ public class CreateretaileModel
     {
         this.customer_picture_path = customer_picture_path;
     }
+
+
 }

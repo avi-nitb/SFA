@@ -11,7 +11,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorAccent"
+        android:background="@drawable/main_gradient_bg"
         app:contentInsetStartWithNavigation="0dp"/>
 
     <LinearLayout
@@ -93,9 +93,9 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/two_dp"
+            android:layout_height=".5dp"
             android:layout_marginTop="@dimen/two_dp"
-            android:background="@android:color/holo_green_light" />
+            android:background="@color/colorAccent" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/mySalesHistory_RecyclerView"

@@ -15,7 +15,7 @@
             android:id="@id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/colorAccent"
+            android:background="@drawable/main_gradient_bg"
             android:visibility="visible"
             app:contentInsetStartWithNavigation="0dp"/>
 
@@ -41,43 +41,51 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-        <LinearLayout
-            android:layout_margin="10dp"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:weightSum="4">
+            android:orientation="horizontal">
 
-            <AutoCompleteTextView
-                android:drawableLeft="@android:drawable/ic_menu_search"
+            <in.etaminepgg.sfa.Utilities.ClearableAutoCompleteTextView
+                android:layout_alignBaseline="@+id/btn_category"
+                android:layout_marginLeft="@dimen/dim_10"
+                android:layout_marginTop="@dimen/dim_10"
+                android:layout_centerVertical="true"
                 android:id="@+id/act_searchsku"
-                android:layout_width="0dp"
-                android:hint="Enter sku name"
-                android:textColor="@color/black"
-                android:singleLine="true"
+                android:layout_toLeftOf="@+id/spacer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:fontFamily="@font/lato_regular"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"/>
+                android:hint="Enter sku name"
+                android:singleLine="true"
+                android:textColor="@color/black"/>
 
-            <Button
+            <android.support.v4.widget.Space
+                android:layout_toLeftOf="@+id/btn_category"
+                android:id="@+id/spacer"
+                android:layout_width="@dimen/dim_30"
+                android:layout_height="wrap_content"/>
 
+
+            <ImageView
+                android:layout_marginRight="@dimen/dim_10"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
                 android:id="@+id/btn_category"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="@dimen/dim_30"
+                android:layout_height="@dimen/dim_30"
                 android:background="@drawable/mybutton"
-                android:text="Filter"
-                android:textAllCaps="false"
-                android:textColor="@color/white"/>
-        </LinearLayout>
+                android:src="@drawable/ic_if_filter1"
+               />
+        </RelativeLayout>
 
 
         <ExpandableListView
             android:id="@+id/el_category"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_margin="10dp"
+            android:layout_height="@dimen/dim_180"
+            android:layout_margin="@dimen/dim_10"
             android:background="@drawable/rectangle">
 
         </ExpandableListView>
@@ -88,7 +96,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:paddingTop="@dimen/eight_dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     </LinearLayout>

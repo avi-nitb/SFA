@@ -59,7 +59,10 @@ public class ApiUrl
     public static final String LOG_URL_UPDATERETAILERPICTURE= "?q=api/updateRetailerpicture";
 
     public static final String LOG_URL_GETSKUCATEGORYSUBCATEGORYLIST= "?q=api/getSkuCategoryAndSubcategorylist";
+
     public static final String LOG_URL_GETNOORDER_REASONLIST= "?q=api/getNoOrderReasonList";
+
+    public static final String LOG_URL_PUTSUMMARYREPORT= "?q=api/putSummaryReport";
 
 
 }

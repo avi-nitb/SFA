@@ -1,5 +1,6 @@
 package in.etaminepgg.sfa.Activities;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -12,6 +13,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,6 +21,9 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -40,8 +45,10 @@ import in.etaminepgg.sfa.Models.SkuGroupHistory;
 import in.etaminepgg.sfa.Models.SubCategoryForCategoryHeader;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.Constants;
+import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
+import in.etaminepgg.sfa.Utilities.Utils;
 
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_CATEGORY;
@@ -64,11 +71,12 @@ public class SkuListByGenreActivity extends AppCompatActivity
     Toolbar toolbar;
     ExpandableListView el_category;
 
-    Button btn_category;
+    ImageView btn_category;
 
     AutoCompleteTextView act_searchsku;
 
 
+    @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -82,7 +90,7 @@ public class SkuListByGenreActivity extends AppCompatActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        btn_category = (Button) findViewById(R.id.btn_category);
+        btn_category = (ImageView) findViewById(R.id.btn_category);
         act_searchsku = (AutoCompleteTextView) findViewById(R.id.act_searchsku);
         el_category = (ExpandableListView) findViewById(R.id.el_category);
         skuGenre_tabLayout = (TabLayout) findViewById(R.id.skuGenre_tabLayout);
@@ -115,8 +123,37 @@ public class SkuListByGenreActivity extends AppCompatActivity
 
         showRelevantTab(intentExtraValue);
 
+       // setFirstTab();
 
 
+    }
+
+
+
+    public void setFirstTab()
+    {
+
+        String activeorderid = DbUtils.getActiveOrderID();
+
+        LinearLayout yourlinearlayout = (LinearLayout) LayoutInflater.from(SkuListByGenreActivity.this).inflate(R.layout.title_text, null);
+        TextView tab_text = (TextView) yourlinearlayout.findViewById(R.id.tabContent);
+        tab_text.setText("  " + "SALES ORDER");
+
+        if (activeorderid.equalsIgnoreCase(ConstantsA.NONE))
+        {
+
+
+            skuGenre_tabLayout.getTabAt(0).setText("SALES ORDER");
+
+
+        }
+        else
+        {
+
+            tab_text.setCompoundDrawablesWithIntrinsicBounds(R.drawable.bullet, 0, 0, 0);
+            skuGenre_tabLayout.getTabAt(0).setCustomView(tab_text);
+
+        }
     }
 
     public  void setAdapterForSearch()
@@ -260,6 +297,8 @@ public class SkuListByGenreActivity extends AppCompatActivity
                     el_category.setVisibility(View.GONE);
                     btn_category.setVisibility(View.GONE);
                     act_searchsku.setVisibility(View.GONE);
+
+                    skuList_ViewPager.setCurrentItem(0);
 
 
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.skuList_ViewPager + ":" + skuList_ViewPager.getCurrentItem());

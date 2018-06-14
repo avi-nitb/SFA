@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:orientation="horizontal"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:weightSum="4.0">
 
         <LinearLayout
@@ -21,132 +21,509 @@
             android:gravity="center">
 
             <ImageView
+                android:adjustViewBounds="true"
                 android:id="@+id/skuPhoto_ImageView"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_marginLeft="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dim_5"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_tiffin_box"/>
         </LinearLayout>
 
         <RelativeLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="3.2">
+            android:layout_height="wrap_content"
+            android:layout_weight="2.8">
 
             <TextView
+                android:includeFontPadding="false"
                 android:id="@+id/skuName_TextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lato_bold"
                 android:text="Tiffin Box"
+                android:layout_marginBottom="@dimen/dim_3"
                 android:textColor="@color/colorYellow"
                 android:textSize="@dimen/text_size_medium"/>
 
-            <TextView
-                android:id="@+id/skuPrice_TextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/skuQuantity_TextInputEditText"
+
+            <LinearLayout
+                android:id="@+id/lay_skuprice"
                 android:layout_below="@+id/skuName_TextView"
-                android:fontFamily="@font/lato_regular"
-                android:text="Rs.500/-"
-                android:textColor="@color/black"
-                android:textSize="@dimen/text_size_medium"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dim_5"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+
+                <TextView
+                    android:layout_weight="0.4"
+                    android:includeFontPadding="false"
+                    android:layout_alignBaseline="@+id/skuPrice_TextView"
+                    android:id="@+id/skupricelabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    android:text="SKU Unit Price"/>
+
+
+                <TextView
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium"
+                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text=":"/>
+
+                <TextView
+                    android:id="@+id/skuPrice_TextView"
+                    android:fontFamily="@font/lato_bold"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium_double"
+                    android:layout_weight=".6"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text=" Rs. 1350"
+                    />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/lay_skuqty"
+                android:layout_below="@+id/lay_skuprice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dim_5"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+
+                <TextView
+                    android:layout_weight=".4"
+                    android:includeFontPadding="false"
+                    android:id="@+id/text_qty"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="Qty"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    />
+
+
+                <TextView
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium"
+                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text=":"/>
+
+                <TextView
+                    android:layout_weight=".6"
+                    android:includeFontPadding="false"
+                    android:layout_alignBaseline="@+id/text_qty"
+                    android:id="@+id/skuQuantity_TextInputEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/text_qty"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium_double"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/lato_regular"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lay_skufreeqty"
+                android:layout_below="@+id/lay_skuqty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dim_5"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_weight=".4"
+                    android:includeFontPadding="false"
+                    android:layout_alignBaseline="@id/text_qty"
+                    android:id="@+id/text_freeqty"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="Free Qty"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    />
+
+
+                <TextView
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium"
+                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text=":"/>
+
+                <TextView
+                    android:layout_weight=".6"
+                    android:layout_alignParentRight="true"
+                    android:includeFontPadding="false"
+                    android:layout_alignBaseline="@id/text_qty"
+                    android:id="@+id/freeskuQuantity_TextInputEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/text_freeqty"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium_double"
+                    android:textStyle="bold"
+                    android:text="0"
+                    android:fontFamily="@font/lato_regular"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lay_skudiscount"
+                android:layout_below="@+id/lay_skufreeqty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dim_5"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_weight=".4"
+                    android:layout_marginBottom="@dimen/dim_3"
+                    android:includeFontPadding="true"
+                    android:id="@+id/text_discount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/lin"
+                    android:text="Discount"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    />
+
+
+                <TextView
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium"
+                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text=":"/>
+
+                <TextView
+                    android:layout_weight=".6"
+                    android:includeFontPadding="true"
+                    android:layout_alignBaseline="@+id/text_discount"
+                    android:id="@+id/skuDiscount_TextInputEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/text_discount"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium_double"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/lay_skuamount"
+                android:layout_below="@+id/lay_skudiscount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dim_5"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+
+                <TextView
+                    android:layout_weight=".4"
+                    android:includeFontPadding="false"
+                    android:id="@+id/text_amount"
+                    android:layout_alignBaseline="@+id/text_discount"
+                    android:layout_toLeftOf="@+id/sku_total_after_discount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/text_qty"
+                    android:text="Amount"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    />
+
+
+                <TextView
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium"
+                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text=":"/>
+
+                <TextView
+                    android:layout_weight=".6"
+                    android:includeFontPadding="false"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignBaseline="@+id/text_discount"
+                    android:id="@+id/sku_total_after_discount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato_regular"
+                    android:text="Rs.500/-"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_size_medium_double"/>
+            </LinearLayout>
+
+ <!--           <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_below="@+id/skuName_TextView"
+                android:layout_marginBottom="@dimen/dim_3"
+                android:id="@+id/lay_skuprice"
+                android:layout_height="wrap_content">
+
+
+                <TextView
+
+                    android:includeFontPadding="false"
+                    android:layout_alignBaseline="@+id/skuPrice_TextView"
+                    android:id="@+id/skupricelabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    android:text="SKU Unit Price : "/>
+
+                <TextView
+                    android:includeFontPadding="false"
+                    android:id="@+id/skuPrice_TextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Rs.500/-"
+                    android:layout_toRightOf="@id/skupricelabel"
+                    android:fontFamily="@font/lato_bold"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium_double"/>
+
+
+            </RelativeLayout>-->
+
+        <!--    <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/lay_qty2"
+                android:layout_below="@+id/lay_skuprice">
+
+
+                <LinearLayout
+                    android:layout_marginBottom="@dimen/dim_3"
+                    android:id="@+id/lin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="2"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:gravity="center_vertical"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:includeFontPadding="false"
+                            android:id="@+id/text_qty"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/lato_regular"
+                            android:text="Qty : "
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_size_small"
+                            />
+
+                        <TextView
+                            android:includeFontPadding="false"
+                            android:layout_alignBaseline="@+id/text_qty"
+                            android:id="@+id/skuQuantity_TextInputEditText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toRightOf="@id/text_qty"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_size_medium_double"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/lato_regular"/>
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:gravity="center_vertical"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+
+                            android:includeFontPadding="false"
+                            android:layout_alignBaseline="@id/text_qty"
+                            android:id="@+id/text_freeqty"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/lato_regular"
+                            android:text="Free Qty : "
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_size_small"
+                            />
+
+                        <TextView
+                            android:layout_alignParentRight="true"
+                            android:includeFontPadding="false"
+                            android:layout_alignBaseline="@id/text_qty"
+                            android:id="@+id/freeskuQuantity_TextInputEditText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toRightOf="@id/text_freeqty"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_size_medium_double"
+                            android:textStyle="bold"
+                            android:text="0"
+                            android:fontFamily="@font/lato_regular"/>
+
+                    </LinearLayout>
+
+
+
+
+
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                    android:layout_marginBottom="@dimen/dim_5"
+                    android:layout_alignLeft="@+id/text_amount"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+
+                </LinearLayout>
+
+
+                <TextView
+                    android:layout_marginBottom="@dimen/dim_3"
+                    android:includeFontPadding="true"
+                    android:id="@+id/text_discount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/lin"
+                    android:text="Discount : "
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_small"
+                    />
+
+                <TextView
+                    android:includeFontPadding="true"
+                    android:layout_alignBaseline="@+id/text_discount"
+                    android:id="@+id/skuDiscount_TextInputEditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/text_discount"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_medium_double"
+                    android:textStyle="bold"/>
+
+
+                <LinearLayout
+                    android:layout_below="@+id/lay_skudiscount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:includeFontPadding="false"
+                        android:id="@+id/text_amount"
+                        android:layout_alignBaseline="@+id/text_discount"
+                        android:layout_toLeftOf="@+id/sku_total_after_discount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/text_qty"
+                        android:text="Amount : "
+                        android:fontFamily="@font/lato_regular"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_size_small"
+                        />
+
+
+                    <TextView
+                        android:includeFontPadding="false"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignBaseline="@+id/text_discount"
+                        android:id="@+id/sku_total_after_discount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lato_regular"
+                        android:text="Rs.500/-"
+                        android:textColor="@color/black"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/text_size_medium_double"/>
+
+                </LinearLayout>
+
+
+
+
+
+            </RelativeLayout>-->
+
+
+
 
             <TextView
+                android:includeFontPadding="false"
                 android:id="@+id/sku_SO_Attr_TextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/skuPrice_TextView"
+                android:layout_below="@+id/lay_skuamount"
                 android:layout_marginTop="5dp"
                 android:fontFamily="@font/lato_regular_font"
                 android:text="Attribute Set"
-                android:textSize="@dimen/text_size"/>
-
-            <TextView
-                android:id="@+id/sku_total_after_discount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/skuPrice_TextView"
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="40dp"
-                android:layout_centerHorizontal="true"
-                android:fontFamily="@font/lato_regular_font"
-                android:text="Attribute Set"
-                android:textSize="@dimen/text_size"/>
-
-            <TextView
-                android:id="@+id/text_qty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/skuQuantity_TextInputEditText"
-                android:layout_below="@+id/skuName_TextView"
-                android:layout_toRightOf="@+id/skuPrice_TextView"
-                android:fontFamily="@font/lato_regular"
-                android:paddingRight="5dp"
-                android:layout_marginLeft="10dp"
-                android:text="Qty : "
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold"/>
-
-            <EditText
-                android:id="@+id/skuQuantity_TextInputEditText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/skuName_TextView"
-                android:layout_marginBottom="5dp"
-                android:layout_toRightOf="@+id/text_qty"
-                android:digits="0123456789"
-                android:focusable="auto"
-                android:inputType="number"
-                android:textSize="15dp"
-                android:textStyle="bold">
-                <requestFocus/>
-            </EditText>
+                android:visibility="gone"
+                android:textSize="@dimen/text_size_small"/>
 
 
-            <TextView
-                android:id="@+id/text_discount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/skuQuantity_TextInputEditText"
-                android:layout_below="@+id/skuName_TextView"
-                android:layout_toLeftOf="@+id/skuDiscount_TextInputEditText"
-                android:fontFamily="@font/lato_regular"
-                android:paddingRight="5dp"
-                android:layout_marginLeft="10dp"
-                android:text="Discount : "
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold"/>
 
-            <EditText
-                android:id="@+id/skuDiscount_TextInputEditText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/skuName_TextView"
-                android:layout_marginBottom="5dp"
-                android:layout_toLeftOf="@+id/deleteSKU_ImageButton"
-                android:digits="0123456789"
-                android:focusable="auto"
-                android:inputType="number"
-                android:textSize="15dp"
-                android:textStyle="bold">
-                <requestFocus/>
-            </EditText>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_weight=".4"
+            android:layout_marginRight="@dimen/dim_30"
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/deleteSKU_ImageButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignRight="@+id/skuPrice_TextView"
-                android:layout_below="@+id/skuName_TextView"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
+                android:layout_centerInParent="true"
                 android:src="@drawable/ic_delete"/>
+
         </RelativeLayout>
     </LinearLayout>
 
@@ -155,6 +532,6 @@
         android:layout_height="0.2dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:background="@color/colorPrimaryDark"/>
 </LinearLayout>

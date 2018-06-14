@@ -11,7 +11,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorAccent"
+        android:background="@drawable/main_gradient_bg"
         app:contentInsetStartWithNavigation="0dp"/>
 
 
@@ -32,13 +32,14 @@
             tools:context="in.etaminepgg.sfa.Activities.PickRetailerActivity">
 
             <TextView
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/sixteen_dp"
-                android:text="Enter shop name of retailer below, for whom you want to create sales order "
+                android:text="Select Retailer"
                 android:textColor="@color/colorAccent"
                 android:fontFamily="@font/lato_bold"
-                android:textSize="@dimen/text_size_small" />
+                android:textSize="@dimen/text_size_large" />
 
 
 
@@ -47,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="@dimen/sixteen_dp"
-                android:hint="Enter Shop Name Here"
+                android:hint="Enter Retailer Name Here"
                 android:textColor="@color/pink500"
                 android:textColorHint="@android:color/black" />
 
@@ -138,6 +139,7 @@
                     android:id="@+id/retailerPhoto_ImageView"
                     android:layout_width="150dp"
                     android:layout_height="100dp"
+                    android:src="@drawable/ic_nia"
                     android:background="@android:color/darker_gray"
                     android:scaleType="fitXY" />
             </LinearLayout>
@@ -174,7 +176,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/eight_dp"
-                android:text="Update Retailer" />
+                android:text="Take Photo" />
 
         </LinearLayout>
 

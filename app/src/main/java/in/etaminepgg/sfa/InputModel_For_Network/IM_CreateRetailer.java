@@ -3,6 +3,8 @@ package in.etaminepgg.sfa.InputModel_For_Network;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+
 /**
  * Created by etamine on 9/1/18.
  */
@@ -90,7 +92,20 @@ public class IM_CreateRetailer
         @Expose
         private String customerPicture;
 
-        public RetailerData(String customerCompanyname,String customerContactName , String customerType, String customerPincode, String ownerMobileNumber, String contactEmail, String customerGeopos, String locationId, String createdDate,String created_by, String customerPicture,String customer_address_1)
+
+        @SerializedName("card_front_text")
+        @Expose
+        private String card_front_text;
+
+        @SerializedName("card_back_text")
+        @Expose
+        private String card_back_text;
+
+        @SerializedName("card_photos")
+        @Expose
+        private ArrayList<String> card_photos;
+
+        public RetailerData(String customerCompanyname,String customerContactName , String customerType, String customerPincode, String ownerMobileNumber, String contactEmail, String customerGeopos, String locationId, String createdDate,String created_by, String customerPicture,String customer_address_1,String card_front_text,String card_back_text,ArrayList<String> card_photos)
         {
             this.customerContactName = customerContactName;
             this.customerCompanyname = customerCompanyname;
@@ -104,6 +119,9 @@ public class IM_CreateRetailer
             this.created_by = created_by;
             this.customerPicture = customerPicture;
             this.customer_address_1 = customer_address_1;
+            this.card_front_text=card_front_text;
+            this.card_back_text=card_back_text;
+            this.card_photos=card_photos;
         }
 
         public RetailerData()
@@ -210,6 +228,36 @@ public class IM_CreateRetailer
         public void setCustomer_address_1(String customer_address_1)
         {
             this.customer_address_1 = customer_address_1;
+        }
+
+        public String getCard_front_text()
+        {
+            return card_front_text;
+        }
+
+        public void setCard_front_text(String card_front_text)
+        {
+            this.card_front_text = card_front_text;
+        }
+
+        public String getCard_back_text()
+        {
+            return card_back_text;
+        }
+
+        public void setCard_back_text(String card_back_text)
+        {
+            this.card_back_text = card_back_text;
+        }
+
+        public ArrayList<String> getCard_photos()
+        {
+            return card_photos;
+        }
+
+        public void setCard_photos(ArrayList<String> card_photos)
+        {
+            this.card_photos = card_photos;
         }
     }
 }

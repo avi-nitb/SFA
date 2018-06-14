@@ -640,9 +640,11 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         salesOrderValues.put("visit_id", visitID);
         salesOrderValues.put("retailer_id", retailerID);
         salesOrderValues.put("emp_id", new MySharedPrefrencesData().getUser_Id(SelectSalesOrderTypeActivity.this));
-        salesOrderValues.put("order_date", getTodayDate());
+        salesOrderValues.put("order_date", getDateTime());
         salesOrderValues.put("created_date", getTodayDate());
         salesOrderValues.put("modified_date", getTodayDate());
+        salesOrderValues.put("total_order_value", "0");
+        salesOrderValues.put("total_discount", "0");
         salesOrderValues.put("is_regular", "0");
         salesOrderValues.put("is_placed", "0");
         salesOrderValues.put("is_cancelled", "0");

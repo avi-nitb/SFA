@@ -42,6 +42,7 @@ public class MySalesHistoryAdapter extends RecyclerView.Adapter<MySalesHistoryAd
         String orderDate = mySalesHistoryList.get(position).getOrderDate();
         String totalItems = mySalesHistoryList.get(position).getSkuCount();
         String orderTotal = mySalesHistoryList.get(position).getOrderTotal();
+        String overalldiscount = mySalesHistoryList.get(position).getTotal_discount();
 
         viewHolder.itemView.setTag(R.string.tag_order_id, orderId);
 
@@ -49,7 +50,8 @@ public class MySalesHistoryAdapter extends RecyclerView.Adapter<MySalesHistoryAd
         viewHolder.retailerId_TextView.setText("Retailer name : "+getRetailerNameAccordingToRetailerId(retailerId));
         viewHolder.orderDate_TextView.setText("Ordered Date : "+orderDate);
         viewHolder.skuCount_TextView.setText(totalItems + " items");
-        viewHolder.orderTotal_TextView.setText("Total Price : Rs. " + orderTotal);
+        viewHolder.orderTotal_TextView.setText("Total : Rs. " + orderTotal);
+        viewHolder.tv_sku_overall_disc.setText("Overall Disc : Rs. " + overalldiscount);
 
         Saleshistory_for_skuitemAdapter saleshistory_for_skuitemAdapter=new Saleshistory_for_skuitemAdapter((ArrayList<MySalesHistory.SkuDetails_Ordered>) mySalesHistoryList.get(position).getSku_Details_ordered());
         viewHolder.rv_child_for_skuitem.setAdapter(saleshistory_for_skuitemAdapter);
@@ -63,7 +65,7 @@ public class MySalesHistoryAdapter extends RecyclerView.Adapter<MySalesHistoryAd
 
     public class MySalesHistoryViewHolder extends RecyclerView.ViewHolder
     {
-        TextView orderId_TextView, retailerId_TextView, orderDate_TextView, skuCount_TextView, orderTotal_TextView;
+        TextView orderId_TextView, retailerId_TextView, orderDate_TextView, skuCount_TextView, orderTotal_TextView,tv_sku_overall_disc;
         RecyclerView rv_child_for_skuitem;
 
         public MySalesHistoryViewHolder(View itemView)
@@ -75,6 +77,7 @@ public class MySalesHistoryAdapter extends RecyclerView.Adapter<MySalesHistoryAd
             orderDate_TextView = (TextView) itemView.findViewById(R.id.orderDate_TextView);
             skuCount_TextView = (TextView) itemView.findViewById(R.id.skuCount_TextView);
             orderTotal_TextView = (TextView) itemView.findViewById(R.id.orderTotal_TextView);
+            tv_sku_overall_disc = (TextView) itemView.findViewById(R.id.tv_sku_overall_disc);
             rv_child_for_skuitem=(RecyclerView)itemView.findViewById(R.id.rv_child_for_skuitem);
             rv_child_for_skuitem.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
 
