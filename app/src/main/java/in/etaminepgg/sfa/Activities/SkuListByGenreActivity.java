@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import in.etaminepgg.sfa.Adapters.CustomListAdapter;
+import in.etaminepgg.sfa.Adapters.CustomSuggestionAdapter;
 import in.etaminepgg.sfa.Adapters.ExpandableListAdapter;
 import in.etaminepgg.sfa.Adapters.SkuGenreTabsAdapter;
 import in.etaminepgg.sfa.Fragments.AllSKUsFragment;
@@ -44,6 +46,7 @@ import in.etaminepgg.sfa.Models.CategoryHeader;
 import in.etaminepgg.sfa.Models.SkuGroupHistory;
 import in.etaminepgg.sfa.Models.SubCategoryForCategoryHeader;
 import in.etaminepgg.sfa.R;
+import in.etaminepgg.sfa.Utilities.ClearableAutoCompleteTextView;
 import in.etaminepgg.sfa.Utilities.Constants;
 import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
@@ -159,9 +162,16 @@ public class SkuListByGenreActivity extends AppCompatActivity
     public  void setAdapterForSearch()
     {
 
-        ArrayAdapter<SkuGroupHistory> skuAdapter = new ArrayAdapter<SkuGroupHistory>(this, android.R.layout.simple_dropdown_item_1line, DbUtils.getCustomSkuList());
-        act_searchsku.setThreshold(1);
+      // ArrayAdapter<SkuGroupHistory> skuAdapter = new ArrayAdapter<SkuGroupHistory>(this, android.R.layout.simple_dropdown_item_1line, DbUtils.getCustomSkuList());
+
+       ArrayList arrayList=new ArrayList<>();
+
+       arrayList=(ArrayList) DbUtils.getCustomSkuList();
+       CustomSuggestionAdapter skuAdapter =new CustomSuggestionAdapter(getApplicationContext(),arrayList);
         act_searchsku.setAdapter(skuAdapter);
+        act_searchsku.setThreshold(1);
+
+
     }
 
     @Override
@@ -173,37 +183,7 @@ public class SkuListByGenreActivity extends AppCompatActivity
     }
 
 
-  /*  private List<SkuGroupHistory> getCustomSkuList()
-    {
-        String SQL_SELECT_SKUs=null;
-     *//*  Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.skuList_ViewPager + ":" + skuList_ViewPager.getCurrentItem());
 
-        if(skuList_ViewPager.getCurrentItem()==1){
-            SQL_SELECT_SKUs = "select sku_id, sku_name from " + TBL_SKU + " WHERE new_sku=1;";
-        }
-        else if(skuList_ViewPager.getCurrentItem()==3 )
-        {*//*
-            SQL_SELECT_SKUs = "select sku_id, sku_name from " + TBL_SKU + " ;";
-//        }
-        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
-        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
-        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SKUs, null);
-
-        List<SkuGroupHistory> skuList = new ArrayList<>();
-
-        while (cursor.moveToNext())
-        {
-            String skuID = cursor.getString(cursor.getColumnIndexOrThrow("sku_id"));
-            String skuName = cursor.getString(cursor.getColumnIndexOrThrow("sku_name"));
-
-            skuList.add(new SkuGroupHistory(skuID,skuName));
-        }
-
-        cursor.close();
-        sqLiteDatabase.close();
-
-        return skuList;
-    }*/
 
     private void categoryInactive()
     {
@@ -234,15 +214,16 @@ public class SkuListByGenreActivity extends AppCompatActivity
     {
 
 
-        act_searchsku.setOnClickListener(new View.OnClickListener()
+      /*  act_searchsku.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                el_category.setVisibility(View.GONE);
+
+
             }
         });
-
+*/
 
 
 
@@ -251,7 +232,10 @@ public class SkuListByGenreActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
             {
-                SkuGroupHistory sgh= (SkuGroupHistory) adapterView.getAdapter().getItem(i);
+                el_category.setVisibility(View.GONE);
+
+               // SkuGroupHistory sgh= (SkuGroupHistory) adapterView.getAdapter().getItem(i);
+                SkuGroupHistory sgh= (SkuGroupHistory) adapterView.getItemAtPosition(i);
 
                 Log.i("sku",new Gson().toJson(sgh));
 

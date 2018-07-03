@@ -281,23 +281,20 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                 {
                     int position = SkuInfoViewHolder.this.getLayoutPosition();
                     String orderDetailID = itemView.getTag(R.string.tag_order_detail_id).toString();
+
                     if (SkuInfoViewHolder.this.deleteSkuInSalesOrderDetailsTable(orderDetailID, itemView.getTag(R.string.tag_sku_id).toString()) == 1)
                     {
                         SkuInfoViewHolder.this.deleteEntriesInSalesOrderSkuAttributes(orderDetailID);
 
+                        SalesOrderAdapter.this.skuList.remove(position);
+                        SalesOrderAdapter.this.notifyItemRemoved(position);
                         SalesOrderAdapter.this.notifyItemRangeChanged(position, SalesOrderAdapter.this.skuList.size());
+
                         String activeOrderID = DbUtils.getActiveOrderID();
                         //SalesOrderAdapter.this.orderSummary_TextView.setText(DbUtils.getItemCount(activeOrderID) + " items \nTotal:  Rs. " + DbUtils.getOrderTotal(activeOrderID)+"\nOrder for "+DbUtils.getActiveRetailer(activeOrderID));
                         SalesOrderAdapter.this.orderSummary_TextView.setText("Rs. " + DbUtils.getOrderTotal(activeOrderID));
                         SalesOrderAdapter.this.tv_grandtoalitems.setText("Grand Total ( " + DbUtils.getItemCount(activeOrderID) + " items )");
-                      /*  if (SalesOrderAdapter.this.skuList.size() <= 0)
-                        {
-                            SalesOrderAdapter.this.salesOrder_LinearLayout.setVisibility(View.GONE);
-                            SalesOrderAdapter.this.salesOrder_LinearLayout_outer.findViewById(R.id.emptyAdapter_TextView).setVisibility(View.VISIBLE);
-                            return;
-                        }
-                        SalesOrderAdapter.this.salesOrder_LinearLayout.setVisibility(View.VISIBLE);
-                        SalesOrderAdapter.this.salesOrder_LinearLayout_outer.findViewById(R.id.emptyAdapter_TextView).setVisibility(View.GONE);*/
+
 
                         if (SalesOrderAdapter.this.skuList.size() <= 0)
                         {
@@ -313,6 +310,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                         SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + (DbUtils.getOrderTotal(activeOrderID) - Float.parseFloat(overalldiscount)));
                         return;
                     }
+
                     Utils.showToast(LoginActivity.baseContext, "Error Removing SKU");
                 }
             });
@@ -737,7 +735,10 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
         private int deleteSkuInSalesOrderDetailsTable(String orderDetailID, String skuID)
         {
             String[] selectionArgs = new String[]{orderDetailID, skuID};
-            return MyDb.getDbHandle(MyDb.openDatabase(dbFileFullPath)).delete(TBL_SALES_ORDER_DETAILS, "order_detail_id = ? AND sku_id = ?", selectionArgs);
+
+            SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(dbFileFullPath));
+
+            return sqLiteDatabase.delete(TBL_SALES_ORDER_DETAILS, "order_detail_id = ? AND sku_id = ?", selectionArgs);
         }
 
         private void eraseCurrentRegularOrderFor(String retailerID)
@@ -815,6 +816,8 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                 Utils.dismissProgressDialog(progressDialog);
                 Utils.showToast(this.itemView.getContext(), "ERROR! Order Failed");
             }
+
+
         }
 
         private String getActiveOrderIdIfHasSalesOrderDetailId()

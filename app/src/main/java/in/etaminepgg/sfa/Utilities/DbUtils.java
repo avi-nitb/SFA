@@ -170,6 +170,7 @@ public class DbUtils
         noOfSalesOrders = cursor.getInt(0);
 
         cursor.close();
+        sqLiteDatabase.close();
         return noOfSalesOrders;
     }
 
@@ -188,6 +189,7 @@ public class DbUtils
         noOfSkuRows = cursor.getInt(0);
 
         cursor.close();
+        sqLiteDatabase.close();
         return noOfSkuRows;
     }
 
@@ -529,12 +531,11 @@ public class DbUtils
 
         if(cursor.moveToNext())
         {
-            orderTotal = cursor.getInt(cursor.getColumnIndexOrThrow("total"));
+            orderTotal = cursor.getFloat(cursor.getColumnIndexOrThrow("total"));
         }
 
         cursor.close();
         sqLiteDatabase.close();
-        orderTotal=(float)orderTotal;
         return orderTotal;
     }
 
@@ -868,6 +869,10 @@ public class DbUtils
                 is_value=true;
             }
         }
+
+
+        cursor.close();
+        sqLiteDatabase.close();
 
         return is_value;
     }

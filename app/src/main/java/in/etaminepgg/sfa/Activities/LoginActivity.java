@@ -407,18 +407,23 @@ public class LoginActivity extends AppCompatActivity
         }
 
         cursor.close();
+        sqLiteDatabase.close();
         return isAutoLogout;
 
     }
 
     private boolean isValidUser(String userName, String password)
     {
+        valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+        sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
         String SQL_SELECT_SALES_PERSON = "SELECT emp_id FROM " + TBL_EMPLOYEE + " WHERE " +
                 "emp_username " + "= ? AND " + "emp_password " + "= ?";
         String[] selectionArgs = {userName, password};
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SALES_PERSON, selectionArgs);
         boolean isUserFound = cursor.moveToFirst();
         cursor.close();
+        sqLiteDatabase.close();
         return isUserFound;
     }
 
@@ -542,8 +547,7 @@ public class LoginActivity extends AppCompatActivity
                 else
                 {
                     dismissProgressDialog(progressDialog);
-                    Utils.showErrorDialog(LoginActivity.this, "User not found, Please login and " +
-                            "try again with valid username");
+                    Utils.showErrorDialog(LoginActivity.this, "User not found, Please login and " + "try again with valid username");
                 }
             }
 
@@ -925,7 +929,7 @@ public class LoginActivity extends AppCompatActivity
                             @Override
                             public void onFailure(Call<AuthUserDetails> call, Throwable t)
                             {
-
+                                dismissProgressDialog(progressDialog);
                             }
                         });
 
@@ -934,7 +938,7 @@ public class LoginActivity extends AppCompatActivity
                     @Override
                     public void onFailure(Call<Location_Model> call, Throwable t)
                     {
-
+                        dismissProgressDialog(progressDialog);
                     }
                 });
 
@@ -945,7 +949,7 @@ public class LoginActivity extends AppCompatActivity
             {
 
                 Utils.showToast(baseContext, ConstantsA.NO_INTERNET_CONNECTION);
-
+                dismissProgressDialog(progressDialog);
             }
         });
 

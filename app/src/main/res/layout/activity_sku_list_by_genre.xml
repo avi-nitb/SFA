@@ -47,6 +47,39 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+
+          <!--  <FrameLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="5dp">
+
+                <AutoCompleteTextView
+                    android:layout_alignBaseline="@+id/btn_category"
+                    android:layout_marginLeft="@dimen/dim_10"
+                    android:layout_marginTop="@dimen/dim_10"
+                    android:layout_centerVertical="true"
+                    android:id="@+id/act_searchsku"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:fontFamily="@font/lato_regular"
+                    android:hint="Enter sku name"
+                    android:singleLine="true"
+                    android:textColor="@color/black"/>
+
+                <Button
+                    android:id="@+id/clear"
+                    android:layout_width="23dp"
+                    android:layout_height="23dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="right|bottom"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/ic_clear"
+                    />
+
+            </FrameLayout>-->
+
             <in.etaminepgg.sfa.Utilities.ClearableAutoCompleteTextView
                 android:layout_alignBaseline="@+id/btn_category"
                 android:layout_marginLeft="@dimen/dim_10"
@@ -58,6 +91,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lato_regular"
                 android:hint="Enter sku name"
+                android:completionThreshold="1"
                 android:singleLine="true"
                 android:textColor="@color/black"/>
 

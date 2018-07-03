@@ -56,6 +56,7 @@ import com.google.gson.Gson;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +123,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     private GoogleApiClient googleApiClient;
     private Uri imageUri, imageuriback;
     private TextRecognizer detector;
-    private TextView tv_bcr_text, tv_bcr_photo_count, tv_ocr_back;
+    private TextView tv_bcr_text, tv_bcr_photo_count, tv_ocr_back,tv_area_header;
     private ImageView iv_bcr_photo;
 
 
@@ -162,7 +163,6 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
     private void networkcall_for_createretailer()
     {
-
 
         Apimethods apimethods = API_Call_Retrofit.getretrofit(CreateRetailerActivity.this).create(Apimethods.class);
 
@@ -271,6 +271,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         tv_bcr_text = (TextView) findViewById(R.id.tv_ocr);
         tv_ocr_back = (TextView) findViewById(R.id.tv_ocr_back);
+
+
         tv_bcr_photo_count = (TextView) findViewById(R.id.bcr_count);
 
         btn_bcr_photo = (Button) findViewById(R.id.btn_bcr_photo);
@@ -394,7 +396,35 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             @Override
             public void onClick(View v)
             {
-                dispatchTakePictureIntent(Constants.FLAG_RETAILER_PHOTO);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                {
+                    String[] permissionsArray = new String[]{"android.permission.CAMERA"};
+                    try
+                    {
+                        if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") != PackageManager.PERMISSION_GRANTED )
+                        {
+                            ActivityCompat.requestPermissions(CreateRetailerActivity.this, permissionsArray, 1);
+
+                        }else if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") == PackageManager.PERMISSION_DENIED )
+                        {
+                            ActivityCompat.shouldShowRequestPermissionRationale(CreateRetailerActivity.this, "android.permission.CAMERA");
+
+                        }else {
+
+                            dispatchTakePictureIntent(Constants.FLAG_RETAILER_PHOTO);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                }else {
+
+                    dispatchTakePictureIntent(Constants.FLAG_RETAILER_PHOTO);
+
+                }
+
             }
         });
 
@@ -414,12 +444,6 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             }
         });
 
-/*
-        if (savedInstanceState != null)
-        {
-            imageUri = Uri.parse(savedInstanceState.getString(SAVED_INSTANCE_URI));
-            tv_bcr_text.setText(savedInstanceState.getString(SAVED_INSTANCE_RESULT));
-        }*/
         detector = new TextRecognizer.Builder(getApplicationContext()).build();
 
 
@@ -456,6 +480,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             @Override
             public void onClick(View view)
             {
+
                 ActivityCompat.requestPermissions(CreateRetailerActivity.this, new
                         String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION_BACK);
             }
@@ -467,7 +492,35 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             @Override
             public void onClick(View v)
             {
-                dispatchTakePictureIntent(Constants.FLAG_BCR_PHOTO);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                {
+                    String[] permissionsArray = new String[]{"android.permission.CAMERA"};
+                    try
+                    {
+                        if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") != PackageManager.PERMISSION_GRANTED )
+                        {
+                            ActivityCompat.requestPermissions(CreateRetailerActivity.this, permissionsArray, 1);
+
+                        }else if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") == PackageManager.PERMISSION_DENIED )
+                        {
+                            ActivityCompat.shouldShowRequestPermissionRationale(CreateRetailerActivity.this, "android.permission.CAMERA");
+
+                        }else {
+
+                            dispatchTakePictureIntent(Constants.FLAG_BCR_PHOTO);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                }else {
+
+                    dispatchTakePictureIntent(Constants.FLAG_BCR_PHOTO);
+                }
+
+
             }
         });
 
@@ -477,30 +530,67 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
         {
-            Bitmap imageBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-            ivPhotoPreview.setImageBitmap(imageBitmap);
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+
+
+            if (imageFile != null)
+            {
+                FileOutputStream out = null;
+                try {
+                    out = new FileOutputStream(imageFile);
+                    photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                    // PNG is a lossless format, the compression factor (100) is ignored
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (out != null) {
+                            out.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+            ivPhotoPreview.setImageBitmap(photo);
         }
         else if (requestCode == BCR_REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
         {
             removeError();
 
-            Bitmap imageBitmap = BitmapFactory.decodeFile(imageFile_BCR.getAbsolutePath());
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
 
-            iv_bcr_photo.setImageBitmap(imageBitmap);
+            if (imageFile_BCR != null)
+            {
+                FileOutputStream out = null;
+                try {
+                    out = new FileOutputStream(imageFile_BCR);
+                    photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                    // PNG is a lossless format, the compression factor (100) is ignored
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (out != null) {
+                            out.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+         //   Bitmap imageBitmap = BitmapFactory.decodeFile(imageFile_BCR.getAbsolutePath());
+
+            iv_bcr_photo.setImageBitmap(photo);
             Log.d("arraysize", imagecount.size() + "");
             tv_bcr_photo_count.setText(imagecount.size() + "");
 
-            uploadImage();
-        }
-        else if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
-        {
-            createNewRetailer();
-        }
-        else if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED && requestCode != PHOTO_REQUEST && requestCode != PHOTO_REQUEST_BACK)
-        {
-            Utils.showErrorDialog(this, "Retailer creation failed. You must turn on GPS.");
+
         }
         else if (requestCode == PHOTO_REQUEST && resultCode == RESULT_OK)
         {
@@ -628,21 +718,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         }
     }
 
-    private void uploadImage()
-    {
 
-        //File creating from selected URL
-        File file = new File(imageFile_BCR.getAbsolutePath());
-
-        // create RequestBody instance from file
-        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-
-        MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", file.getName(), requestFile);
-
-        Log.e("multipathimage", new Gson().toJson(body));
-
-
-    }
 
     // for oce media intent
     private void launchMediaScanIntent(int requestcode)
@@ -709,26 +785,6 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 networkcall_for_createretailer();
             }
 
-
-
-          /*  insertIntoRetailers(loggedInUserID, retailerName, ownerName, shopAddress, pincode,
-                    mobileNumber, email, areaID, lat, lng, getImagePath());*/
-
-
-/*
-            if(Utils.isNetworkConnected(CreateRetailerActivity.this)){
-
-                network_call_for_PutRetailerInfo(new MySharedPrefrencesData().getEmployee_AuthKey
-                                (CreateRetailerActivity.this), loggedInUserID, retailerName,
-                        ownerName, shopAddress, pincode, mobileNumber, email, areaID, lat, lng, getImagePath());
-
-                insertIntoRetailers(loggedInUserID, retailerName, ownerName, shopAddress, pincode,
-                        mobileNumber, email, areaID, lat, lng, getImagePath());
-
-            }else{
-                insertIntoRetailers(loggedInUserID, retailerName, ownerName, shopAddress, pincode,
-                        mobileNumber, email, areaID, lat, lng, getImagePath());
-            }*/
             // clearFormData();
         }
     }
@@ -915,7 +971,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     {
         Uri photoURI;
 
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+       // Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent takePictureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 
         try
         {
@@ -940,16 +997,6 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
             if (imageFile != null)
             {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                {
-                    photoURI = FileProvider.getUriForFile(CreateRetailerActivity.this, BuildConfig.APPLICATION_ID + ".provider", imageFile);
-                }
-                else
-                {
-                    photoURI = Uri.fromFile(imageFile);
-                }
-
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
@@ -959,16 +1006,6 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
             if (imageFile_BCR != null)
             {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                {
-                    photoURI = FileProvider.getUriForFile(CreateRetailerActivity.this, BuildConfig.APPLICATION_ID + ".provider", imageFile_BCR);
-                }
-                else
-                {
-                    photoURI = Uri.fromFile(imageFile_BCR);
-                }
-
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
                 startActivityForResult(takePictureIntent, BCR_REQUEST_IMAGE_CAPTURE);
             }
@@ -1152,10 +1189,19 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         }
 
 
-        if (areaName.equals(ADD_NEW_AREA))
+        if (areaName.equals(ADD_NEW_AREA) || areaName.equals("Select One"))
         {
-            Utils.showPopUp(this, "Error: Select Valid Area");
+            //Utils.showPopUp(this, "Error: Select Valid Area");
+
+            TextView errorText = (TextView)spnArea.getSelectedView();
+            errorText.setError(msgInvalidEntries);
+
             inValidEntriesCount++;
+        }
+
+        if(inValidEntriesCount>0){
+
+            Utils.showPopUp(CreateRetailerActivity.this,"kindly fill all  mandatory details.");
         }
 
         return inValidEntriesCount == 0;
@@ -1288,7 +1334,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         String[] fullhierarray = fullhier.split(",");
 
-        String region = fullhierarray[1];
+       // String region = fullhierarray[1];
 
 
         // String SQL_SELECT_STATES = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "parent_loc_id = ?";
@@ -1407,7 +1453,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_AREAS, selectionArgs);
 
-       // areasList.add("Select Area");
+        areasList.add("Select One");
 
         while (cursor.moveToNext())
         {

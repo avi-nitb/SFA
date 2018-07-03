@@ -17,16 +17,20 @@ android {
         applicationId "in.etaminepgg.sfa"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 8
-        versionName "1.0.6"
+        versionCode 10
+        versionName "1.0.8"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
+            buildConfigField "String", "SERVER_URL", '"http://etaminepgg.in/sfa/"'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
+
+           // buildConfigField "String", "SERVER_URL", '"http://vikas.etaminepgg.in/sfa/"'
+            buildConfigField "String", "SERVER_URL", '"http://etaminepgg.in/sfa/"'
             // signingConfig signingConfigs.config
         }
     }

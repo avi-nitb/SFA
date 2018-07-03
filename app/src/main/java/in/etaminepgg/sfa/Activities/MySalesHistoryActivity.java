@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -521,8 +522,10 @@ public class MySalesHistoryActivity extends AppCompatActivity
         selectionArgs = selectionArgsList.toArray(selectionArgs);
         selectionArgsList.clear();
         List<MySalesHistory> salesHistoryList = new ArrayList<>();
+
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_MY_SALES_HISTORY, selectionArgs);
         while (cursor.moveToNext())
         {
@@ -564,11 +567,11 @@ public class MySalesHistoryActivity extends AppCompatActivity
 
                     myskulis.add(new MySalesHistory().new SkuDetails_Ordered(skuid, skuname, skuqty,sku_free_qty,sku_discount, sku_finalprice));
 
-
                 }
 
 
                 salesHistoryList.add(new MySalesHistory(orderID, retailerID, orderDate, totalItems, orderTotal,total_discount, myskulis));
+
 
             }
 
@@ -581,6 +584,7 @@ public class MySalesHistoryActivity extends AppCompatActivity
 
         }
         cursor.close();
+        sqLiteDatabase.close();
 
         if (salesHistoryList.size() <= 0)
         {

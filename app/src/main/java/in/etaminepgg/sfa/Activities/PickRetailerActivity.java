@@ -47,6 +47,7 @@ import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -319,6 +320,42 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             longitude_TextView.setText("Longitude: " + longitude);
 
 
+
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+
+           // retailerPhoto_ImageView.setImageBitmap(photo);
+
+
+            if (imageFile != null)
+            {
+                FileOutputStream out = null;
+                try
+                {
+                    out = new FileOutputStream(imageFile);
+                    photo.compress(Bitmap.CompressFormat.PNG, 100, out); // photo is your Bitmap instance
+                    // PNG is a lossless format, the compression factor (100) is ignored
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                finally
+                {
+                    try
+                    {
+                        if (out != null)
+                        {
+                            out.close();
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+
             if (Utils.isNetworkConnected(PickRetailerActivity.this))
             {
 
@@ -568,6 +605,9 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
                         {
                             Utils.showErrorDialog(PickRetailerActivity.this, "Invalid shop name. Please select valid name from dropdown");
                         }
+                    }else if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED)
+                    {
+                        ActivityCompat.shouldShowRequestPermissionRationale(PickRetailerActivity.this,Manifest.permission.ACCESS_FINE_LOCATION);
                     }
                     else
                     {
@@ -717,21 +757,6 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
             String filestring = imageFile.getAbsolutePath();
 
-           /* Matrix matrix = new Matrix();
-            try
-            {
-                ExifInterface exif = new ExifInterface(filestring);
-
-                int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-                int rotationInDegrees = exifToDegrees(rotation);
-                if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
-
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }*/
 
             if (Utils.isNetworkConnected(getBaseContext()))
             {
@@ -753,7 +778,6 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             }
             else
             {
-
 
                 return filestring;
             }
@@ -794,16 +818,6 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
         if (imageFile != null)
         {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                photoURI = FileProvider.getUriForFile(PickRetailerActivity.this, BuildConfig.APPLICATION_ID + ".provider", imageFile);
-            }
-            else
-            {
-                photoURI = Uri.fromFile(imageFile);
-            }
-
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }

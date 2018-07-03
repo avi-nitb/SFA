@@ -1,5 +1,7 @@
 package in.etaminepgg.sfa.Network;
 
+import in.etaminepgg.sfa.BuildConfig;
+
 /**
  * Created by Jaya on 15-12-2017.
  */
@@ -10,7 +12,9 @@ public class ApiUrl
     public static final String BASEURL_SKUTHUMBIMAGE = "http://etaminepgg.in/sfa/sites/default/files/images";
 
 
-    public static final String BASE_URL = "http://etaminepgg.in/sfa/";
+    //public static final String BASE_URL = "http://etaminepgg.in/sfa/";
+
+    public static final String BASE_URL = BuildConfig.SERVER_URL;
 
     public static final String LOG_URL_AUTHUSER = "?q=api/authUser";
 

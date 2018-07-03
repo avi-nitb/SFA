@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -337,10 +338,7 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
         this.retailerVisits_ProgressBar = (ProgressBar) findViewById(R.id.retailerVisits_ProgressBar);
         this.retailerVisits_LinearLayout = (LinearLayout) findViewById(R.id.retailerVisits_LinearLayout);
         this.noOfRetailerVisits_TextView = (TextView) findViewById(R.id.noOfRetailerVisits_TextView);
-       /* this.newProducts_TextView = (ImageView) findViewById(R.id.newProducts_TextView);
-        this.promotionalProducts_TextView = (ImageView) findViewById(R.id.promotionalProducts_TextView);
-        this.regularlyOrderedProducts_TextView = (ImageView) findViewById(R.id.regularlyOrderedProducts_TextView);
-        this.allProducts_TextView = (ImageView) findViewById(R.id.allProducts_TextView);*/
+
 
 
         this.ll_allpro = (LinearLayout) findViewById(R.id.ll_allpro);
@@ -456,7 +454,7 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
 
     private void askUserToGrantPermissions()
     {
-        if (VERSION.SDK_INT >= 23)
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
             String[] permissionsArray = new String[]{"android.permission.CAMERA", "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION", "android.permission.READ_PHONE_STATE", "android.permission.WRITE_EXTERNAL_STORAGE"};
             try
@@ -1063,15 +1061,14 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
                             mySharedPrefrencesData.setApiCallForCategoryListOnce(DashboardActivity.this, false);
                             GetSkuCategorySubCategorylist catSubcatlist = response.body();
 
+                            int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+                            SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
                             for (int i = 0; i < catSubcatlist.getSkuCategories().size(); i++)
                             {
 
 
                                 GetSkuCategorySubCategorylist.SkuCategory skuCategory = catSubcatlist.getSkuCategories().get(i);
-
-
-                                int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
-                                SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
 
                                 ContentValues skuCategoryValues = new ContentValues();
@@ -1081,7 +1078,6 @@ public class DashboardActivity extends AppCompatActivity implements OnNavigation
                                 skuCategoryValues.put("created_date", Utils.getTodayDate());
                                 skuCategoryValues.put("upload_status", 1);
                                 sqLiteDatabase.insert(TBL_SKU_CATEGORY, null, skuCategoryValues);
-
 
                                 for (int j = 0; j < skuCategory.getSubCategories().size(); j++)
                                 {
