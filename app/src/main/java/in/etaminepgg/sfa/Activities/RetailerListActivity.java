@@ -29,6 +29,7 @@ public class RetailerListActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_retailer_list);
 
         retailerList_RecyclerView = (RecyclerView) findViewById(R.id.retailerList_RecyclerView);
@@ -45,7 +46,7 @@ public class RetailerListActivity extends AppCompatActivity
 
         List<Retailer> retailerList = getRetailerList();
 
-        if(retailerList.size() < 1)
+        if (retailerList.size() < 1)
         {
             emptyAdapter_TextView.setVisibility(View.VISIBLE);
             retailerList_RecyclerView.setVisibility(View.GONE);
@@ -71,7 +72,7 @@ public class RetailerListActivity extends AppCompatActivity
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILERS, null);
 
-        while(cursor.moveToNext())
+        while (cursor.moveToNext())
         {
             String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
             String retailerName = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));

@@ -9,7 +9,7 @@ import in.etaminepgg.sfa.BuildConfig;
 public class ApiUrl
 {
 
-    public static final String BASEURL_SKUTHUMBIMAGE = "http://etaminepgg.in/sfa/sites/default/files/images";
+    public static final String BASEURL_SKUTHUMBIMAGE = BuildConfig.SERVER_URL+"sites/default/files/images";
 
 
     //public static final String BASE_URL = "http://etaminepgg.in/sfa/";

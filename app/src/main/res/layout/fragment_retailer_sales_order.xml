@@ -50,8 +50,8 @@
                     android:text="Order ID :"/>
 
                 <TextView
-                    android:layout_alignParentRight="true"
-                    android:layout_alignBaseline="@+id/tv_order_id"
+                    android:layout_below="@+id/tv_order_id"
+                    android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
                     android:layout_marginTop="@dimen/dim_8"
                     android:layout_marginBottom="8dp"
@@ -143,24 +143,35 @@
                         android:weightSum="1">
 
                         <TextView
+                            android:id="@+id/tv_ovdisc"
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
                             android:fontFamily="@font/lato_regular"
                             android:textColor="@color/black"
                             android:text="Overall Discount"
+                            android:layout_alignBaseline="@id/order_overalldiscount_value"
                             android:textSize="@dimen/dim_14"/>
 
-                        <in.etaminepgg.sfa.Utilities.PrefixEditText
+                        <TextView
+                            android:id="@+id/tv_prefix"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-Rs. "
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_size_medium_double"
+                            android:fontFamily="@font/lato_bold"
+                            android:layout_alignBaseline="@+id/order_overalldiscount_value"
+                            android:layout_toLeftOf="@+id/order_overalldiscount_value"/>
+
+                        <EditText
                             android:layout_alignParentRight="true"
                             android:inputType="number"
                             android:id="@+id/order_overalldiscount_value"
-                            fontPath="@font/lato_regular"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="@dimen/text_size_medium_double"
                             android:fontFamily="@font/lato_bold"
-                            android:tag="-Rs. "
-                            android:focusable="true"
+                            android:focusable="auto"
                             android:text="0"
                             />
 
@@ -225,6 +236,17 @@
                     android:layout_marginBottom="@dimen/sixteen_dp"
                     android:layout_marginTop="@dimen/sixteen_dp"
                     android:text="@string/label_submit_sales_order"/>
+
+
+                <TextView
+                    android:id="@+id/so_upldcount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:fontFamily="@font/lato_bold"
+                    android:textColor="@color/colorRed"
+                    android:textSize="@dimen/text_size_large"
+                    android:text="No. of Sales orders to Upload:"/>
 
 
             </LinearLayout>

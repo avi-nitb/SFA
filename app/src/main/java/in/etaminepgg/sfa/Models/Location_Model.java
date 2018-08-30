@@ -67,6 +67,19 @@ public class Location_Model
         @Expose
         private String companyId;
 
+        public LocatoinsInfo(String locHierId, String name, String hierLevel, String parentId, String fullHier)
+        {
+            this.locHierId = locHierId;
+            this.name = name;
+            this.hierLevel = hierLevel;
+            this.parentId = parentId;
+            this.fullHier = fullHier;
+        }
+
+        public LocatoinsInfo()
+        {
+        }
+
         public String getLocHierId()
         {
             return locHierId;
@@ -150,6 +163,11 @@ public class Location_Model
         public void setCompanyId(String companyId)
         {
             this.companyId = companyId;
+        }
+
+        public void setLocHierId(String locHierId)
+        {
+            this.locHierId = locHierId;
         }
     }
 }

@@ -17,7 +17,7 @@
               android:orientation="vertical">
 
     <TextView
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorRed"
         android:textSize="@dimen/text_size_small"
         android:id="@+id/orderId_TextView"
         android:layout_width="match_parent"

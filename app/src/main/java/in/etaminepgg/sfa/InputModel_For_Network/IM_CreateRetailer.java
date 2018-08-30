@@ -46,6 +46,8 @@ public class IM_CreateRetailer
 
     public class RetailerData {
 
+
+
         @SerializedName("customer_contact_name")
         @Expose
         private String customerContactName;
@@ -107,6 +109,7 @@ public class IM_CreateRetailer
 
         public RetailerData(String customerCompanyname,String customerContactName , String customerType, String customerPincode, String ownerMobileNumber, String contactEmail, String customerGeopos, String locationId, String createdDate,String created_by, String customerPicture,String customer_address_1,String card_front_text,String card_back_text,ArrayList<String> card_photos)
         {
+
             this.customerContactName = customerContactName;
             this.customerCompanyname = customerCompanyname;
             this.customerType = customerType;
@@ -259,5 +262,6 @@ public class IM_CreateRetailer
         {
             this.card_photos = card_photos;
         }
+
     }
 }

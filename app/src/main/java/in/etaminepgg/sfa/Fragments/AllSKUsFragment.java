@@ -68,14 +68,15 @@ public class AllSKUsFragment extends Fragment
         }
         else if (this.mySharedPrefrencesData.getfirsttimeflagforAll(getActivity()))
         {
-            if(DbUtils.getSkuRowsSize()<1){
+            if (DbUtils.getSkuRowsSize() < 1)
+            {
                 this.mySharedPrefrencesData.setSkulistUpdateDate(getActivity(), Utils.getTodayDate());
-                networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()),false);
+                networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()), false);
             }
         }
         else
         {
-           // networkcall_for_isskulistUpdated();
+            // networkcall_for_isskulistUpdated();
         }
 
         setAdapter_Category();
@@ -85,11 +86,7 @@ public class AllSKUsFragment extends Fragment
 
     private void setAdapter(View layout)
     {
-        /*AllSKUsAdapter allSKUsAdapter = new AllSKUsAdapter(DbUtils.getSkuList("select sku_id, sku_name, sku_price, sku_category,sku_category_description, sku_photo_source from " + Constants.TBL_SKU + " ;", null));
-        this.allSKUs_RecyclerView = (RecyclerView) layout.findViewById(R.id.allSKUs_RecyclerView);
-        this.allSKUs_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        this.allSKUs_RecyclerView.setItemAnimator(new DefaultItemAnimator());
-        this.allSKUs_RecyclerView.setAdapter(allSKUsAdapter);*/
+
     }
 
 
@@ -124,6 +121,8 @@ public class AllSKUsFragment extends Fragment
 
     }
 
+
+    //api call for updated list
     private void networkcall_for_isskulistUpdated()
     {
 
@@ -150,7 +149,7 @@ public class AllSKUsFragment extends Fragment
                     {
                         Utils.dismissProgressDialog(progressDialog);
                         AllSKUsFragment.this.isUpdated = true;
-                        AllSKUsFragment.this.networkcall_for_getSKUlistAfter(AllSKUsFragment.this.mySharedPrefrencesData.getEmployee_AuthKey(AllSKUsFragment.this.getActivity()),true);
+                        AllSKUsFragment.this.networkcall_for_getSKUlistAfter(AllSKUsFragment.this.mySharedPrefrencesData.getEmployee_AuthKey(AllSKUsFragment.this.getActivity()), true);
                         return;
                     }
                     return;
@@ -169,6 +168,7 @@ public class AllSKUsFragment extends Fragment
     }
 
 
+    //api call for all sku
     private void networkcall_for_getSKUlistAfter(final String authToken, final boolean isUpdated)
     {
         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
@@ -208,7 +208,7 @@ public class AllSKUsFragment extends Fragment
                     GetSkuListAfterNew getSkuListAfter = (GetSkuListAfterNew) response.body();
                     Log.i("GetSkuListAfter_op_new", new Gson().toJson(getSkuListAfter));
 
-                    mySharedPrefrencesData.setfirsttimeflagforAll(getActivity(),false);
+                    mySharedPrefrencesData.setfirsttimeflagforAll(getActivity(), false);
 
                     if (getSkuListAfter.getApiStatus().intValue() == 1)
                     {
@@ -306,11 +306,14 @@ public class AllSKUsFragment extends Fragment
                                 }
                             }
 
-                            if(!DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && !isUpdated){
+                            if (!DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && !isUpdated)
+                            {
 
                                 AllSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
 
-                            }else if(DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && isUpdated){
+                            }
+                            else if (DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && isUpdated)
+                            {
 
                                 delete_sku_row_from_db(skuId_Info.getSkuId());
 
@@ -320,7 +323,7 @@ public class AllSKUsFragment extends Fragment
 
                         }
 
-                        ((SkuListByGenreActivity)getActivity()).setAdapterForSearch();
+                        ((SkuListByGenreActivity) getActivity()).setAdapterForSearch();
 
                         Utils.dismissProgressDialog(progressDialog);
 
@@ -343,18 +346,10 @@ public class AllSKUsFragment extends Fragment
     }
 
 
-
     private void delete_sku_row_from_db(String sku_id)
     {
         String selection = "sku_id = ?";
         String[] selectionArgs = new String[]{sku_id};
-       /* Cursor cursor = this.sqLiteDatabase.rawQuery("SELECT attribute_id FROM " + Constants.TBL_SKU_ATTRIBUTE_MAPPING + " WHERE sku_id = ?", selectionArgs);
-        while (cursor.moveToNext())
-        {
-            String[] selectionArgs1 = new String[]{cursor.getString(cursor.getColumnIndexOrThrow("attribute_id"))};
-            this.sqLiteDatabase.delete(Constants.TBL_GLOBAL_ATTRIBUTES, "attribute_id = ?", selectionArgs1);
-        }
-        this.sqLiteDatabase.delete(Constants.TBL_SKU_ATTRIBUTE_MAPPING, selection, selectionArgs);*/
         this.sqLiteDatabase.delete(Constants.TBL_SKU, selection, selectionArgs);
     }
 }

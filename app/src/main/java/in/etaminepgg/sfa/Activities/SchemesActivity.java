@@ -22,7 +22,6 @@ import in.etaminepgg.sfa.Utilities.MyDb;
 
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SCHEME;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
-import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 
 public class SchemesActivity extends AppCompatActivity
 {
@@ -31,10 +30,15 @@ public class SchemesActivity extends AppCompatActivity
 
     private Toolbar toolbar;
 
+    //not implemented till now
+
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         if (item.getItemId() == android.R.id.home)
+        {
             finish();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -42,9 +46,10 @@ public class SchemesActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        // this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_schemes);
 
-        toolbar=(Toolbar)findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Schemes");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -59,7 +64,7 @@ public class SchemesActivity extends AppCompatActivity
 
         List<Scheme> schemeList = getSchemesList();
 
-        if(schemeList.size() < 1)
+        if (schemeList.size() < 1)
         {
             emptyAdapter_TextView.setVisibility(View.VISIBLE);
             schemes_RecyclerView.setVisibility(View.GONE);
@@ -86,11 +91,11 @@ public class SchemesActivity extends AppCompatActivity
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SCHEMES, selectionArgs);*/
 
-        String SQL_SELECT_SCHEMES = "SELECT" + " * " + "FROM " + TBL_SCHEME ;
+        String SQL_SELECT_SCHEMES = "SELECT" + " * " + "FROM " + TBL_SCHEME;
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SCHEMES, null);
 
 
-        while(cursor.moveToNext())
+        while (cursor.moveToNext())
         {
             String schemeID = cursor.getString(cursor.getColumnIndex("scheme_id"));
             String schemeName = cursor.getString(cursor.getColumnIndex("scheme_name"));

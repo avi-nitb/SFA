@@ -1,6 +1,7 @@
 package in.etaminepgg.sfa.Activities;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
@@ -42,6 +43,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -56,7 +58,6 @@ import com.google.gson.Gson;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,22 +73,24 @@ import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.Constants;
 import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
+import in.etaminepgg.sfa.Utilities.LocationTrack;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.MySharedPrefrencesData;
 import in.etaminepgg.sfa.Utilities.Utils;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.os.Environment.getExternalStoragePublicDirectory;
-import static in.etaminepgg.sfa.Utilities.Constants.REQUEST_TURN_ON_LOCATION;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_LOCATION_HIERARCHY;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.NOT_PRESENT;
 import static in.etaminepgg.sfa.Utilities.Utils.getDateTime;
+import static in.etaminepgg.sfa.Utilities.Utils.getIST;
+import static in.etaminepgg.sfa.Utilities.Utils.getRandomNumber;
 import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 
 public class CreateRetailerActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -102,6 +105,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     private static final int REQUEST_WRITE_PERMISSION_BACK = 21;
     private static final String SAVED_INSTANCE_URI = "uri";
     private static final String SAVED_INSTANCE_RESULT = "result";
+    private final static int ALL_PERMISSIONS_RESULT_CreateRetailer = 789;
     private final int REQUEST_CODE_ACCESS_FINE_LOCATION = 11;
     EditText etRetailerName, etOwnerName, etShopAddress, etPincode, etMobNo, etEmail;
     Spinner spnState, spnDistrict, spnTaluk, spnArea;
@@ -117,20 +121,17 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     ProgressDialog progressDialog = null;
     String lat, lng;
     ArrayList<File> imagecount = new ArrayList<>();
+    LocationTrack locationTrack;
     private String retailerName, ownerName, shopAddress, pincode, mobileNumber, email = "";
     private String stateName, districtName, talukName, areaName;
     private String stateID, districtID, talukID, areaID;
     private GoogleApiClient googleApiClient;
     private Uri imageUri, imageuriback;
     private TextRecognizer detector;
-    private TextView tv_bcr_text, tv_bcr_photo_count, tv_ocr_back,tv_area_header;
+    private TextView tv_bcr_text, tv_bcr_photo_count, tv_ocr_back, tv_area_header, retailer_upldcount;
     private ImageView iv_bcr_photo;
-
-
     private Button btn_bcr_photo;
-
     private Toolbar toolbar;
-    private LocationRequest locationRequest;
     private RadioGroup rg_location;
     LocationListener locationListener = new LocationListener()
     {
@@ -145,22 +146,20 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, locationListener);
 
-            if (Utils.isNetworkConnected(CreateRetailerActivity.this))
-            {
+            dismissProgressDialog();
 
-                networkcall_for_createretailer();
-            }
-            else
-            {
-
-                Utils.showErrorDialog(CreateRetailerActivity.this, "You are unable to create retailer dueto no internet connection.");
-            }
-
+            insertIntoRetailers("", String.valueOf("RETAILER_" + getIST() + "_" + getRandomNumber()), loggedInUserID, retailerName, ownerName, shopAddress, pincode, mobileNumber, email, areaID, lat, lng, getImagePath(), tv_bcr_text.getText().toString(), tv_ocr_back.getText().toString(), getBCRPhotoPathList(), 0);
+            Utils.showSuccessDialogForUpload(CreateRetailerActivity.this, "Retailer information saved, Do you want to Upload ?");
             clearFormData();
+
         }
     };
+    private LocationRequest locationRequest;
+    private ArrayList<String> permissionsToRequest;
+    private ArrayList<String> permissionsRejected = new ArrayList();
+    private ArrayList permissions = new ArrayList();
 
-
+    //api call for create retailer
     private void networkcall_for_createretailer()
     {
 
@@ -192,8 +191,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                     if (createretaileModel.getApiStatus() == 1)
                     {
 
-                        insertIntoRetailers(createretaileModel.getCustomerCode(), loggedInUserID, retailerName, ownerName, shopAddress, pincode,
-                                mobileNumber, email, areaID, lat, lng, createretaileModel.getCustomer_picture_path());
+                        insertIntoRetailers(createretaileModel.getCustomerCode(), String.valueOf("RETAILER_" + getIST() + "_" + getRandomNumber()), loggedInUserID, retailerName, ownerName, shopAddress, pincode,
+                                mobileNumber, email, areaID, lat, lng, createretaileModel.getCustomer_picture_path(), tv_bcr_text.getText().toString(), tv_ocr_back.getText().toString(), getBCRPhotoPathList(), 1);
                         dismissProgressDialog();
                         Utils.dismissProgressDialog(progressDialog);
                         Utils.showSuccessDialog(CreateRetailerActivity.this, "Retailer creation successful.");
@@ -223,6 +222,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -237,6 +237,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_create_retailer);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -245,7 +248,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        buildGoogleApiClient();
+        //buildGoogleApiClient();
         progressDialog = new ProgressDialog(CreateRetailerActivity.this);
 
         retailerName = ownerName = shopAddress = pincode = mobileNumber = email = "";
@@ -273,6 +276,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         tv_ocr_back = (TextView) findViewById(R.id.tv_ocr_back);
 
 
+        retailer_upldcount = (TextView) findViewById(R.id.retailer_upldcount);
+
+
         tv_bcr_photo_count = (TextView) findViewById(R.id.bcr_count);
 
         btn_bcr_photo = (Button) findViewById(R.id.btn_bcr_photo);
@@ -281,20 +287,23 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         rg_location = (RadioGroup) findViewById(R.id.rg_location);
 
-        rg_location.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-          @Override
+        rg_location.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
 
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
+            public void onCheckedChanged(RadioGroup group, int checkedId)
+            {
 
                 // find which radio button is selected
 
-                if(checkedId == R.id.rb_yes) {
+                if (checkedId == R.id.rb_yes)
+                {
 
-                  //  Toast.makeText(getApplicationContext(), "choice: Silent", Toast.LENGTH_SHORT).show();
 
-                } else if(checkedId == R.id.rb_no) {
+                }
+                else if (checkedId == R.id.rb_no)
+                {
 
-                  //  Toast.makeText(getApplicationContext(), "choice: Sound", Toast.LENGTH_SHORT).show();
 
                 }
 
@@ -302,6 +311,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         });
 
+        retailer_upldcount.setText("No. of Retailers to Upload: " + DbUtils.getRetailerCountForUpload(CreateRetailerActivity.this));
 
 
         arrState = new ArrayList<>();
@@ -309,6 +319,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         arrCity = new ArrayList<>();
         arrArea = new ArrayList<>();
 
+
+        //state list for state dropdown
 
         ArrayAdapter<String> stateAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, getStatesList());
         stateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -352,24 +364,6 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             }
         });
 
-      /*  spnTaluk.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                talukName = spnTaluk.getSelectedItem().toString();
-                talukID = getLocationID(talukName);
-
-                setAreaAdapter();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent)
-            {
-
-            }
-        });*/
-
         spnArea.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -402,15 +396,18 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                     String[] permissionsArray = new String[]{"android.permission.CAMERA"};
                     try
                     {
-                        if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") != PackageManager.PERMISSION_GRANTED )
+                        if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") != PackageManager.PERMISSION_GRANTED)
                         {
                             ActivityCompat.requestPermissions(CreateRetailerActivity.this, permissionsArray, 1);
 
-                        }else if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") == PackageManager.PERMISSION_DENIED )
+                        }
+                        else if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") == PackageManager.PERMISSION_DENIED)
                         {
                             ActivityCompat.shouldShowRequestPermissionRationale(CreateRetailerActivity.this, "android.permission.CAMERA");
 
-                        }else {
+                        }
+                        else
+                        {
 
                             dispatchTakePictureIntent(Constants.FLAG_RETAILER_PHOTO);
                         }
@@ -419,7 +416,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                     {
                         ex.printStackTrace();
                     }
-                }else {
+                }
+                else
+                {
 
                     dispatchTakePictureIntent(Constants.FLAG_RETAILER_PHOTO);
 
@@ -433,14 +432,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             @Override
             public void onClick(View v)
             {
-                if (!Utils.isGpsEnabled(CreateRetailerActivity.this))
-                {
-                    Utils.enableGPS(googleApiClient, locationRequest, CreateRetailerActivity.this);
-                }
-                else
-                {
-                    createNewRetailer();
-                }
+                createNewRetailer();
+
             }
         });
 
@@ -498,15 +491,18 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                     String[] permissionsArray = new String[]{"android.permission.CAMERA"};
                     try
                     {
-                        if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") != PackageManager.PERMISSION_GRANTED )
+                        if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") != PackageManager.PERMISSION_GRANTED)
                         {
                             ActivityCompat.requestPermissions(CreateRetailerActivity.this, permissionsArray, 1);
 
-                        }else if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") == PackageManager.PERMISSION_DENIED )
+                        }
+                        else if (ContextCompat.checkSelfPermission(CreateRetailerActivity.this, "android.permission.CAMERA") == PackageManager.PERMISSION_DENIED)
                         {
                             ActivityCompat.shouldShowRequestPermissionRationale(CreateRetailerActivity.this, "android.permission.CAMERA");
 
-                        }else {
+                        }
+                        else
+                        {
 
                             dispatchTakePictureIntent(Constants.FLAG_BCR_PHOTO);
                         }
@@ -515,7 +511,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                     {
                         ex.printStackTrace();
                     }
-                }else {
+                }
+                else
+                {
 
                     dispatchTakePictureIntent(Constants.FLAG_BCR_PHOTO);
                 }
@@ -524,74 +522,59 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             }
         });
 
+
+        permissions.add(ACCESS_FINE_LOCATION);
+        permissions.add(ACCESS_COARSE_LOCATION);
+
+        permissionsToRequest = findUnAskedPermissions(permissions);
+        //get the permissions we have asked for before but are not granted..
+        //we will store this in a global list to access later.
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            if (permissionsToRequest.size() > 0)
+            {
+                requestPermissions((String[]) permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT_CreateRetailer);
+            }
+        }
+
+        locationTrack = new LocationTrack(CreateRetailerActivity.this);
+
     }
 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-
+        //retailer shop photo capture
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
         {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-
 
             if (imageFile != null)
             {
-                FileOutputStream out = null;
-                try {
-                    out = new FileOutputStream(imageFile);
-                    photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
-                    // PNG is a lossless format, the compression factor (100) is ignored
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (out != null) {
-                            out.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
 
+
+                Glide.with(getBaseContext()).load(imageFile.getAbsolutePath()).into(ivPhotoPreview);
             }
-            ivPhotoPreview.setImageBitmap(photo);
         }
+        //BCR  photo capture
         else if (requestCode == BCR_REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
         {
             removeError();
 
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
 
             if (imageFile_BCR != null)
             {
-                FileOutputStream out = null;
-                try {
-                    out = new FileOutputStream(imageFile_BCR);
-                    photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
-                    // PNG is a lossless format, the compression factor (100) is ignored
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (out != null) {
-                            out.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+
+                Glide.with(getBaseContext()).load(imageFile_BCR.getAbsolutePath()).into(iv_bcr_photo);
             }
-
-         //   Bitmap imageBitmap = BitmapFactory.decodeFile(imageFile_BCR.getAbsolutePath());
-
-            iv_bcr_photo.setImageBitmap(photo);
             Log.d("arraysize", imagecount.size() + "");
             tv_bcr_photo_count.setText(imagecount.size() + "");
 
 
         }
+        //BCR front photo  scan
         else if (requestCode == PHOTO_REQUEST && resultCode == RESULT_OK)
         {
 
@@ -622,6 +605,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                         for (Text line : tBlock.getComponents())
                         {
                             //extract scanned text lines here
+
                             lines = lines + line.getValue() + "\n";
                             for (Text element : line.getComponents())
                             {
@@ -636,7 +620,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                     }
                     else
                     {
-                        Log.d("tv_card_front",lines);
+                        Log.d("tv_card_front", lines);
                         tv_bcr_text.setVisibility(View.VISIBLE);
                         tv_bcr_text.setText(lines + "\n");
 
@@ -654,6 +638,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 Log.e(LOG_TAG, e.toString());
             }
         }
+
+        //BCR back photo scan
         else if (requestCode == PHOTO_REQUEST_BACK && resultCode == RESULT_OK)
         {
             removeError();
@@ -684,6 +670,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                         for (Text line : tBlock.getComponents())
                         {
                             //extract scanned text lines here
+
                             lines = lines + line.getValue() + "\n";
                             for (Text element : line.getComponents())
                             {
@@ -698,7 +685,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                     }
                     else
                     {
-                        Log.d("tv_card_back",lines);
+                        Log.d("tv_card_back", lines);
                         tv_ocr_back.setVisibility(View.VISIBLE);
                         tv_ocr_back.setText(lines + "\n");
 
@@ -716,11 +703,30 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 Log.e(LOG_TAG, e.toString());
             }
         }
+        //after gps location on from setting alert
+        else if (requestCode == LocationTrack.GPS_ENABLE_REQUEST)
+        {
+
+            locationTrack = new LocationTrack(CreateRetailerActivity.this);
+            if (locationTrack.canGetLocation())
+            {
+                //mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+                lat = String.valueOf(locationTrack.getLongitude());
+                lng = String.valueOf(locationTrack.getLatitude());
+
+            }
+            else
+            {
+
+                locationTrack.showSettingsAlert();
+            }
+
+        }
     }
 
 
-
-    // for oce media intent
+    // for OCR media intent
     private void launchMediaScanIntent(int requestcode)
     {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
@@ -754,42 +760,83 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 .openInputStream(uri), null, bmOptions);
     }
 
+
+    //create retailer after submit ...checking validation
+
     void createNewRetailer()
     {
         captureFormData();
 
         if (hasEnteredValidData())
         {
-            RadioButton rb = (RadioButton) rg_location.findViewById(rg_location.getCheckedRadioButtonId());
 
-            if(rb == null){
 
-             Utils.showToast(this,"Please confirm your presence at retailer location. ");
+            //check retailer validation in same area with retailer name
 
-            }else if(rg_location.getCheckedRadioButtonId()==R.id.rb_yes){
+            if (!DbUtils.retailerValidation(CreateRetailerActivity.this, retailerName, areaID))
+            {
 
-                if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                RadioButton rb = (RadioButton) rg_location.findViewById(rg_location.getCheckedRadioButtonId());
+
+                //validating users presence at retailer location
+
+                if (rb == null)
                 {
-                    startProgressDialog();
-                    LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
+
+                    Utils.showToast(this, "Please confirm your presence at retailer location. ");
+
                 }
-                else
+
+                //if user present at retailer location
+                else if (rg_location.getCheckedRadioButtonId() == R.id.rb_yes)
                 {
-                    ActivityCompat.requestPermissions(CreateRetailerActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ACCESS_FINE_LOCATION);
-                    //LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
+
+                    if (locationTrack.canGetLocation())
+                    {
+
+
+                        lat = String.valueOf(locationTrack.getLongitude());
+                        lng = String.valueOf(locationTrack.getLatitude());
+
+                        insertIntoRetailers("", String.valueOf("RETAILER_" + getIST() + "_" + getRandomNumber()), loggedInUserID, retailerName, ownerName, shopAddress, pincode, mobileNumber, email, areaID, lat, lng, getImagePath(), tv_bcr_text.getText().toString(), tv_ocr_back.getText().toString(), getBCRPhotoPathList(), 0);
+                        Utils.showSuccessDialogForUpload(CreateRetailerActivity.this, "Retailer information saved, Do you want to Upload ?");
+                        clearFormData();
+
+
+                    }
+                    else
+                    {
+                        //location button on and gps not on
+                        locationTrack.showSettingsAlert();
+                    }
+
                 }
-            }else if(rg_location.getCheckedRadioButtonId()==R.id.rb_no){
+                //if user not present at retailer location
+                else if (rg_location.getCheckedRadioButtonId() == R.id.rb_no)
+                {
 
-                Utils.startProgressDialog(CreateRetailerActivity.this, progressDialog);
 
-                networkcall_for_createretailer();
+                    insertIntoRetailers("", String.valueOf("RETAILER_" + getIST() + "_" + getRandomNumber()), loggedInUserID, retailerName, ownerName, shopAddress, pincode, mobileNumber, email, areaID, NOT_PRESENT, NOT_PRESENT, getImagePath(), tv_bcr_text.getText().toString(), tv_ocr_back.getText().toString(), getBCRPhotoPathList(), 0);
+                    clearFormData();
+                    Utils.showSuccessDialogForUpload(CreateRetailerActivity.this, "Retailer information saved, Do you want to Upload ?");
+
+
+                }
+
+            }
+            else
+            {
+
+                Utils.showErrorDialog(CreateRetailerActivity.this, "Retailer exists in the selected area.");
+                //clearFormData();
+
             }
 
-            // clearFormData();
         }
     }
 
 
+    //get base 64 string for retailer photo
     String getImagePath()
     {
         //if photo is not captured
@@ -802,31 +849,40 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             String filestring = imageFile.getAbsolutePath();
             Bitmap bm = BitmapFactory.decodeFile(filestring);
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
-            bm.compress(Bitmap.CompressFormat.JPEG, 50, bao);
-            byte[] ba = bao.toByteArray();
-            //Converting bitmap into Base64String
-            String ba1 = Base64.encodeToString(ba, Base64.DEFAULT);
-            Log.e("base64image", ba1);
-            return ba1;
+            if (bm != null)
+            {
+                bm.compress(Bitmap.CompressFormat.JPEG, 50, bao);
+                byte[] ba = bao.toByteArray();
+                //Converting bitmap into Base64String
+                String ba1 = Base64.encodeToString(ba, Base64.DEFAULT);
+                Log.e("base64image", ba1);
+                return ba1;
+            }
+            else
+            {
+                return "";
+            }
             // return imageFile.getAbsolutePath();
 
         }
     }
 
 
+    //get base 64 string list for BCR photo
+
     ArrayList<String> getBCRPhotoPathList()
     {
         //if photo is not captured
-        if (imagecount== null)
+        if (imagecount == null)
         {
             return null;
         }
         else
         {
-            ArrayList<String> bcrphotolist=new ArrayList<>();
+            ArrayList<String> bcrphotolist = new ArrayList<>();
 
-            for(File imagename:imagecount){
-
+            for (File imagename : imagecount)
+            {
 
 
                 String filestring = imagename.getAbsolutePath();
@@ -841,12 +897,14 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             }
 
 
-
             return bcrphotolist;
             // return imageFile.getAbsolutePath();
 
         }
     }
+
+
+    //show popup on click of new area
 
     void showAddNewAreaDialog()
     {
@@ -871,6 +929,36 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 }
                 else
                 {
+
+                    String full_hier_level = "NONE";
+
+                    int areaID = Utils.getRandomNumber();
+                    String SQL_FULL_HEIR = "SELECT full_hier_level from " + TBL_LOCATION_HIERARCHY + " WHERE loc_id=? ";
+                    String[] selectionArgs = {districtID};
+
+                    int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+                    SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+                    Cursor cursor = sqLiteDatabase.rawQuery(SQL_FULL_HEIR, selectionArgs);
+
+                    if (cursor.moveToFirst())
+                    {
+                        full_hier_level = cursor.getString(cursor.getColumnIndexOrThrow("full_hier_level"));
+                    }
+
+                    cursor.close();
+
+                    sqLiteDatabase.close();
+
+                    DbUtils.insertIntoLocationHierarchy(areaID, areaEntered, "5", full_hier_level + "," + areaID, districtID, "0");
+                    setAreaAdapter();
+                    Utils.showToast(getBaseContext(), "New Area Added Successfully");
+
+
+
+
+
+               /*
                     if (Utils.isNetworkConnected(CreateRetailerActivity.this))
                     {
 
@@ -904,10 +992,10 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
                         sqLiteDatabase.close();
 
-                        DbUtils.insertIntoLocationHierarchy(areaID, areaEntered, "5", full_hier_level + "," + areaID, districtID);
+                        DbUtils.insertIntoLocationHierarchy(areaID, areaEntered, "5", full_hier_level + "," + areaID, districtID,"0");
                         setAreaAdapter();
                         Utils.showToast(getBaseContext(), "New Area Added Successfully");
-                    }
+                    }*/
 
                 }
             }
@@ -931,6 +1019,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         addNewArea_AlertDialog.show();
     }
 
+
+    //api call for addition of new area
     private void networkcall_for_putNewArea(final IM_PutNewArea im_putNewArea)
     {
         Apimethods apimethods = API_Call_Retrofit.getretrofit(CreateRetailerActivity.this).create(Apimethods.class);
@@ -948,7 +1038,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 {
                     PutNewArea putNewArea = response.body();
 
-                    DbUtils.insertIntoLocationHierarchy(Integer.parseInt(putNewArea.getLocHierId()), im_putNewArea.getAreaData().getName(), "5", putNewArea.getLocationHier(), districtID);
+                    DbUtils.insertIntoLocationHierarchy(Integer.parseInt(putNewArea.getLocHierId()), im_putNewArea.getAreaData().getName(), "5", putNewArea.getLocationHier(), districtID, "1");
                     setAreaAdapter();
                     Utils.showToast(getBaseContext(), "New Area Added Successfully");
 
@@ -967,11 +1057,13 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         });
     }
 
+
+    //dispatch intent for retailer photo and BCR
     protected void dispatchTakePictureIntent(int flag_for_bcr_photo)
     {
         Uri photoURI;
 
-       // Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         Intent takePictureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 
         try
@@ -998,6 +1090,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             if (imageFile != null)
             {
 
+                photoURI = FileProvider.getUriForFile(getBaseContext(), BuildConfig.APPLICATION_ID + ".provider", imageFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
@@ -1007,12 +1102,19 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
             if (imageFile_BCR != null)
             {
 
+                //photoURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", imageFile_BCR);
+                photoURI = FileProvider.getUriForFile(getBaseContext(), BuildConfig.APPLICATION_ID + ".provider", imageFile_BCR);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                //startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+
                 startActivityForResult(takePictureIntent, BCR_REQUEST_IMAGE_CAPTURE);
             }
         }
 
 
     }
+
+    //image file for retailer photo
 
     private File createImageFile() throws IOException
     {
@@ -1027,11 +1129,13 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         return image;
     }
 
+
+    //image file for BCR photo
     private File createImageFileBCR() throws IOException
     {
         String imageFileName = "BCR_IMG_" + Utils.getRandomNumber();
 
-       // imagecount.add(imageFileName);
+        // imagecount.add(imageFileName);
 
         File photoDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
@@ -1042,7 +1146,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         return image;
     }
 
-    // ocr permission
+    // ocr permission and location
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
     {
@@ -1070,6 +1175,44 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
                 {
                     Toast.makeText(CreateRetailerActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
                 }
+                break;
+
+
+            case ALL_PERMISSIONS_RESULT_CreateRetailer:
+                for (String perms : permissionsToRequest)
+                {
+                    if (!hasPermission(perms))
+                    {
+                        permissionsRejected.add(perms);
+                    }
+                }
+
+                if (permissionsRejected.size() > 0)
+                {
+
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    {
+                        if (shouldShowRequestPermissionRationale(permissionsRejected.get(0)))
+                        {
+                            showMessageOKCancel("These permissions are mandatory for the application. Please allow access.",
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which)
+                                        {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                                            {
+                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT_CreateRetailer);
+                                            }
+                                        }
+                                    });
+                            return;
+                        }
+                    }
+
+                }
+
                 break;
         }
     }
@@ -1104,6 +1247,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         startActivityForResult(intent, PHOTO_REQUEST_BACK);
     }
 
+
+    //before retailer submit capture all filled data
     private void captureFormData()
     {
         retailerName = etRetailerName.getText().toString().trim();
@@ -1119,6 +1264,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         areaName = spnArea.getSelectedItem().toString();*/
     }
 
+
+    //after retailer submit clear filled data
     private void clearFormData()
     {
         etRetailerName.setText("");
@@ -1132,9 +1279,13 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         tv_bcr_photo_count.setText("0");
         tv_bcr_text.setVisibility(View.GONE);
         tv_ocr_back.setVisibility(View.GONE);
+        imagecount = new ArrayList<>();
+        imageFile = null;
         rg_location.clearCheck();
     }
 
+
+    //check retailer all data validation
     boolean hasEnteredValidData()
     {
         String msgInvalidEntries = "Invalid Entry Here. Please Enter Valid Data";
@@ -1148,7 +1299,30 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         if ((!tv_bcr_text.getText().toString().isEmpty()) || imagecount.size() > 0)
         {
-           // Utils.showToast(this, "error data");
+            // Utils.showToast(this, "error data");
+
+
+            if (!pincode.isEmpty() && !pincode.matches("^[1-9][0-9]{5}$"))
+            {
+                etPincode.setError(msgInvalidEntries);
+                inValidEntriesCount++;
+            }
+            if (!mobileNumber.isEmpty() && !mobileNumber.matches("^[7-9][0-9]{9}$"))
+            {
+                etMobNo.setError(msgInvalidEntries);
+                inValidEntriesCount++;
+            }
+
+
+            //entering email is optional.
+            if (!email.isEmpty())
+            {
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
+                {
+                    etEmail.setError(msgInvalidEntries);
+                    inValidEntriesCount++;
+                }
+            }
 
         }
         else
@@ -1193,15 +1367,16 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         {
             //Utils.showPopUp(this, "Error: Select Valid Area");
 
-            TextView errorText = (TextView)spnArea.getSelectedView();
+            TextView errorText = (TextView) spnArea.getSelectedView();
             errorText.setError(msgInvalidEntries);
 
             inValidEntriesCount++;
         }
 
-        if(inValidEntriesCount>0){
+        if (inValidEntriesCount > 0)
+        {
 
-            Utils.showPopUp(CreateRetailerActivity.this,"kindly fill all  mandatory details.");
+            Utils.showPopUp(CreateRetailerActivity.this, "kindly fill all  mandatory details.");
         }
 
         return inValidEntriesCount == 0;
@@ -1250,7 +1425,7 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     @Override
     protected void onStart()
     {
-        connectGoogleApiClient();
+        //connectGoogleApiClient();
         super.onStart();
     }
 
@@ -1258,10 +1433,12 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     @Override
     protected void onStop()
     {
-        disConnectGoogleApiClient();
+        //disConnectGoogleApiClient();
         super.onStop();
     }
 
+
+    //get location online via google api client
     @Override
     public void onConnected(Bundle bundle)
     {
@@ -1272,13 +1449,13 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
     @Override
     public void onConnectionSuspended(int i)
     {
-        connectGoogleApiClient();
+        //connectGoogleApiClient();
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
     {
-        connectGoogleApiClient();
+        //connectGoogleApiClient();
     }
 
     private void connectGoogleApiClient()
@@ -1297,6 +1474,9 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         }
     }
 
+
+    //state list acc to loggedin user
+
     List<String> getStatesList()
     {
         List<String> statesList = new ArrayList<>();
@@ -1312,49 +1492,94 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         {
 
             String location_id_arr[] = userlocationid.split(",");
-            selected_location_id = location_id_arr[0];
+
+            for (int i = 0; i < location_id_arr.length; i++)
+            {
+
+                selected_location_id = location_id_arr[i];
+
+
+                String user_full_hier = "SELECT " + "full_hier_level" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
+                String[] selectionArgs_for_user = {selected_location_id};
+
+                Cursor cursor1 = sqLiteDatabase.rawQuery(user_full_hier, selectionArgs_for_user);
+                String fullhier = "";
+                if (cursor1.moveToFirst())
+                {
+                    fullhier = cursor1.getString(cursor1.getColumnIndexOrThrow("full_hier_level"));
+
+                }
+
+                String[] fullhierarray = fullhier.split(",");
+
+                // String region = fullhierarray[1];
+
+
+                // String SQL_SELECT_STATES = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "parent_loc_id = ?";
+                String SQL_SELECT_STATES = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
+                String[] selectionArgs = {fullhierarray[2]};
+
+                Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_STATES, selectionArgs);
+
+                while (cursor.moveToNext())
+                {
+                    String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
+                    if (!statesList.contains(stateName))
+                    {
+
+                        statesList.add(stateName);
+                    }
+                }
+
+                cursor.close();
+            }
+
+            sqLiteDatabase.close();
 
         }
         else
         {
 
             selected_location_id = userlocationid;
+
+
+            String user_full_hier = "SELECT " + "full_hier_level" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
+            String[] selectionArgs_for_user = {selected_location_id};
+
+            Cursor cursor1 = sqLiteDatabase.rawQuery(user_full_hier, selectionArgs_for_user);
+            String fullhier = "";
+            if (cursor1.moveToFirst())
+            {
+                fullhier = cursor1.getString(cursor1.getColumnIndexOrThrow("full_hier_level"));
+
+            }
+
+            String[] fullhierarray = fullhier.split(",");
+
+            // String region = fullhierarray[1];
+
+
+            // String SQL_SELECT_STATES = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "parent_loc_id = ?";
+            String SQL_SELECT_STATES = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
+            String[] selectionArgs = {fullhierarray[2]};
+
+            Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_STATES, selectionArgs);
+
+            while (cursor.moveToNext())
+            {
+                String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
+                statesList.add(stateName);
+            }
+
+            cursor.close();
+            sqLiteDatabase.close();
         }
 
-        String user_full_hier = "SELECT " + "full_hier_level" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
-        String[] selectionArgs_for_user = {selected_location_id};
-
-        Cursor cursor1 = sqLiteDatabase.rawQuery(user_full_hier, selectionArgs_for_user);
-        String fullhier = "";
-        if (cursor1.moveToFirst())
-        {
-            fullhier = cursor1.getString(cursor1.getColumnIndexOrThrow("full_hier_level"));
-
-        }
-
-        String[] fullhierarray = fullhier.split(",");
-
-       // String region = fullhierarray[1];
-
-
-        // String SQL_SELECT_STATES = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "parent_loc_id = ?";
-        String SQL_SELECT_STATES = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
-        String[] selectionArgs = {fullhierarray[2]};
-
-        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_STATES, selectionArgs);
-
-        while (cursor.moveToNext())
-        {
-            String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
-            statesList.add(stateName);
-        }
-
-        cursor.close();
-        sqLiteDatabase.close();
 
         return statesList;
     }
 
+    //district list acc to loggedin user
     List<String> getDistrictsList(String stateID)
     {
         List<String> districtsList = new ArrayList<>();
@@ -1374,44 +1599,88 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         {
 
             String location_id_arr[] = userlocationid.split(",");
-            selected_location_id = location_id_arr[0];
+
+            for (int i = 0; i < location_id_arr.length; i++)
+            {
+
+                selected_location_id = location_id_arr[i];
+
+                String user_full_hier = "SELECT " + "full_hier_level" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
+                String[] selectionArgs_for_user = {selected_location_id};
+
+                Cursor cursor1 = sqLiteDatabase.rawQuery(user_full_hier, selectionArgs_for_user);
+                String fullhier = "";
+
+                if (cursor1.moveToFirst())
+                {
+                    fullhier = cursor1.getString(cursor1.getColumnIndexOrThrow("full_hier_level"));
+
+                }
+
+                String[] fullhierarray = fullhier.split(",");
+
+                String district = fullhierarray[3];
+
+
+                String SQL_SELECT_DISTRICTS = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ? AND parent_loc_id = ?";
+                String[] selectionArgs = {district, stateID};
+
+                //////////////////////////////////////////
+                Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_DISTRICTS, selectionArgs);
+
+                while (cursor.moveToNext())
+                {
+                    String districtName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
+
+                    if (!districtsList.contains(districtName))
+                    {
+
+                        districtsList.add(districtName);
+                    }
+                }
+
+                cursor.close();
+            }
+
 
         }
         else
         {
 
             selected_location_id = userlocationid;
+
+            String user_full_hier = "SELECT " + "full_hier_level" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
+            String[] selectionArgs_for_user = {selected_location_id};
+
+            Cursor cursor1 = sqLiteDatabase.rawQuery(user_full_hier, selectionArgs_for_user);
+            String fullhier = "";
+            if (cursor1.moveToFirst())
+            {
+                fullhier = cursor1.getString(cursor1.getColumnIndexOrThrow("full_hier_level"));
+
+            }
+
+            String[] fullhierarray = fullhier.split(",");
+
+            String district = fullhierarray[3];
+
+
+            String SQL_SELECT_DISTRICTS = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ? AND parent_loc_id = ?";
+            String[] selectionArgs = {district, stateID};
+
+            //////////////////////////////////////////
+            Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_DISTRICTS, selectionArgs);
+
+            while (cursor.moveToNext())
+            {
+                String districtName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
+                districtsList.add(districtName);
+            }
+
+            cursor.close();
         }
 
-        String user_full_hier = "SELECT " + "full_hier_level" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
-        String[] selectionArgs_for_user = {selected_location_id};
 
-        Cursor cursor1 = sqLiteDatabase.rawQuery(user_full_hier, selectionArgs_for_user);
-        String fullhier = "";
-        if (cursor1.moveToFirst())
-        {
-            fullhier = cursor1.getString(cursor1.getColumnIndexOrThrow("full_hier_level"));
-
-        }
-
-        String[] fullhierarray = fullhier.split(",");
-
-        String district = fullhierarray[3];
-
-
-        String SQL_SELECT_DISTRICTS = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
-        String[] selectionArgs = {district};
-
-        //////////////////////////////////////////
-        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_DISTRICTS, selectionArgs);
-
-        while (cursor.moveToNext())
-        {
-            String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
-            districtsList.add(stateName);
-        }
-
-        cursor.close();
         sqLiteDatabase.close();
 
         return districtsList;
@@ -1441,6 +1710,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         return taluksList;
     }
 
+    //area list acc to loggedin user
+
     List<String> getAreasList(String talukID)
     {
         List<String> areasList = new ArrayList<>();
@@ -1448,7 +1719,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        String SQL_SELECT_AREAS = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "parent_loc_id = ?";
+
+        String SQL_SELECT_AREAS = "SELECT " + "loc_id,loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "parent_loc_id = ?";
         String[] selectionArgs = {talukID};
 
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_AREAS, selectionArgs);
@@ -1457,8 +1729,41 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         while (cursor.moveToNext())
         {
-            String stateName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
-            areasList.add(stateName);
+            String locationId = cursor.getString(cursor.getColumnIndexOrThrow("loc_id"));
+            String areaName = cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
+
+            String userlocationid = new MySharedPrefrencesData().getUser_LocationId(CreateRetailerActivity.this);
+
+            String selected_location_id = "";
+
+
+            if (userlocationid.contains(","))
+            {
+
+                String location_id_arr[] = userlocationid.split(",");
+                for (int i = 0; i < location_id_arr.length; i++)
+                {
+
+                    if (locationId.equalsIgnoreCase(location_id_arr[i]))
+                    {
+
+                        areasList.add(areaName);
+                    }
+                }
+
+            }
+            else
+            {
+
+                selected_location_id = userlocationid;
+                if (locationId.equalsIgnoreCase(selected_location_id))
+                {
+
+                    areasList.add(areaName);
+                }
+            }
+
+            //areasList.add(areaName);
         }
 
         areasList.add(ADD_NEW_AREA);
@@ -1468,6 +1773,8 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
 
         return areasList;
     }
+
+    //location id  acc to loc name
 
     String getLocationID(String locationName)
     {
@@ -1492,14 +1799,18 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         return locationID;
     }
 
-    private void insertIntoRetailers(String retailer_id, String empID, String retailerName, String ownerName, String shopAddress, String pincode,
-                                     String mobileNumber, String email, String areaID, String latitude, String longitude, String imgPath)
+
+    //inserting into RETILER table
+
+    private void insertIntoRetailers(String retailer_id, String mobile_retailer_id, String empID, String retailerName, String ownerName, String shopAddress, String pincode,
+                                     String mobileNumber, String email, String areaID, String latitude, String longitude, String imgPath, String ocr_frnttxt, String ocr_backtext, ArrayList<String> bcrPhotoList, int uploadstatus)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
         ContentValues retailerValues = new ContentValues();
         retailerValues.put("retailer_id", retailer_id);
+        retailerValues.put("mobile_retailer_id", mobile_retailer_id);
         retailerValues.put("emp_id", empID);
         retailerValues.put("shop_name", ownerName);
         retailerValues.put("retailer_name", retailerName);
@@ -1511,6 +1822,17 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         retailerValues.put("latitude", latitude);
         retailerValues.put("longitude", longitude);
         retailerValues.put("img_source", imgPath);
+        retailerValues.put("ocr_front_text", ocr_frnttxt);
+        retailerValues.put("ocr_back_text", ocr_backtext);
+        retailerValues.put("distributor_id", "0");
+        retailerValues.put("distributor_name", "No Name");
+
+
+        String bcrphotosstr = new Gson().toJson(bcrPhotoList);
+
+        retailerValues.put("ocr_photolist", bcrphotosstr);
+
+
         retailerValues.put("created_date", Utils.getDateTime());
         retailerValues.put("modified_date", Utils.getDateTime());
         retailerValues.put("created_by", new MySharedPrefrencesData().getUser_Id(CreateRetailerActivity.this));
@@ -1519,17 +1841,65 @@ public class CreateRetailerActivity extends AppCompatActivity implements GoogleA
         //retailerValues.put("taluk", "taluk");
         retailerValues.put("district", districtName);
         retailerValues.put("state", stateName);
-        retailerValues.put("upload_status", 1);
+        retailerValues.put("upload_status", uploadstatus);
         sqLiteDatabase.insert(TBL_RETAILER, null, retailerValues);
 
         sqLiteDatabase.close();
     }
+
+
+    //set area list in area dropdown
 
     void setAreaAdapter()
     {
         ArrayAdapter<String> areaAdapter = new ArrayAdapter<>(CreateRetailerActivity.this, android.R.layout.simple_spinner_item, getAreasList(districtID));
         areaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnArea.setAdapter(areaAdapter);
+    }
+
+
+    //for location track offline
+
+    private ArrayList findUnAskedPermissions(ArrayList<String> wanted)
+    {
+        ArrayList result = new ArrayList();
+
+        for (String perm : wanted)
+        {
+            if (!hasPermission(perm))
+            {
+                result.add(perm);
+            }
+        }
+
+        return result;
+    }
+
+    private boolean hasPermission(String permission)
+    {
+        if (canMakeSmores())
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                return (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
+            }
+        }
+        return true;
+    }
+
+    private boolean canMakeSmores()
+    {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener)
+    {
+        new android.support.v7.app.AlertDialog.Builder(CreateRetailerActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
     }
 
 

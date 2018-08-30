@@ -26,6 +26,7 @@ import java.util.List;
 
 import in.etaminepgg.sfa.Activities.DashboardActivity;
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
+import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
 import in.etaminepgg.sfa.Activities.SkuVideoActivity;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
@@ -148,7 +149,7 @@ public class NewSKUsAdapter extends Adapter<NewSKUsAdapter.SkuInfoViewHolder> {
                 public void onClick(View view) {
                     String skuID = itemView.getTag(R.string.tag_sku_id).toString();
                     String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
-                    new Utils().pickAttributeValuesOrSelectRetailer(skuID, itemView.getTag(R.string.tag_sku_name).toString(), skuPrice, itemView.getContext());
+                    new Utils().pickAttributeValuesOrSelectRetailer(skuID, itemView.getTag(R.string.tag_sku_name).toString(), skuPrice, itemView.getContext(), SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
                 }
             });
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -160,7 +161,7 @@ public class NewSKUsAdapter extends Adapter<NewSKUsAdapter.SkuInfoViewHolder> {
                 public void onClick(View view) {
 
                     String video_url= DbUtils.getSkuVideoURL(itemView.getTag(R.string.tag_sku_id).toString());
-                    if(video_url != null && video_url.length()>3){
+                    if(video_url != null && video_url.length()>3 && !video_url.equalsIgnoreCase(ConstantsA.NOT_PRESENT)){
 
                         Utils.launchActivityWithExtra(view.getContext(), SkuVideoActivity.class, ConstantsA.KEY_SKU_ID, video_url);
 
@@ -193,7 +194,7 @@ public class NewSKUsAdapter extends Adapter<NewSKUsAdapter.SkuInfoViewHolder> {
                     String sku_catalogue_url= DbUtils.getSkuCatalogueURL(itemView.getTag(R.string.tag_sku_id).toString());
                     try {
 
-                        if(sku_catalogue_url != null && sku_catalogue_url.length()>3){
+                        if(sku_catalogue_url != null && sku_catalogue_url.length()>3 && !sku_catalogue_url.equalsIgnoreCase(ConstantsA.NOT_PRESENT)){
 
 
                             file = new File(folder, DashboardActivity.substringAfterLastSeparator(sku_catalogue_url, "/"));
@@ -209,7 +210,7 @@ public class NewSKUsAdapter extends Adapter<NewSKUsAdapter.SkuInfoViewHolder> {
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
-                    if (read == 1 && sku_catalogue_url !=null && sku_catalogue_url.length()>3 ) {
+                    if (read == 1 && sku_catalogue_url !=null && sku_catalogue_url.length()>3 && !sku_catalogue_url.equalsIgnoreCase(ConstantsA.NOT_PRESENT)) {
 
                         new Downloader().DownloadFile(this.itemView.getContext(), sku_catalogue_url, file);
 

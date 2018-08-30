@@ -119,6 +119,21 @@
                     android:textColor="@color/black"
                     android:text="Android Profile XMl UI Design"/>
 
+                <TextView
+                    android:id="@+id/tv_lastupdateDate"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginTop="3dp"
+                    android:background="#fff"
+                    android:clickable="true"
+                    android:elevation="4dp"
+                    android:padding="20dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="@color/black"
+                    android:text="Android Profile XMl UI Design"/>
+
 
             </LinearLayout>
         </RelativeLayout>

@@ -1,8 +1,9 @@
 package in.etaminepgg.sfa.Activities;
 
-import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -17,9 +18,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -34,6 +34,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -47,7 +48,6 @@ import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +65,7 @@ import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
+import in.etaminepgg.sfa.Utilities.LocationTrack;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.MySharedPrefrencesData;
 import in.etaminepgg.sfa.Utilities.Utils;
@@ -72,6 +73,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static in.etaminepgg.sfa.Utilities.Constants.REQUEST_TURN_ON_LOCATION;
 import static in.etaminepgg.sfa.Utilities.Constants.SHOW_UPDATE_BUTTON;
@@ -79,8 +82,10 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_NO_ORDERREASON;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.EMPTY;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_MOBILE_RETAILER_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_RETAILER_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_RETAILER_NAME;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_UPLOAD_STATUS;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NOT_PRESENT;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NO_INTERNET_CONNECTION;
 import static in.etaminepgg.sfa.Utilities.Utils.getRandomNumber;
@@ -89,9 +94,12 @@ import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 public class PickRetailerActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
     private static final int REQUEST_IMAGE_CAPTURE = 100;
+    private final static int ALL_PERMISSIONS_RESULT_PICKRETAILER = 456;
     static String SEPARATOR = ", ";
     static int THRESHOLD = 1;
     private final int REQUEST_CODE_ACCESS_FINE_LOCATION = 1000;
+
+
     File imageFile = null;
     String latitude = NOT_PRESENT;
     String longitude = NOT_PRESENT;
@@ -102,7 +110,13 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     boolean isItemClicked = false;
     String retailerName;
     String retailerID;
+    String mobileRetailerID;
+    String uploadStatus;
+
+
     MySharedPrefrencesData mySharedPrefrencesData;
+    LocationTrack locationTrack;
+    String lat = NOT_PRESENT, lng = NOT_PRESENT;
     private GoogleApiClient googleApiClient;
     LocationListener locationListener = new LocationListener()
     {
@@ -127,6 +141,9 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             //dismissProgressDialog();
         }
     };
+    private ArrayList<String> permissionsToRequest;
+    private ArrayList<String> permissionsRejected = new ArrayList();
+    private ArrayList permissions = new ArrayList();
     private LocationRequest locationRequest;
 
     private static int exifToDegrees(int exifOrientation)
@@ -150,13 +167,14 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        // this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_pick_retailer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        buildGoogleApiClient();
+        //buildGoogleApiClient();
 
         findViewsByIDs();
         setListenersToViews();
@@ -184,12 +202,43 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
         // Instantiating an adapter to store each items
         // R.layout.listview_layout defines the layout of each item
+        //adapter for retailer
         SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), getCustomretailerList(), android.R.layout.simple_dropdown_item_1line, from, to);
-
-
-        // ArrayAdapter<String> shopNamesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, getRetailerNames());
         shopName_AutoCompleteTextView.setAdapter(adapter);
+
+
+        //one activity used for update and sales order
+
+
+        //so checking for intent extras
+
+        if (getIntent().getStringExtra(SHOW_UPDATE_BUTTON).equalsIgnoreCase("YES"))
+        {
+            permissions.add(ACCESS_FINE_LOCATION);
+            permissions.add(ACCESS_COARSE_LOCATION);
+
+            permissionsToRequest = findUnAskedPermissions(permissions);
+            //get the permissions we have asked for before but are not granted..
+            //we will store this in a global list to access later.
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+
+
+                if (permissionsToRequest.size() > 0)
+                {
+                    requestPermissions((String[]) permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT_PICKRETAILER);
+                }
+            }
+
+
+            locationTrack = new LocationTrack(PickRetailerActivity.this);
+        }
+
     }
+
+    //api call for reason api
 
     private void networkcallForReasonList()
     {
@@ -267,34 +316,180 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
     }
 
+    //get retailer list
     private List<HashMap<String, String>> getCustomretailerList()
     {
 
         // Each row in the list stores country name, currency and flag
         List<HashMap<String, String>> shopsInfoList = new ArrayList<HashMap<String, String>>();
 
-
-        //List<String> shopsInfoList = new ArrayList<>();
-        String SQL_SELECT_RETAILERS = "select retailer_id, retailer_name from " + TBL_RETAILER;
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
-        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILERS, null);
-        cursor.moveToFirst();
 
-        while (!cursor.isAfterLast())
+        String userlocationid = mySharedPrefrencesData.getUser_LocationId(PickRetailerActivity.this);
+
+        String selected_location_id = "";
+
+        if (userlocationid.contains(","))
         {
-            String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
-            String retailer_name = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));
 
-            HashMap<String, String> hm = new HashMap<String, String>();
-            hm.put("retailer_name", retailer_name);
-            hm.put("retailer_id", retailerID);
-            shopsInfoList.add(hm);
-            cursor.moveToNext();
+            String location_id_arr[] = userlocationid.split(",");
+            for (int i = 0; i < location_id_arr.length; i++)
+            {
+
+                //List<String> shopsInfoList = new ArrayList<>();
+                String SQL_SELECT_RETAILERS = "select retailer_id,mobile_retailer_id,retailer_name,upload_status from " + TBL_RETAILER + "  WHERE  area_id = ?;";
+                Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILERS, new String[]{location_id_arr[i]});
+                cursor.moveToFirst();
+
+                while (!cursor.isAfterLast())
+                {
+                    String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
+                    String mobileRetailerId = cursor.getString(cursor.getColumnIndexOrThrow("mobile_retailer_id"));
+                    String retailer_name = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));
+                    String uploadStatus = cursor.getString(cursor.getColumnIndexOrThrow("upload_status"));
+
+                    HashMap<String, String> hm = new HashMap<String, String>();
+                    hm.put("retailer_name", retailer_name);
+                    hm.put("retailer_id", retailerID + "," + mobileRetailerId + "," + uploadStatus);
+                    shopsInfoList.add(hm);
+
+                    ContentValues cv = new ContentValues();
+                    cv.put("emp_id", mySharedPrefrencesData.getUser_Id(PickRetailerActivity.this));
+                    sqLiteDatabase.update(TBL_RETAILER, cv, " retailer_id = ? AND mobile_retailer_id = ?", new String[]{retailerID, mobileRetailerId});
+                    cursor.moveToNext();
+                }
+                cursor.close();
+            }
+
         }
-        cursor.close();
+        else
+        {
+
+            selected_location_id = userlocationid;
+
+            //List<String> shopsInfoList = new ArrayList<>();
+            String SQL_SELECT_RETAILERS = "select retailer_id,mobile_retailer_id,retailer_name,upload_status from " + TBL_RETAILER + "  WHERE  area_id = ?;";
+            Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILERS, new String[]{selected_location_id});
+            cursor.moveToFirst();
+
+            while (!cursor.isAfterLast())
+            {
+                String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
+                String mobileRetailerId = cursor.getString(cursor.getColumnIndexOrThrow("mobile_retailer_id"));
+                String retailer_name = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));
+                String uploadStatus = cursor.getString(cursor.getColumnIndexOrThrow("upload_status"));
+
+                HashMap<String, String> hm = new HashMap<String, String>();
+                hm.put("retailer_name", retailer_name);
+                hm.put("retailer_id", retailerID + "," + mobileRetailerId + "," + uploadStatus);
+                shopsInfoList.add(hm);
+                ContentValues cv = new ContentValues();
+                cv.put("emp_id", mySharedPrefrencesData.getUser_Id(PickRetailerActivity.this));
+                sqLiteDatabase.update(TBL_RETAILER, cv, " retailer_id = ? AND mobile_retailer_id = ?", new String[]{retailerID, mobileRetailerId});
+                cursor.moveToNext();
+            }
+            cursor.close();
+
+        }
+
+
         return shopsInfoList;
     }
+
+
+    //check for location
+    private ArrayList findUnAskedPermissions(ArrayList<String> wanted)
+    {
+        ArrayList result = new ArrayList();
+
+        for (String perm : wanted)
+        {
+            if (!hasPermission(perm))
+            {
+                result.add(perm);
+            }
+        }
+
+        return result;
+    }
+
+    private boolean hasPermission(String permission)
+    {
+        if (canMakeSmores())
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                return (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
+            }
+        }
+        return true;
+    }
+
+    private boolean canMakeSmores()
+    {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+    {
+
+        switch (requestCode)
+        {
+
+            case ALL_PERMISSIONS_RESULT_PICKRETAILER:
+                for (String perms : permissionsToRequest)
+                {
+                    if (!hasPermission(perms))
+                    {
+                        permissionsRejected.add(perms);
+                    }
+                }
+
+                if (permissionsRejected.size() > 0)
+                {
+
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    {
+                        if (shouldShowRequestPermissionRationale(permissionsRejected.get(0)))
+                        {
+                            showMessageOKCancel("These permissions are mandatory for the application. Please allow access.",
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which)
+                                        {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                                            {
+                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT_PICKRETAILER);
+                                            }
+                                        }
+                                    });
+                            return;
+                        }
+                    }
+
+                }
+
+                break;
+        }
+
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener)
+    {
+        new AlertDialog.Builder(PickRetailerActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -305,6 +500,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -320,54 +516,16 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             longitude_TextView.setText("Longitude: " + longitude);
 
 
-
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-
-           // retailerPhoto_ImageView.setImageBitmap(photo);
-
-
+            //retailerPhoto_ImageView.setImageBitmap(photo);
             if (imageFile != null)
             {
-                FileOutputStream out = null;
-                try
-                {
-                    out = new FileOutputStream(imageFile);
-                    photo.compress(Bitmap.CompressFormat.PNG, 100, out); // photo is your Bitmap instance
-                    // PNG is a lossless format, the compression factor (100) is ignored
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                finally
-                {
-                    try
-                    {
-                        if (out != null)
-                        {
-                            out.close();
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
 
+                Glide.with(getBaseContext()).load(imageFile.getAbsolutePath()).into(retailerPhoto_ImageView);
             }
 
-            if (Utils.isNetworkConnected(PickRetailerActivity.this))
-            {
-
-                network_call_for_PutRetailerInfo(new MySharedPrefrencesData().getEmployee_AuthKey(PickRetailerActivity.this), retailerID, latitude, longitude, getImagePath());
-
-            }
-            else
-            {
-
-                updateRetailerInDB(retailerID, latitude, longitude, getImagePath());
-                Utils.showSuccessDialog(PickRetailerActivity.this, "Retailer updated successfully.");
-            }
+            //inserting data to retailer table
+            updateRetailerInDB(retailerID, mobileRetailerID, latitude, longitude, getImagePath(), uploadStatus);
+            Utils.showSuccessDialog(PickRetailerActivity.this, "Retailer updated successfully.");
 
 
         }
@@ -379,7 +537,29 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
         {
             Utils.showErrorDialog(this, "Updating Retailer failed. You must turn on GPS.");
         }
+        else if (requestCode == LocationTrack.GPS_ENABLE_REQUEST)
+        {
+
+            locationTrack = new LocationTrack(PickRetailerActivity.this);
+            if (locationTrack.canGetLocation())
+            {
+                //mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+                lat = String.valueOf(locationTrack.getLongitude());
+                lng = String.valueOf(locationTrack.getLatitude());
+
+            }
+            else
+            {
+
+                locationTrack.showSettingsAlert();
+            }
+
+        }
     }
+
+
+    //update retailer api
 
     private void network_call_for_PutRetailerInfo(final String employee_authKey, final String retailerID, final String latitude, final String longitude, final String imagePath)
     {
@@ -451,7 +631,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
                             Log.i("updt_retailpicture_op", new Gson().toJson(updateRetailerpictureModel));
 
-                            updateRetailerInDB(retailerID, latitude, longitude, updateRetailerpictureModel.getCustomerPicturePath());
+                            updateRetailerInDB(retailerID, mobileRetailerID, latitude, longitude, updateRetailerpictureModel.getCustomerPicturePath(), uploadStatus);
                             Utils.dismissProgressDialog(progressDialog);
                             Utils.showSuccessDialog(PickRetailerActivity.this, "Retailer updated successfully.");
                         }
@@ -514,6 +694,8 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
     private void setListenersToViews()
     {
+
+        //onclick on retaile entry
         shopName_AutoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
@@ -524,13 +706,16 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
                 shopName_AutoCompleteTextView.setText(hashMap.get("retailer_name"));
                 isItemClicked = true;
 
-                retailerID = hashMap.get("retailer_id");
+                retailerID = hashMap.get("retailer_id").split(",")[0];
+                mobileRetailerID = hashMap.get("retailer_id").split(",")[1];
+                uploadStatus = hashMap.get("retailer_id").split(",")[2];
                 //retailerID = parent.getItemAtPosition(position).toString().split(SEPARATOR)[0];
                 showRetailerDetails(retailerID);
 
             }
         });
 
+        //if retailer name edited
         shopName_AutoCompleteTextView.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -548,9 +733,18 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
             @Override
             public void afterTextChanged(Editable s)
             {
-
+                if (s.length() > 2)
+                {
+                    if (!shopName_AutoCompleteTextView.isPopupShowing())
+                    {
+                        Toast.makeText(getApplicationContext(), "No retailers found", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
             }
         });
+
+        //onclick on create order
 
         selectOrderType_Button.setOnClickListener(new View.OnClickListener()
         {
@@ -566,58 +760,43 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
                     Utils.showErrorDialog(PickRetailerActivity.this, "Invalid shop name. Please select valid name from dropdown");
                 }
 
-                /*if (isItemClicked)
-                {
-                    if (shopName_AutoCompleteTextView.getText().toString().trim().isEmpty())
-                    {
-                        Utils.showPopUp(getBaseContext(), "Please Enter Retailer Shop Name");
-                    }
-                    else
-                    {
-                         launchSelectSalesOrderTypeActivity();
-                    }
-                }
-                else
-                {
-                    Utils.showPopUp(getBaseContext(), "Invalid shop name. Please select shop name from dropdown");
-                }*/
             }
         });
+
+        //onclick on update retailer
 
         updateRetailer_Button.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                if (!Utils.isGpsEnabled(PickRetailerActivity.this))
+
+
+                if (locationTrack.canGetLocation())
                 {
-                    Utils.enableGPS(googleApiClient, locationRequest, PickRetailerActivity.this);
+
+
+                    longitude = String.valueOf(locationTrack.getLongitude());
+                    latitude = String.valueOf(locationTrack.getLatitude());
+
+                    lat = String.valueOf(latitude);
+                    lng = String.valueOf(longitude);
+
+
+                    dispatchTakePictureIntent();
+
                 }
                 else
                 {
-                    if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                    {
-                        if (isShopNameValid())
-                        {
-                            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
-                        }
-                        else
-                        {
-                            Utils.showErrorDialog(PickRetailerActivity.this, "Invalid shop name. Please select valid name from dropdown");
-                        }
-                    }else if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED)
-                    {
-                        ActivityCompat.shouldShowRequestPermissionRationale(PickRetailerActivity.this,Manifest.permission.ACCESS_FINE_LOCATION);
-                    }
-                    else
-                    {
-                        ActivityCompat.requestPermissions(PickRetailerActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ACCESS_FINE_LOCATION);
-                    }
+
+                    locationTrack.showSettingsAlert();
                 }
+
             }
         });
     }
 
+    //retailer validation
     boolean isShopNameValid()
     {
         if (isItemClicked)
@@ -637,35 +816,23 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
         }
     }
 
+    //launch select order type screen
     private void launchSelectSalesOrderTypeActivity()
     {
+
+        final String intentExtraKey_TabToShow = getResources().getString(R.string.key_tab_to_show);
+
         Intent intent = new Intent(this, SelectSalesOrderTypeActivity.class);
         intent.putExtra(INTENT_EXTRA_RETAILER_NAME, retailerName);
         intent.putExtra(INTENT_EXTRA_RETAILER_ID, retailerID);
+        intent.putExtra(INTENT_EXTRA_MOBILE_RETAILER_ID, mobileRetailerID);
+        intent.putExtra(INTENT_EXTRA_UPLOAD_STATUS, uploadStatus);
+        intent.putExtra(intentExtraKey_TabToShow, ConstantsA.All_SKUs_TAB);
         startActivity(intent);
 
     }
 
-    List<String> getRetailerNames()
-    {
-        List<String> shopsInfoList = new ArrayList<>();
-        String SQL_SELECT_RETAILERS = "select retailer_id, retailer_name from " + TBL_RETAILER;
-        int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
-        SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
-        Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_RETAILERS, null);
-        cursor.moveToFirst();
-
-        while (!cursor.isAfterLast())
-        {
-            String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));
-            String retailer_name = cursor.getString(cursor.getColumnIndexOrThrow("retailer_name"));
-            shopsInfoList.add(retailerID + SEPARATOR + retailer_name);
-            cursor.moveToNext();
-        }
-        cursor.close();
-        return shopsInfoList;
-    }
-
+    //display retailer details
     void showRetailerDetails(String retailerID)
     {
         //in local db shopname=owner name
@@ -693,13 +860,16 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
                 ownername = EMPTY;
             }
 
-            if(latitude==null){
+            if (latitude == null)
+            {
 
 
-                    latitude = EMPTY;
-                    longitude = EMPTY;
+                latitude = EMPTY;
+                longitude = EMPTY;
 
-            }else {
+            }
+            else
+            {
 
                 if (latitude.equalsIgnoreCase("null"))
                 {
@@ -745,6 +915,8 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
         cursor.close();
     }
 
+
+    //get image base 64 of shop photo
     String getImagePath()
     {
         //if photo is not captured or capturing failed
@@ -788,6 +960,8 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
         }
     }
 
+
+    //create file for shop photo
     private File createImageFile() throws IOException
     {
         String imageFileName = "UPD_RET_IMG_" + getTodayDate() + getRandomNumber();
@@ -800,6 +974,9 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
         return image;
     }
+
+
+    //open camera intent for full size photo
 
     protected void dispatchTakePictureIntent()
     {
@@ -818,12 +995,16 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
 
         if (imageFile != null)
         {
+            photoURI = FileProvider.getUriForFile(getBaseContext(), BuildConfig.APPLICATION_ID + ".provider", imageFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
 
-    private void updateRetailerInDB(String retailerID, String latitude, String longitude, String imgPath)
+    //updating retailer table
+
+    private void updateRetailerInDB(String retailerID, String mobileRetailerID, String latitude, String longitude, String imgPath, String uploadStatus)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
@@ -834,14 +1015,24 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
         retailerValues.put("longitude", longitude);
         retailerValues.put("img_source", imgPath);
         retailerValues.put("modified_date", Utils.getDateTime());
-        retailerValues.put("modified_by", new MySharedPrefrencesData().getUser_Id(PickRetailerActivity.this));
 
-        sqLiteDatabase.update(TBL_RETAILER, retailerValues, "retailer_id = ?", new String[]{retailerID});
+        if (uploadStatus.equalsIgnoreCase("0"))
+        {
+
+            retailerValues.put("modified_by", new MySharedPrefrencesData().getUser_Id(PickRetailerActivity.this));
+
+        }
+        else
+        {
+
+            retailerValues.put("modified_by", new MySharedPrefrencesData().getUser_Id(PickRetailerActivity.this) + "_" + uploadStatus);
+        }
+
+        sqLiteDatabase.update(TBL_RETAILER, retailerValues, "retailer_id = ?  AND mobile_retailer_id = ?", new String[]{retailerID, mobileRetailerID});
 
         sqLiteDatabase.close();
 
-
-        Glide.with(PickRetailerActivity.this).load(imgPath).diskCacheStrategy(DiskCacheStrategy.NONE).into(retailerPhoto_ImageView);
+        //   Glide.with(PickRetailerActivity.this).load(imgPath).diskCacheStrategy(DiskCacheStrategy.NONE).into(retailerPhoto_ImageView);
 
         //showRetailerDetails(retailerID);
     }
@@ -858,7 +1049,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     @Override
     protected void onStart()
     {
-        connectGoogleApiClient();
+        //connectGoogleApiClient();
         super.onStart();
     }
 
@@ -866,7 +1057,7 @@ public class PickRetailerActivity extends AppCompatActivity implements GoogleApi
     @Override
     protected void onStop()
     {
-        disConnectGoogleApiClient();
+        // disConnectGoogleApiClient();
         super.onStop();
     }
 

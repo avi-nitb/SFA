@@ -9,6 +9,7 @@
     <string name="nav_item_update_retailer">Update Retailer</string>
     <string name="nav_item_new_sales_order">New Sales Order</string>
     <string name="nav_item_download_data">Download Data</string>
+    <string name="nav_item_upload_data">Upload Data</string>
     <string name="nav_item_logout">Logout</string>
     <string name="nav_item_my_sales_history">My Sales History</string>
     <string name="nav_item_Profile">Profile</string>

@@ -46,7 +46,7 @@
                     android:id="@+id/etRetailerName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
                     android:ems="10"
                     android:hint="@string/retailer_name"
                     android:inputType="textPersonName|textCapWords"
@@ -310,7 +310,7 @@
                 android:padding="@dimen/four_dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <TextView
                     android:textSize="@dimen/text_size_medium"
@@ -322,17 +322,19 @@
 
                 <RadioGroup
                     android:id="@+id/rg_location"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:orientation="horizontal"
-                    >
+                    android:orientation="horizontal">
 
                 <RadioButton
                     android:id="@+id/rb_yes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Yes"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/lato_bold"
                     android:gravity="center"/>
 
                 <RadioButton
@@ -342,6 +344,9 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:text="No"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/lato_bold"
                     android:gravity="center"/>
                 </RadioGroup>
 
@@ -360,6 +365,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/two_dp"
                 android:layout_marginTop="@dimen/eight_dp" />
+            
+            
+            <TextView
+                android:id="@+id/retailer_upldcount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:fontFamily="@font/lato_bold"
+                android:textColor="@color/colorRed"
+                android:textSize="@dimen/text_size_large"
+                android:text="No. of Retailers to Upload:"/>
 
         </LinearLayout>
 

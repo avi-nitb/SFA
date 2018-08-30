@@ -1,6 +1,5 @@
 package in.etaminepgg.sfa.Activities;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -23,13 +22,11 @@ import java.util.List;
 
 import in.etaminepgg.sfa.Adapters.SimilarSKUsAdapter;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuInfo;
-import in.etaminepgg.sfa.Models.GetSkuInfo;
 import in.etaminepgg.sfa.Models.GetSkuListAfter;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.Network.API_Call_Retrofit;
 import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
-import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.MySharedPrefrencesData;
@@ -65,30 +62,35 @@ public class SkuDetailsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_sku_details);
 
-        toolbar=(Toolbar)findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Sku Details");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        mySharedPrefrencesData=new MySharedPrefrencesData();
+        mySharedPrefrencesData = new MySharedPrefrencesData();
 
 
         findViewsByIDs();
 
         Intent intent = getIntent();
 
-        if(intent != null)
+        //get sku id and display details
+
+        if (intent != null)
         {
             skuID = getIntent().getStringExtra(KEY_SKU_ID);
-            if(skuID != null)
+            if (skuID != null)
             {
                 getDataAndBind(skuID);
 
-              //  network_call_for_getSimilarSKUsList(mySharedPrefrencesData.getEmployee_AuthKey(SkuDetailsActivity.this),skuID);
+                //  network_call_for_getSimilarSKUsList(mySharedPrefrencesData.getEmployee_AuthKey(SkuDetailsActivity.this),skuID);
 
-                similarSKUs_RecyclerView.setAdapter(new SimilarSKUsAdapter(getSimilarSKUsList(),container_lay));
+                //get similar sku according to sku category
+
+                similarSKUs_RecyclerView.setAdapter(new SimilarSKUsAdapter(getSimilarSKUsList(), container_lay));
                 similarSKUs_RecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
                 similarSKUs_RecyclerView.setItemAnimator(new DefaultItemAnimator());
             }
@@ -97,9 +99,12 @@ public class SkuDetailsActivity extends AppCompatActivity
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         if (item.getItemId() == android.R.id.home)
+        {
             finish();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -112,10 +117,12 @@ public class SkuDetailsActivity extends AppCompatActivity
         skuSubCategory_TextView = (TextView) findViewById(R.id.skuSubCategory_TextView);
         skuDescription_TextView = (TextView) findViewById(R.id.skuDescription_TextView);
         similarSKUs_RecyclerView = (RecyclerView) findViewById(R.id.similarSKUs_RecyclerView);
-        container_lay=(LinearLayout)findViewById(R.id.skuDetails_ScrollView);
+        container_lay = (LinearLayout) findViewById(R.id.skuDetails_ScrollView);
     }
 
-    private  void getDataAndBind(String skuID)
+    //display sku details
+
+    private void getDataAndBind(String skuID)
     {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
@@ -123,27 +130,31 @@ public class SkuDetailsActivity extends AppCompatActivity
         String[] selectionArgs = new String[]{skuID};
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_SKU_DATA, selectionArgs);
 
-        if(cursor.moveToFirst())
+        if (cursor.moveToFirst())
         {
             //skuPhoto_ImageView = (ImageView) findViewById(R.id.skuPhoto_ImageView);
+
+            //getting sku category
             skuCategory = cursor.getString(cursor.getColumnIndexOrThrow("sku_category"));
             skuName_TextView.setText(/*skuID + " : " +*/ cursor.getString(cursor.getColumnIndexOrThrow("sku_name")));
             skuPrice_TextView.setText(RS + cursor.getString(cursor.getColumnIndexOrThrow("sku_price")));
 
 
-            skuCategory_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Category : ",cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description")))));
-            skuSubCategory_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Sub category : ",cursor.getString(cursor.getColumnIndexOrThrow("sku_sub_category_description")))));
-            skuDescription_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Description : ",cursor.getString(cursor.getColumnIndexOrThrow("description")))));
-           // skuCategory_TextView.setText("Category : "+cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description")));
+            skuCategory_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Category : ", cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description")))));
+            skuSubCategory_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Sub category : ", cursor.getString(cursor.getColumnIndexOrThrow("sku_sub_category_description")))));
+            skuDescription_TextView.setText(Html.fromHtml(new Utils().getModifiedkeyValueString("Description : ", cursor.getString(cursor.getColumnIndexOrThrow("description")))));
+            // skuCategory_TextView.setText("Category : "+cursor.getString(cursor.getColumnIndexOrThrow("sku_category_description")));
             //skuSubCategory_TextView.setText("Sub category : "+cursor.getString(cursor.getColumnIndexOrThrow("sku_sub_category_description")));
-           // skuDescription_TextView.setText("Description : "+cursor.getString(cursor.getColumnIndexOrThrow("description")));
-            Glide.with(SkuDetailsActivity.this).load(getSku_PhotoSource(skuID)).error(R.drawable.ic_tiffin_box).bitmapTransform(new RoundedCornersTransformation(this,sCorner,sMargin)).into(skuPhoto_ImageView);
+            // skuDescription_TextView.setText("Description : "+cursor.getString(cursor.getColumnIndexOrThrow("description")));
+            Glide.with(SkuDetailsActivity.this).load(getSku_PhotoSource(skuID)).error(R.drawable.ic_tiffin_box).bitmapTransform(new RoundedCornersTransformation(this, sCorner, sMargin)).into(skuPhoto_ImageView);
         }
 
         cursor.close();
         sqLiteDatabase.close();
     }
 
+
+    //function for similar sku
     private List<Sku> getSimilarSKUsList()
     {
         String SQL_SELECT_SIMILAR_SKUs = "select sku_id, sku_name, sku_price from " + TBL_SKU + " where sku_category=?";
@@ -151,9 +162,13 @@ public class SkuDetailsActivity extends AppCompatActivity
         return DbUtils.getSkuList2(SQL_SELECT_SIMILAR_SKUs, selectionArgs);
     }
 
-    private void network_call_for_getSimilarSKUsList(String authtoken,String skuID){
 
-        Apimethods methods= API_Call_Retrofit.getretrofit(SkuDetailsActivity.this).create(Apimethods.class);
+    //api call for similar sku list
+
+    private void network_call_for_getSimilarSKUsList(String authtoken, String skuID)
+    {
+
+        Apimethods methods = API_Call_Retrofit.getretrofit(SkuDetailsActivity.this).create(Apimethods.class);
 
         IM_GetSkuInfo im_getSkuInfo = new IM_GetSkuInfo(authtoken, skuID);
 
@@ -174,7 +189,6 @@ public class SkuDetailsActivity extends AppCompatActivity
 
             }
         });
-
 
 
     }

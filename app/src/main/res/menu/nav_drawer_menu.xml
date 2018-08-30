@@ -22,7 +22,10 @@
             android:id="@+id/navItem_downloadData"
             android:icon="@drawable/ic_file_download"
             android:title="@string/nav_item_download_data"/>
-
+        <item
+            android:id="@+id/navItem_uploadData"
+            android:icon="@drawable/upload_icon"
+            android:title="@string/nav_item_upload_data"/>
 
         <item
             android:id="@+id/navItem_mySalesHistory"

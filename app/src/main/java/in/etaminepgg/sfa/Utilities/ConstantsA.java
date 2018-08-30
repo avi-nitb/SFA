@@ -31,8 +31,14 @@ public interface ConstantsA
 
     String INTENT_EXTRA_RETAILER_NAME = "RETAILER_NAME";
     String INTENT_EXTRA_RETAILER_ID = "RETAILER_ID";
+    String INTENT_EXTRA_MOBILE_RETAILER_ID = "MOBILE_RETAILER_ID";
+    String INTENT_EXTRA_UPLOAD_STATUS = "UPLOAD_STATUS";
 
     String KEY_SKU_ID = "sku_id";
+    String KEY_MOBILE_RETAILER_ID = "mobileRetailerId";
+    String KEY_RETAILER_ID = "RETAILERID";
+    String KEY_ACTIVEMOBILEORDERID_RETAILER = "activeMobileOrderIdRetailerBased";
+    String KEY_ISNEWORREGULAR = "isNewOrRegular";
 
     String RS = "Rs. ";
     String NO_INTERNET_CONNECTION = "Failed, Please check your internet!";

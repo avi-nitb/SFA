@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -14,6 +15,7 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
+import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.MyDb;
@@ -106,6 +108,9 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
         ImageView skuPhoto_ImageView, addSkuToCart_ImageView;
         TextView skuName_TextView, skuPrice_TextView, skuCategory_TextView;
 
+        LinearLayout linlayVC;
+
+
         SkuInfoViewHolder(final View itemView)
         {
             super(itemView);
@@ -114,6 +119,11 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
             skuName_TextView = (TextView) itemView.findViewById(R.id.skuName_TextView);
             skuPrice_TextView = (TextView) itemView.findViewById(R.id.skuPrice_TextView);
             skuCategory_TextView = (TextView) itemView.findViewById(R.id.sku_SO_Attr_TextView);
+
+            linlayVC=(LinearLayout)itemView.findViewById(R.id.linlayVC);
+
+            linlayVC.setVisibility(View.GONE);
+            itemView.findViewById(R.id.viewline2).setVisibility(View.GONE);
 
 
             addSkuToCart_ImageView.setOnClickListener(new View.OnClickListener()
@@ -125,7 +135,7 @@ public class PreviouslyOrderedSKUsAdapter extends RecyclerView.Adapter<Previousl
                     String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
                     String skuName = itemView.getTag(R.string.tag_sku_name).toString();
 
-                    new Utils().pickAttributeValuesOrSelectRetailer(skuID, skuName, skuPrice, itemView.getContext());
+                    new Utils().pickAttributeValuesOrSelectRetailer(skuID, skuName, skuPrice, itemView.getContext(), SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
                 }
             });
 

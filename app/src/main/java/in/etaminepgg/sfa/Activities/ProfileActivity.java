@@ -2,8 +2,8 @@ package in.etaminepgg.sfa.Activities;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.view.MenuItem;
@@ -19,10 +19,9 @@ import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 public class ProfileActivity extends AppCompatActivity
 {
 
-    private Toolbar toolbar;
-    private TextView user_name,name,user_email,user_mobile,user_assigned_area;
     MySharedPrefrencesData mySharedPrefrencesData;
-
+    private Toolbar toolbar;
+    private TextView user_name, name, user_email, user_mobile, user_assigned_area, tv_lastupdateDate;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -38,8 +37,9 @@ public class ProfileActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_profile);
-        mySharedPrefrencesData=new MySharedPrefrencesData();
+        mySharedPrefrencesData = new MySharedPrefrencesData();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -54,11 +54,12 @@ public class ProfileActivity extends AppCompatActivity
     private void setFindViewById()
     {
 
-        this.user_name = (TextView)findViewById(R.id.user_profile_name);
-        this.name = (TextView)findViewById(R.id.name);
-        this.user_mobile = (TextView)findViewById(R.id.mobile);
-        this.user_email = (TextView)findViewById(R.id.email);
-        this.user_assigned_area = (TextView)findViewById(R.id.assignarea);
+        this.user_name = (TextView) findViewById(R.id.user_profile_name);
+        this.name = (TextView) findViewById(R.id.name);
+        this.user_mobile = (TextView) findViewById(R.id.mobile);
+        this.user_email = (TextView) findViewById(R.id.email);
+        this.user_assigned_area = (TextView) findViewById(R.id.assignarea);
+        this.tv_lastupdateDate = (TextView) findViewById(R.id.tv_lastupdateDate);
     }
 
 
@@ -67,24 +68,26 @@ public class ProfileActivity extends AppCompatActivity
         user_name.setText(mySharedPrefrencesData.getUsername(getBaseContext()));
 
 
-        name.setText(Html.fromHtml(getModifiedkeyValueString("Name : ",mySharedPrefrencesData.getUsername(getBaseContext()))));
+        name.setText(Html.fromHtml(getModifiedkeyValueString("Name : ", mySharedPrefrencesData.getUsername(getBaseContext()))));
 
 
-        user_mobile.setText(Html.fromHtml(getModifiedkeyValueString("Mobile : " ,mySharedPrefrencesData.get_User_mobile(getBaseContext()))));
+        user_mobile.setText(Html.fromHtml(getModifiedkeyValueString("Mobile : ", mySharedPrefrencesData.get_User_mobile(getBaseContext()))));
 
 
-        user_email.setText(Html.fromHtml(getModifiedkeyValueString("Email : ",mySharedPrefrencesData.getEmail(getBaseContext()))));
+        user_email.setText(Html.fromHtml(getModifiedkeyValueString("Email : ", mySharedPrefrencesData.getEmail(getBaseContext()))));
 
 
-        user_assigned_area.setText(Html.fromHtml(getModifiedkeyValueString("Assigned Area : ",getLocationname())));
+        user_assigned_area.setText(Html.fromHtml(getModifiedkeyValueString("Assigned Area : ", getLocationname())));
+
+        tv_lastupdateDate.setText(Html.fromHtml(getModifiedkeyValueString("Last Updated Date : ", mySharedPrefrencesData.getSkulistUpdateDate(getBaseContext()))) + "\n\n" + "Please click on Download to sync up with the server data");
 
     }
 
-    private String getModifiedkeyValueString(String key,String Value)
+    private String getModifiedkeyValueString(String key, String Value)
     {
-        String name_string=key+Value;
+        String name_string = key + Value;
         String replacedWith1 = "<font color='blue'>" + key + "</font>";
-        String modified_string_name = name_string.replaceAll(key,replacedWith1);
+        String modified_string_name = name_string.replaceAll(key, replacedWith1);
         return modified_string_name;
     }
 
@@ -98,17 +101,19 @@ public class ProfileActivity extends AppCompatActivity
 
         String userlocationid = new MySharedPrefrencesData().getUser_LocationId(ProfileActivity.this);
 
-        String selected_location_id="";
-        if(userlocationid.contains(",")){
+        String selected_location_id = "";
+        if (userlocationid.contains(","))
+        {
 
-            String location_id_arr[]=userlocationid.split(",");
+            String location_id_arr[] = userlocationid.split(",");
 
 
             String loc_name_query = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
 
-            String location_name_with_comma="";
+            String location_name_with_comma = "";
 
-            for(String locationid:location_id_arr){
+            for (String locationid : location_id_arr)
+            {
 
                 String[] selectionArgs_for_user = {locationid};
 
@@ -117,22 +122,24 @@ public class ProfileActivity extends AppCompatActivity
 
                 while (cursor.moveToNext())
                 {
-                    location_name_with_comma = location_name_with_comma+" , "+cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
+                    location_name_with_comma = location_name_with_comma + " , " + cursor.getString(cursor.getColumnIndexOrThrow("loc_name"));
 
                 }
 
 
             }
 
-            location_name=location_name_with_comma.substring(3);
+            location_name = location_name_with_comma.substring(3);
 
             //cursor.close();
             sqLiteDatabase.close();
 
 
-        }else {
+        }
+        else
+        {
 
-            selected_location_id=userlocationid;
+            selected_location_id = userlocationid;
 
             String loc_name_query = "SELECT " + "loc_name" + " FROM " + TBL_LOCATION_HIERARCHY + " WHERE " + "loc_id = ?";
 

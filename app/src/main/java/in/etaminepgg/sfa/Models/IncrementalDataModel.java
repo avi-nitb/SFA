@@ -3,20 +3,31 @@ package in.etaminepgg.sfa.Models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Created by Jayattama Prusty on 23-Dec-17.
- */
+public class IncrementalDataModel implements Serializable
+{
 
-public class RetailerInfo_Model {
-
-    @SerializedName("api_status")
+    /*@SerializedName("api_status")
     @Expose
     private Integer apiStatus;
+
+    @SerializedName("sku_ids")
+    @Expose
+    private List<GetSkuListAfter.SkuInfo> skuIds = null;
+
+
     @SerializedName("retailer_data")
     @Expose
-    private ArrayList<RetailerData> retailerData;
+    private ArrayList<RetailerInfo_Model.RetailerData> retailerData;
+
+
+    @SerializedName("sku_categories")
+    @Expose
+    private List<GetSkuCategorySubCategorylist.SkuCategory> skuCategories = null;
+
 
     public Integer getApiStatus() {
         return apiStatus;
@@ -26,12 +37,68 @@ public class RetailerInfo_Model {
         this.apiStatus = apiStatus;
     }
 
-    public ArrayList<RetailerData> getRetailerData() {
+    public List<GetSkuListAfter.SkuInfo> getSkuIds() {
+        return skuIds;
+    }
+
+    public void setSkuIds(List<GetSkuListAfter.SkuInfo> skuIds) {
+        this.skuIds = skuIds;
+    }
+
+
+    public ArrayList<RetailerInfo_Model.RetailerData> getRetailerData() {
         return retailerData;
     }
 
-    public void setRetailerData(ArrayList<RetailerData> retailerData) {
+    public void setRetailerData(ArrayList<RetailerInfo_Model.RetailerData> retailerData) {
         this.retailerData = retailerData;
+    }
+
+
+    public List<GetSkuCategorySubCategorylist.SkuCategory> getSkuCategories() {
+        return skuCategories;
+    }
+
+    public void setSkuCategories(List<GetSkuCategorySubCategorylist.SkuCategory> skuCategories) {
+        this.skuCategories = skuCategories;
+    }
+
+
+    public class SkuInfo
+    {
+        private String sku_id;
+        private String op_type;
+        private String mod_type;
+
+        public String getSku_id()
+        {
+            return sku_id;
+        }
+
+        public void setSku_id(String sku_id)
+        {
+            this.sku_id = sku_id;
+        }
+
+        public String getOp_type()
+        {
+            return op_type;
+        }
+
+        public void setOp_type(String op_type)
+        {
+            this.op_type = op_type;
+        }
+
+        public String getMod_type()
+        {
+            return mod_type;
+        }
+
+        public void setMod_type(String mod_type)
+        {
+            this.mod_type = mod_type;
+        }
     }
 
 
@@ -596,7 +663,5 @@ public class RetailerInfo_Model {
         {
             this.distributor_name = distributor_name;
         }
-    }
-
-
+    }*/
 }

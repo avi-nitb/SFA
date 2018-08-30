@@ -1,48 +1,24 @@
 package in.etaminepgg.sfa.Fragments;
 
 
-import android.app.ProgressDialog;
-import android.content.ContentValues;
-import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
-import in.etaminepgg.sfa.Adapters.NewSKUsAdapter;
 import in.etaminepgg.sfa.Adapters.PromotionalSKUsAdapter;
-import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuInfo;
-import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuListAfter;
-import in.etaminepgg.sfa.Models.GetSkuAttribute;
-import in.etaminepgg.sfa.Models.GetSkuInfo;
-import in.etaminepgg.sfa.Models.GetSkuListAfter;
-import in.etaminepgg.sfa.Models.GetSkuThumbImage;
-import in.etaminepgg.sfa.Network.API_Call_Retrofit;
-import in.etaminepgg.sfa.Network.ApiUrl;
-import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
-import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
-import in.etaminepgg.sfa.Utilities.MySharedPrefrencesData;
 import in.etaminepgg.sfa.Utilities.Utils;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-import static in.etaminepgg.sfa.Activities.DashboardActivity.substringAfterLastSeparator;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_GLOBAL_ATTRIBUTES;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_ATTRIBUTE_MAPPING;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
-import static in.etaminepgg.sfa.Utilities.ConstantsA.NEW_SKUs_TAB;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -51,7 +27,7 @@ public class PromotionalSKUsFragment extends Fragment
 {
     RecyclerView promotionalSKUs_RecyclerView;
 
-    String type="2";
+    String type = "2";
 
     int valueFromOpenDatabase;
     SQLiteDatabase sqLiteDatabase;
@@ -71,11 +47,14 @@ public class PromotionalSKUsFragment extends Fragment
         valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        if(Utils.isNetworkConnected(getActivity())){
+        if (Utils.isNetworkConnected(getActivity()))
+        {
 
-           // networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()));
+            // networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()));
 
-        }else {
+        }
+        else
+        {
             setAdapter(layout);
         }
 

@@ -60,6 +60,7 @@ public class Saleshistory_for_skuitemAdapter extends RecyclerView.Adapter<Salesh
         holder.sku_name.setCompoundDrawablesWithIntrinsicBounds(itemView.getContext().getResources().getDrawable(R.drawable.dot),null,null,null);
         holder.sku_qty.setText("SKU Qty : "+skuDetails_ordereds.get(position).getSku_qty() +" Items");
         holder.sku_order_item_freeQty.setText("SKU Free Qty : "+skuDetails_ordereds.get(position).getSku_free_qty());
+        holder.sku_order_item_perPrice.setText("SKU Unit Price : Rs. "+skuDetails_ordereds.get(position).getSku_unit_price());
         holder.sku_final_price.setText("SKU Price : Rs. "+skuDetails_ordereds.get(position).getSku_finalprice());
         holder.sku_order_item_discount.setText("SKU Discount : Rs. "+skuDetails_ordereds.get(position).getSku_discount());
 
@@ -73,7 +74,7 @@ public class Saleshistory_for_skuitemAdapter extends RecyclerView.Adapter<Salesh
 
     public class MySalesHistoryItemViewHolder extends RecyclerView.ViewHolder
     {
-        TextView sku_name,sku_qty,sku_final_price,sku_order_item_freeQty,sku_order_item_discount;
+        TextView sku_name,sku_qty,sku_final_price,sku_order_item_freeQty,sku_order_item_discount,sku_order_item_perPrice;
 
         public MySalesHistoryItemViewHolder(View itemView)
         {
@@ -82,6 +83,7 @@ public class Saleshistory_for_skuitemAdapter extends RecyclerView.Adapter<Salesh
             sku_qty=(TextView)itemView.findViewById(R.id.sku_order_item_qty);
             sku_order_item_freeQty=(TextView)itemView.findViewById(R.id.sku_order_item_freeQty);
             sku_final_price=(TextView)itemView.findViewById(R.id.sku_order_item_price);
+            sku_order_item_perPrice=(TextView)itemView.findViewById(R.id.sku_order_item_perPrice);
             sku_order_item_discount=(TextView)itemView.findViewById(R.id.sku_order_item_discount);
         }
     }

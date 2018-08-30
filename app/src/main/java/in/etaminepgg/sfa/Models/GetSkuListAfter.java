@@ -22,6 +22,7 @@ public class GetSkuListAfter
     @SerializedName("api_status")
     @Expose
     private Integer apiStatus;
+
     @SerializedName("sku_ids")
     @Expose
     private List<SkuInfo> skuIds = null;

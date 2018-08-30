@@ -58,8 +58,8 @@ public class PendingOrdersAdapter extends RecyclerView.Adapter<PendingOrdersAdap
         viewHolder.retailerId_TextView.setText(retailerID);
         viewHolder.retailerName_TextView.setText(getRetailerName(retailerID));
         viewHolder.orderDate_TextView.setText(orderDate);
-        viewHolder.orderTotal_TextView.setText("Rs." + DbUtils.getOrderTotal(orderID) + "/-");
-        viewHolder.itemCount_TextView.setText(DbUtils.getItemCount(orderID) + " items");
+        viewHolder.orderTotal_TextView.setText("Rs." + DbUtils.getOrderTotal(orderID,"") + "/-");
+        viewHolder.itemCount_TextView.setText(DbUtils.getItemCount(orderID,orderID) + " items");
     }
 
     @Override
@@ -168,7 +168,7 @@ public class PendingOrdersAdapter extends RecyclerView.Adapter<PendingOrdersAdap
 
                     String orderID = itemView.getTag(R.string.tag_order_id).toString();
 
-                    DbUtils.makeCurrentActiveOrderInactive();
+                   // DbUtils.makeCurrentActiveOrderInactive();
                     makeThisOrderActive(orderID);
 
                     Utils.makeThreadSleepFor(500);

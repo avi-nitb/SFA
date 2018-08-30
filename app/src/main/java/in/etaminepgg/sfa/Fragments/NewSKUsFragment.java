@@ -1,6 +1,5 @@
 package in.etaminepgg.sfa.Fragments;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -11,40 +10,21 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Selection;
-import android.text.SpanWatcher;
-import android.text.Spannable;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 
 import in.etaminepgg.sfa.Activities.DashboardActivity;
 import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
 import in.etaminepgg.sfa.Adapters.NewSKUsAdapter;
-import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuInfo;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuListAfter;
-import in.etaminepgg.sfa.Models.GetSkuAttribute;
-import in.etaminepgg.sfa.Models.GetSkuAttribute.SkuAttr;
-import in.etaminepgg.sfa.Models.GetSkuInfo;
-import in.etaminepgg.sfa.Models.GetSkuInfo.SkuIds;
-import in.etaminepgg.sfa.Models.GetSkuListAfter;
 import in.etaminepgg.sfa.Models.GetSkuListAfterNew;
-import in.etaminepgg.sfa.Models.GetSkuThumbImage;
 import in.etaminepgg.sfa.Models.IsSkuListUpdate;
-import in.etaminepgg.sfa.Models.SkuGroupHistory;
 import in.etaminepgg.sfa.Network.API_Call_Retrofit;
 import in.etaminepgg.sfa.Network.ApiUrl;
 import in.etaminepgg.sfa.Network.Apimethods;
@@ -59,12 +39,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.etaminepgg.sfa.Utilities.Constants.MOD_TYPE_SKU_MULTIMEDIA_AND_INFO;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_SUBCATEGORY;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NOT_PRESENT;
 
-public class NewSKUsFragment extends Fragment {
+public class NewSKUsFragment extends Fragment
+{
     int a = 0;
     int b = 0;
     boolean isUpdated = false;
@@ -83,45 +63,52 @@ public class NewSKUsFragment extends Fragment {
     boolean is_Attribute;
 
 
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
-            savedInstanceState) {
+            savedInstanceState)
+    {
         this.layout = inflater.inflate(R.layout.fragment_new_skus, container, false);
         this.valueFromOpenDatabase = MyDb.openDatabase(Constants.dbFileFullPath);
         this.sqLiteDatabase = MyDb.getDbHandle(this.valueFromOpenDatabase);
         this.mySharedPrefrencesData = new MySharedPrefrencesData();
 
-        this.is_Attribute=DbUtils.getConfigValue(Constants.SKU_ATTRIBUTE_REQUIRED);
+        this.is_Attribute = DbUtils.getConfigValue(Constants.SKU_ATTRIBUTE_REQUIRED);
 
         this.skuListByGenreActivity = (SkuListByGenreActivity) getActivity();
 
 
-        if (!Utils.isNetworkConnected(getActivity())) {
+        if (!Utils.isNetworkConnected(getActivity()))
+        {
             setAdapter(this.layout);
-        } else if (this.mySharedPrefrencesData.getfirsttimeflagfornew(getActivity())) {
-            this.mySharedPrefrencesData.setSkulistUpdateDate(getActivity(), Utils.getTodayDate());
+        }
+        else if (this.mySharedPrefrencesData.getfirsttimeflagfornew(getActivity()))
+        {
 
-            if(DbUtils.getSkuRowsSize()<1){
+            if (DbUtils.getSkuRowsSize() < 1)
+            {
 
-                networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()),false);
+                this.mySharedPrefrencesData.setSkulistUpdateDate(getActivity(), Utils.getTodayDate());
+                networkcall_for_getSKUlistAfter(new MySharedPrefrencesData().getEmployee_AuthKey(getActivity()), false);
             }
 
-        } else {
+        }
+        else
+        {
             //networkcall_for_isskulistUpdated();
         }
 
         setAdapter_Category();
 
 
-
-
         return this.layout;
     }
 
-    private void networkcall_for_isskulistUpdated() {
+    private void networkcall_for_isskulistUpdated()
+    {
 
         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
         Utils.startProgressDialog(getActivity(), progressDialog);
@@ -135,18 +122,22 @@ public class NewSKUsFragment extends Fragment {
         Log.i("isSkulistUpdate_ip_new", new Gson().toJson(IM_getSkuListAfter));
 
 
-        call.enqueue(new Callback<IsSkuListUpdate>() {
-            public void onResponse(Call<IsSkuListUpdate> call, Response<IsSkuListUpdate> response) {
+        call.enqueue(new Callback<IsSkuListUpdate>()
+        {
+            public void onResponse(Call<IsSkuListUpdate> call, Response<IsSkuListUpdate> response)
+            {
                 Log.d("Response", "" + response.code());
                 Log.d("respones", "" + response);
-                if (response.isSuccessful()) {
+                if (response.isSuccessful())
+                {
                     IsSkuListUpdate isSkuListUpdate = (IsSkuListUpdate) response.body();
                     Log.i("isSkulistUpdate_op_new", new Gson().toJson(isSkuListUpdate));
-                    if (isSkuListUpdate.getIsUpdated().intValue() == 1) {
+                    if (isSkuListUpdate.getIsUpdated().intValue() == 1)
+                    {
 
                         Utils.dismissProgressDialog(progressDialog);
                         NewSKUsFragment.this.isUpdated = true;
-                        NewSKUsFragment.this.networkcall_for_getSKUlistAfter(NewSKUsFragment.this.mySharedPrefrencesData.getEmployee_AuthKey(NewSKUsFragment.this.getActivity()),true);
+                        NewSKUsFragment.this.networkcall_for_getSKUlistAfter(NewSKUsFragment.this.mySharedPrefrencesData.getEmployee_AuthKey(NewSKUsFragment.this.getActivity()), true);
                         return;
                     }
                     return;
@@ -155,7 +146,8 @@ public class NewSKUsFragment extends Fragment {
                 NewSKUsFragment.this.setAdapter(NewSKUsFragment.this.layout);
             }
 
-            public void onFailure(Call<IsSkuListUpdate> call, Throwable t) {
+            public void onFailure(Call<IsSkuListUpdate> call, Throwable t)
+            {
                 Utils.dismissProgressDialog(progressDialog);
                 Utils.showToast(getContext(), ConstantsA.NO_INTERNET_CONNECTION);
             }
@@ -164,7 +156,8 @@ public class NewSKUsFragment extends Fragment {
     }
 
 
-    public void setAdapter_Category() {
+    public void setAdapter_Category()
+    {
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
@@ -173,19 +166,20 @@ public class NewSKUsFragment extends Fragment {
         String[] selectionArgs = new String[]{"1"};
         Cursor cursor = sqLiteDatabase.rawQuery(category_query, selectionArgs);
         String skuSubCategory = "";
-        if (cursor.moveToFirst()) {
+        if (cursor.moveToFirst())
+        {
 
             skuSubCategory = cursor.getString(cursor.getColumnIndexOrThrow("sub_category_id"));
 
         }
 
-        Log.d("SKU ID : ", ""+Constants.search_skuId);
+        Log.d("SKU ID : ", "" + Constants.search_skuId);
 
 
         NewSKUsAdapter newSKUsAdapter = new NewSKUsAdapter(DbUtils.getSkuList_Category("select " +
                 "sku_id, sku_name, sku_price, sku_category,sku_category_description, " +
                 "sku_photo_source from " + Constants.TBL_SKU + " WHERE new_sku = ? AND " +
-                "(sku_sub_category = ? OR sku_id = ?) ;", new String[]{"1", skuSubCategory,Constants.search_skuId}));
+                "(sku_sub_category = ? OR sku_id = ?) ;", new String[]{"1", skuSubCategory, Constants.search_skuId}));
         this.newSKUs_RecyclerView = (RecyclerView) layout.findViewById(R.id.newSKUs_RecyclerView);
         this.newSKUs_RecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         this.newSKUs_RecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -199,7 +193,8 @@ public class NewSKUsFragment extends Fragment {
 
     }
 
-    private void setAdapter(View layout) {
+    private void setAdapter(View layout)
+    {
        /* NewSKUsAdapter newSKUsAdapter = new NewSKUsAdapter(DbUtils.getSkuList("select sku_id,
        sku_name, sku_price, sku_category,sku_category_description, sku_photo_source from " +
        Constants.TBL_SKU + " WHERE new_sku = ? ;", new String[]{"1"}));
@@ -250,7 +245,7 @@ public class NewSKUsFragment extends Fragment {
                     GetSkuListAfterNew getSkuListAfter = (GetSkuListAfterNew) response.body();
                     Log.i("GetSkuListAfter_op_new", new Gson().toJson(getSkuListAfter));
 
-                    mySharedPrefrencesData.setfirsttimeflagfornew(getActivity(),false);
+                    mySharedPrefrencesData.setfirsttimeflagfornew(getActivity(), false);
 
                     if (getSkuListAfter.getApiStatus().intValue() == 1)
                     {
@@ -348,11 +343,14 @@ public class NewSKUsFragment extends Fragment {
                                 }
                             }
 
-                            if(!DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && !isUpdated){
+                            if (!DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && !isUpdated)
+                            {
 
                                 NewSKUsFragment.this.sqLiteDatabase.insert(Constants.TBL_SKU, null, skuValues);
 
-                            }else if(DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && isUpdated){
+                            }
+                            else if (DbUtils.isSKUPresentInDb(skuId_Info.getSkuId()) && isUpdated)
+                            {
 
                                 delete_sku_row_from_db(skuId_Info.getSkuId());
 
@@ -363,7 +361,7 @@ public class NewSKUsFragment extends Fragment {
                         }
 
 
-                        ((SkuListByGenreActivity)getActivity()).setAdapterForSearch();
+                        ((SkuListByGenreActivity) getActivity()).setAdapterForSearch();
 
                         Utils.dismissProgressDialog(progressDialog);
 
@@ -386,8 +384,8 @@ public class NewSKUsFragment extends Fragment {
     }
 
 
-
-    private void delete_sku_row_from_db(String sku_id) {
+    private void delete_sku_row_from_db(String sku_id)
+    {
         String selection = "sku_id = ?";
         String[] selectionArgs = new String[]{sku_id};
        /* Cursor cursor = this.sqLiteDatabase.rawQuery("SELECT attribute_id FROM " + Constants

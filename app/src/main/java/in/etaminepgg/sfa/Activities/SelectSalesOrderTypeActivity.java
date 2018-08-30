@@ -1,6 +1,6 @@
 package in.etaminepgg.sfa.Activities;
 
-import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -10,9 +10,9 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -32,7 +32,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -51,24 +50,33 @@ import in.etaminepgg.sfa.Models.PutSalesOrderMaster;
 import in.etaminepgg.sfa.Network.API_Call_Retrofit;
 import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
+import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
+import in.etaminepgg.sfa.Utilities.LocationTrack;
 import in.etaminepgg.sfa.Utilities.MyDb;
 import in.etaminepgg.sfa.Utilities.MySharedPrefrencesData;
 import in.etaminepgg.sfa.Utilities.Utils;
-import okhttp3.FormBody;
-import okhttp3.HttpUrl;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static in.etaminepgg.sfa.Utilities.Constants.REQUEST_TURN_ON_LOCATION;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_RETAILER_VISIT;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_NO_ORDERREASON;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_MOBILE_RETAILER_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_RETAILER_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_RETAILER_NAME;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.INTENT_EXTRA_UPLOAD_STATUS;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_ACTIVEMOBILEORDERID_RETAILER;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_ISNEWORREGULAR;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_MOBILE_RETAILER_ID;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_RETAILER_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NEW_ORDER;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.NOT_PRESENT;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NO_INTERNET_CONNECTION;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.ORDER_TYPE_NEW_ORDER;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.ORDER_TYPE_NEW_REGULAR_ORDER;
@@ -80,10 +88,10 @@ import static in.etaminepgg.sfa.Utilities.Utils.getRandomNumber;
 import static in.etaminepgg.sfa.Utilities.Utils.getTodayDate;
 import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserID;
 
-public class SelectSalesOrderTypeActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+public class SelectSalesOrderTypeActivity extends AppCompatActivity /*implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener*/
 {
+    private final static int ALL_PERMISSIONS_RESULT = 101;
     private final int REQUEST_CODE_ACCESS_FINE_LOCATION = 12;
-
     TextView salesOrderFor_TextView;
     CheckBox cb_telephone;
     RadioGroup orderTypes_RadioGroup;
@@ -94,16 +102,16 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     Button submitOrderType_Button;
     int selectedOrderType;
     ProgressDialog progressDialog = null;
-
-    String retailerName, retailerID, lat, lng, retailerFeedback;
-
+    String lat = NOT_PRESENT;
+    String lng = NOT_PRESENT;
+    String retailerName, retailerID, retailerFeedback;
+    String mobileRetailerID;
+    String uploadStatus;
     int valueFromOpenDatabase;
     SQLiteDatabase sqLiteDatabase;
-
-
-    ArrayList<NoReasonModel> noReasonModelArrayList=new ArrayList<>();
+    ArrayList<NoReasonModel> noReasonModelArrayList = new ArrayList<>();
     NoOrderReasonAdapter noOrderReasonAdapter;
-
+    LocationTrack locationTrack;
     private GoogleApiClient googleApiClient;
     LocationListener locationListener = new LocationListener()
     {
@@ -118,19 +126,23 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, locationListener);
 
-            doActionDependingOnOrderType();
+            //  doActionDependingOnOrderType();
         }
     };
     private LocationRequest locationRequest;
+    private ArrayList<String> permissionsToRequest;
+    private ArrayList<String> permissionsRejected = new ArrayList();
+    private ArrayList permissions = new ArrayList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_select_sales_order_type);
 
 
-        Toolbar toolbar=(Toolbar)findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Select Order Type");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -139,24 +151,53 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        buildGoogleApiClient();
+        //buildGoogleApiClient();
         findViewsByIDs();
         setListenersToViews();
 
         Intent intent = getIntent();
-        if(intent != null)
+        if (intent != null)
         {
             retailerName = intent.getStringExtra(INTENT_EXTRA_RETAILER_NAME);
             retailerID = intent.getStringExtra(INTENT_EXTRA_RETAILER_ID);
+            mobileRetailerID = intent.getStringExtra(INTENT_EXTRA_MOBILE_RETAILER_ID);
+            uploadStatus = intent.getStringExtra(INTENT_EXTRA_UPLOAD_STATUS);
 
-            salesOrderFor_TextView.append(retailerName + ", " + retailerID);
+            salesOrderFor_TextView.append(retailerName + "");
         }
+
+        permissions.add(ACCESS_FINE_LOCATION);
+        permissions.add(ACCESS_COARSE_LOCATION);
+
+        permissionsToRequest = findUnAskedPermissions(permissions);
+        //get the permissions we have asked for before but are not granted..
+        //we will store this in a global list to access later.
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+
+
+            if (permissionsToRequest.size() > 0)
+            {
+                requestPermissions((String[]) permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
+            }
+        }
+
+
+        locationTrack = new LocationTrack(SelectSalesOrderTypeActivity.this);
+
+
     }
 
+
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         if (item.getItemId() == android.R.id.home)
+        {
             finish();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -164,7 +205,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     protected void onPostResume()
     {
         super.onPostResume();
-        dismissProgressDialog();
+        //dismissProgressDialog();
     }
 
     @Override
@@ -193,32 +234,40 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     {
 
         rv_reasons.setLayoutManager(new LinearLayoutManager(this));
-        noOrderReasonAdapter=new NoOrderReasonAdapter(this,noReasonModelArrayList);
+        noOrderReasonAdapter = new NoOrderReasonAdapter(this, noReasonModelArrayList);
         rv_reasons.setAdapter(noOrderReasonAdapter);
+
+
+        //check telephone order or not
 
         cb_telephone.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b)
             {
-                if(cb_telephone.isChecked()){
+                if (cb_telephone.isChecked())
+                {
 
                     orderTypes_RadioGroup.clearCheck();
                     whyNoOrder_LinearLayout.setVisibility(View.INVISIBLE);
                     noOrder_RadioButton.setVisibility(View.GONE);
 
-                }else {
+                }
+                else
+                {
                     orderTypes_RadioGroup.clearCheck();
                     noOrder_RadioButton.setVisibility(View.VISIBLE);
                 }
             }
         });
+
+        //select for radio groups and order type
         orderTypes_RadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedRadioButtonId)
             {
-                switch(checkedRadioButtonId)
+                switch (checkedRadioButtonId)
                 {
                     case R.id.newOrder_RadioButton:
                         whyNoOrder_LinearLayout.setVisibility(View.INVISIBLE);
@@ -242,6 +291,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
             }
         });
 
+        //submit order type
         submitOrderType_Button.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -252,14 +302,29 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
                 //getGpsCoordinates();
 
-                if(!Utils.isGpsEnabled(SelectSalesOrderTypeActivity.this))
+
+                //checking for gps
+
+                if (locationTrack.canGetLocation())
                 {
-                    Utils.enableGPS(googleApiClient, locationRequest, SelectSalesOrderTypeActivity.this);
+
+
+                    double longitude = locationTrack.getLongitude();
+                    double latitude = locationTrack.getLatitude();
+
+                    lat = String.valueOf(latitude);
+                    lng = String.valueOf(longitude);
+
+                    // Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(longitude) + "\nLatitude:" + Double.toString(latitude), Toast.LENGTH_SHORT).show();
+
+                    doActionDependingOnOrderType();
                 }
                 else
                 {
-                    getGpsCoordinates();
+
+                    locationTrack.showSettingsAlert();
                 }
+
             }
         });
 
@@ -272,19 +337,19 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-        String noOrderReasonlistQuery="SELECT * from "+TBL_SKU_NO_ORDERREASON;
+        String noOrderReasonlistQuery = "SELECT * from " + TBL_SKU_NO_ORDERREASON;
 
         Cursor cursor = sqLiteDatabase.rawQuery(noOrderReasonlistQuery, null);
 
         noReasonModelArrayList.clear();
 
-        while(cursor.moveToNext())
+        while (cursor.moveToNext())
         {
             String reason_id = cursor.getString(cursor.getColumnIndexOrThrow("reason_id"));
             String reasondesc = cursor.getString(cursor.getColumnIndexOrThrow("reasondesc"));
-            noReasonModelArrayList.add(new NoReasonModel(reason_id,reasondesc,false));
+            noReasonModelArrayList.add(new NoReasonModel(reason_id, reasondesc, false));
         }
-        noReasonModelArrayList.add(new NoReasonModel("4","Others",false));
+        noReasonModelArrayList.add(new NoReasonModel("4", "Others", false));
         cursor.close();
         sqLiteDatabase.close();
         noOrderReasonAdapter.notifyDataSetChanged();
@@ -293,41 +358,54 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if(requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
+        if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_OK)
         {
             getGpsCoordinates();
         }
-        else if(requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED)
+        else if (requestCode == REQUEST_TURN_ON_LOCATION && resultCode == RESULT_CANCELED)
         {
             Utils.showErrorDialog(this, "Visit & Order creation failed. Turn on GPS.");
+        }
+        else if (requestCode == LocationTrack.GPS_ENABLE_REQUEST)
+        {
+
+            locationTrack = new LocationTrack(SelectSalesOrderTypeActivity.this);
+            if (locationTrack.canGetLocation())
+            {
+                //mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+                lat = String.valueOf(locationTrack.getLongitude());
+                lng = String.valueOf(locationTrack.getLatitude());
+
+            }
+            else
+            {
+
+                locationTrack.showSettingsAlert();
+            }
+
         }
     }
 
     void getGpsCoordinates()
     {
-        if(Utils.isNetworkConnected(SelectSalesOrderTypeActivity.this))
+
+        if (ContextCompat.checkSelfPermission(getBaseContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
-
-            if(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            if (getOrderFlag().equals("1"))
             {
-                if(getOrderFlag().equals("1"))
-                {
-                    startProgressDialog();
-                }
+                // startProgressDialog();
+            }
 
-                LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
-                //doActionDependingOnOrderType();
-            }
-            else
-            {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_ACCESS_FINE_LOCATION);
-                //LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
-            }
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
+            //doActionDependingOnOrderType();
         }
         else
         {
-            Utils.showErrorDialog(SelectSalesOrderTypeActivity.this, "Please check your internet connection.");
+            ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, REQUEST_CODE_ACCESS_FINE_LOCATION);
+            //LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
         }
+
     }
 
     void doActionDependingOnOrderType()
@@ -335,61 +413,118 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         Resources resources = getResources();
         String intentExtraKey_selectedOrderType = resources.getString(R.string.key_selected_order_type);
 
-        switch(selectedOrderType)
+        switch (selectedOrderType)
         {
             case ORDER_TYPE_NEW_ORDER:
 
-                makeEntriesIntoVisitAndOrderTables(null,ORDER_TYPE_NEW_ORDER);
-                dismissProgressDialog();
-                retailerFeedback="";
+
+                String mobileActiveOrderIdAccToRetailer = DbUtils.getActiveOrderStatusOfRetailer(retailerID, mobileRetailerID, "0");
+
+                if (!mobileActiveOrderIdAccToRetailer.equalsIgnoreCase(ConstantsA.NONE))
+                {
+
+                    Intent intent = new Intent(SelectSalesOrderTypeActivity.this, SkuListByGenreActivity.class);
+                    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(intentExtraKey_selectedOrderType, NEW_ORDER);
+                    intent.putExtra(KEY_MOBILE_RETAILER_ID, mobileRetailerID);
+                    intent.putExtra(KEY_RETAILER_ID, retailerID);
+                    intent.putExtra(KEY_ACTIVEMOBILEORDERID_RETAILER, mobileActiveOrderIdAccToRetailer);
+                    intent.putExtra(KEY_ISNEWORREGULAR, "0");
+                    startActivity(intent);
+
+
+                }
+                else
+                {
+
+                    makeEntriesIntoVisitAndOrderTables(null, ORDER_TYPE_NEW_ORDER);
+
+                    retailerFeedback = "";
+
+                }
+
+
+                //makeEntriesIntoVisitAndOrderTables(null,ORDER_TYPE_NEW_ORDER);
+                //dismissProgressDialog();
+                // retailerFeedback="";
                 break;
 
             case ORDER_TYPE_NEW_REGULAR_ORDER:
-                makeEntriesIntoVisitAndOrderTables(null,ORDER_TYPE_NEW_REGULAR_ORDER);
-                dismissProgressDialog();
-                retailerFeedback="";
+
+                String mobileActiveOrderIdAccToRetailer_regular = DbUtils.getActiveOrderStatusOfRetailer(retailerID, mobileRetailerID, "0");
+
+                if (!mobileActiveOrderIdAccToRetailer_regular.equalsIgnoreCase(ConstantsA.NONE))
+                {
+
+                    Intent intent = new Intent(SelectSalesOrderTypeActivity.this, SkuListByGenreActivity.class);
+                    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(intentExtraKey_selectedOrderType, REGULAR_ORDER);
+                    intent.putExtra(KEY_MOBILE_RETAILER_ID, mobileRetailerID);
+                    intent.putExtra(KEY_RETAILER_ID, retailerID);
+                    intent.putExtra(KEY_ACTIVEMOBILEORDERID_RETAILER, mobileActiveOrderIdAccToRetailer_regular);
+                    intent.putExtra(KEY_ISNEWORREGULAR, "0");
+                    startActivity(intent);
+
+
+                }
+                else
+                {
+
+                    makeEntriesIntoVisitAndOrderTables(null, ORDER_TYPE_NEW_REGULAR_ORDER);
+
+                    retailerFeedback = "";
+
+                }
+
                 break;
 
             case ORDER_TYPE_NO_ORDER:
 
-                if(NoOrderReasonAdapter.selected_Reason_hashmap.isEmpty()){
+                if (NoOrderReasonAdapter.selected_Reason_hashmap.isEmpty())
+                {
 
-                    Utils.showToast(getBaseContext(),"Please select reasons for no order ");
-                }else {
+                    Utils.showToast(getBaseContext(), "Please select reasons for no order ");
+                }
+                else
+                {
 
-                    retailerFeedback="";
+                    retailerFeedback = "";
 
 
-                    if(NoOrderReasonAdapter.selected_Reason_hashmap.containsKey("4")){
+                    if (NoOrderReasonAdapter.selected_Reason_hashmap.containsKey("4"))
+                    {
 
-                        if(NoOrderReasonAdapter.selected_Reason_hashmap.get("4").isEmpty()){
+                        if (NoOrderReasonAdapter.selected_Reason_hashmap.get("4").isEmpty())
+                        {
 
                             Utils.showPopUp(getBaseContext(), "Reason can't be empty. Please enter the reason.");
 
-                        }else {
+                        }
+                        else
+                        {
 
-                            for(Map.Entry<String, String> reasonmap:NoOrderReasonAdapter.selected_Reason_hashmap.entrySet()){
+                            for (Map.Entry<String, String> reasonmap : NoOrderReasonAdapter.selected_Reason_hashmap.entrySet())
+                            {
 
-                                    retailerFeedback=retailerFeedback+","+reasonmap.getValue();
+                                retailerFeedback = retailerFeedback + "," + reasonmap.getValue();
                             }
                             confirmIfHeHasMadeRetailerVisit();
                         }
 
-                    }else {
+                    }
+                    else
+                    {
+
+                        for (Map.Entry<String, String> reasonmap : NoOrderReasonAdapter.selected_Reason_hashmap.entrySet())
+                        {
+
+                            retailerFeedback = retailerFeedback + "," + reasonmap.getValue();
+                        }
 
                         confirmIfHeHasMadeRetailerVisit();
                     }
                 }
 
-
-              /*  if(whyNoOrder_TextInputEditText.getText().toString().trim().isEmpty())
-                {
-                    Utils.showPopUp(getBaseContext(), "Reason can't be empty. Please enter the reason.");
-                }
-                else
-                {
-                    confirmIfHeHasMadeRetailerVisit();
-                }*/
                 break;
 
             default:
@@ -398,6 +533,8 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         }
     }
 
+
+    //confirm for user presence at retailer location
     void confirmIfHeHasMadeRetailerVisit()
     {
         new AlertDialog.Builder(this)
@@ -409,7 +546,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
-                        makeEntriesIntoVisitAndOrderTables(retailerFeedback,ORDER_TYPE_NO_ORDER);
+                        makeEntriesIntoVisitAndOrderTables(retailerFeedback, ORDER_TYPE_NO_ORDER);
                         whyNoOrder_TextInputEditText.setText("");
                         orderTypes_RadioGroup.clearCheck();
                         selectedOrderType = -123;
@@ -428,44 +565,67 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
                 .show();
     }
 
-    //retailerFeedback is explanation/reason by retailer, why there is no order from him
-    private void makeEntriesIntoVisitAndOrderTables(String retailerFeedback,int selectedOrderType)
+    //retailerFeedback is explanation/reason by retailer, when there is no order from him
+    private void makeEntriesIntoVisitAndOrderTables(String retailerFeedback, int selectedOrderType)
     {
 
-        if(Utils.isNetworkConnected(SelectSalesOrderTypeActivity.this)){
+        String mobileVisitID = "VISIT_" + getIST() + "_" + getRandomNumber();
+        String mobileOrderID = "ORDER_" + getIST() + "_" + getRandomNumber();
 
-            networkcall_put_retailer_visit(selectedOrderType);
+        if (selectedOrderType == ORDER_TYPE_NO_ORDER)
+        {
 
-        }else {
+            insertIntoRetailerVisitTable("", mobileVisitID, retailerFeedback, false);
 
-            String visitID = "VISIT_" + getIST() + "_" + getRandomNumber();
-
-            insertIntoRetailerVisitTable(visitID, retailerFeedback,false);
-
-            DbUtils.makeCurrentActiveOrderInactive();
-
-            //insertIntoSalesOrderTable(visitID,"",false);
-
-            launch_corresponding_tab(selectedOrderType);
         }
+        else
+        {
+
+            insertIntoRetailerVisitTable("", mobileVisitID, retailerFeedback, false);
+            //DbUtils.makeCurrentActiveOrderInactive();
+            insertIntoSalesOrderTable("", mobileVisitID, "", mobileOrderID, false);
+        }
+
+        launch_corresponding_tab(selectedOrderType);
     }
 
+    //launch accoring to order type selection
     private void launch_corresponding_tab(int selectedOrderType)
     {
 
         Resources resources = getResources();
+
+        final String intentExtraKey_TabToShow = getResources().getString(R.string.key_tab_to_show);
+
         String intentExtraKey_selectedOrderType = resources.getString(R.string.key_selected_order_type);
-        switch(selectedOrderType)
+
+        switch (selectedOrderType)
         {
             case ORDER_TYPE_NEW_ORDER:
-                dismissProgressDialog();
-                Utils.launchActivityWithExtra(SelectSalesOrderTypeActivity.this, SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, NEW_ORDER);
+
+
+                Intent intent = new Intent(SelectSalesOrderTypeActivity.this, SkuListByGenreActivity.class);
+
+                intent.putExtra(intentExtraKey_TabToShow, getIntent().getStringExtra(intentExtraKey_TabToShow));
+                intent.putExtra(KEY_MOBILE_RETAILER_ID, mobileRetailerID);
+                intent.putExtra(KEY_RETAILER_ID, retailerID);
+                intent.putExtra(KEY_ISNEWORREGULAR, "0");
+                startActivity(intent);
+
                 break;
 
             case ORDER_TYPE_NEW_REGULAR_ORDER:
 
-                dismissProgressDialog();
-                Utils.launchActivityWithExtra(SelectSalesOrderTypeActivity.this, SkuListByGenreActivity.class, intentExtraKey_selectedOrderType, REGULAR_ORDER);
+
+                Intent intent1 = new Intent(SelectSalesOrderTypeActivity.this, SkuListByGenreActivity.class);
+
+                intent1.putExtra(intentExtraKey_selectedOrderType, REGULAR_ORDER);
+                intent1.putExtra(KEY_MOBILE_RETAILER_ID, mobileRetailerID);
+                intent1.putExtra(KEY_RETAILER_ID, retailerID);
+                intent1.putExtra(KEY_ISNEWORREGULAR, "0");
+                startActivity(intent1);
+
+
                 break;
 
             case ORDER_TYPE_NO_ORDER:
@@ -479,25 +639,25 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     }
 
+    //api call for visit
     private void networkcall_put_retailer_visit(final int selectedOrderType)
     {
-        final Apimethods methods= API_Call_Retrofit.getretrofit(SelectSalesOrderTypeActivity.this).create(Apimethods.class);
+        final Apimethods methods = API_Call_Retrofit.getretrofit(SelectSalesOrderTypeActivity.this).create(Apimethods.class);
 
-        final ProgressDialog progressDialog=new ProgressDialog(SelectSalesOrderTypeActivity.this);
-        Utils.startProgressDialog(SelectSalesOrderTypeActivity.this,progressDialog);
+        final ProgressDialog progressDialog = new ProgressDialog(SelectSalesOrderTypeActivity.this);
+        Utils.startProgressDialog(SelectSalesOrderTypeActivity.this, progressDialog);
 
-        IM_PutRetailerVisit.RetailerData retailerData=new IM_PutRetailerVisit().new RetailerData(retailerID,new MySharedPrefrencesData().getUser_Id(SelectSalesOrderTypeActivity.this),lat,lng,getDateTime(),"",retailerFeedback,"",new MySharedPrefrencesData().get_User_CompanyId(SelectSalesOrderTypeActivity.this));
+        IM_PutRetailerVisit.RetailerData retailerData = new IM_PutRetailerVisit().new RetailerData(retailerID, new MySharedPrefrencesData().getUser_Id(SelectSalesOrderTypeActivity.this), lat, lng, getDateTime(), "", retailerFeedback, "", new MySharedPrefrencesData().get_User_CompanyId(SelectSalesOrderTypeActivity.this));
         IM_PutRetailerVisit im_putRetailerVisit = new IM_PutRetailerVisit(new MySharedPrefrencesData().getEmployee_AuthKey(SelectSalesOrderTypeActivity.this), retailerData);
 
         Call<PutRetailerInfo_Model> call = methods.putRetailerVisit(im_putRetailerVisit);
 
-        Log.i("putretailervisit_ip",new Gson().toJson(im_putRetailerVisit));
+        Log.i("putretailervisit_ip", new Gson().toJson(im_putRetailerVisit));
 
         Log.d("url", "url=" + call.request().url().toString());
 
-        Log.d("put_retail_visit_input",new Gson().toJson(im_putRetailerVisit));
+        Log.d("put_retail_visit_input", new Gson().toJson(im_putRetailerVisit));
 
-        
 
         call.enqueue(new Callback<PutRetailerInfo_Model>()
         {
@@ -507,32 +667,37 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
                 int statusCode = response.code();
                 Log.d("Response", "" + statusCode);
                 Log.d("respones", "" + response);
-                Log.d("put_retail_visit_output",new Gson().toJson(response));
+                Log.d("put_retail_visit_output", new Gson().toJson(response));
 
-                if(response.isSuccessful()){
+                if (response.isSuccessful())
+                {
 
-                    PutRetailerInfo_Model putRetailerInfo_model=response.body();
+                    PutRetailerInfo_Model putRetailerInfo_model = response.body();
 
-                    Log.i("putretailervisit_op",new Gson().toJson(putRetailerInfo_model));
+                    Log.i("putretailervisit_op", new Gson().toJson(putRetailerInfo_model));
 
-                    if(putRetailerInfo_model.getApiStatus()==1){
+                    if (putRetailerInfo_model.getApiStatus() == 1)
+                    {
                         Utils.dismissProgressDialog(progressDialog);
-                        Log.d("put_retail_visit_output",new Gson().toJson(putRetailerInfo_model));
+                        Log.d("put_retail_visit_output", new Gson().toJson(putRetailerInfo_model));
 
                         String visitID = putRetailerInfo_model.getRetailer_visit_id();
 
-                        insertIntoRetailerVisitTable(visitID, retailerFeedback,true);
-                        DbUtils.makeCurrentActiveOrderInactive();
-                        if(selectedOrderType!=ORDER_TYPE_NO_ORDER){
+                        insertIntoRetailerVisitTable(visitID, String.valueOf("VISIT_" + getIST() + "_" + getRandomNumber()), retailerFeedback, true);
+                        //DbUtils.makeCurrentActiveOrderInactive();
+                        if (selectedOrderType != ORDER_TYPE_NO_ORDER)
+                        {
 
-                            networkcall_for_putSalesOrderMaster(new MySharedPrefrencesData().getEmployee_AuthKey(SelectSalesOrderTypeActivity.this),visitID);
+                            networkcall_for_putSalesOrderMaster(new MySharedPrefrencesData().getEmployee_AuthKey(SelectSalesOrderTypeActivity.this), visitID);
                         }
 
                     }
-                }else {
-                    Log.d("put_retail_visit_output",new Gson().toJson(response.errorBody()));
+                }
+                else
+                {
+                    Log.d("put_retail_visit_output", new Gson().toJson(response.errorBody()));
                     Utils.dismissProgressDialog(progressDialog);
-                    Utils.showToast(SelectSalesOrderTypeActivity.this,"Retailer visit is not created successfully.");
+                    Utils.showToast(SelectSalesOrderTypeActivity.this, "Retailer visit is not created successfully.");
                 }
 
             }
@@ -540,16 +705,17 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
             private void networkcall_for_putSalesOrderMaster(String employee_authKey, final String visitiD)
             {
 
-                int getStatusforTelephonicOrder=0;
+                int getStatusforTelephonicOrder = 0;
 
-                if(cb_telephone.isChecked()){
+                if (cb_telephone.isChecked())
+                {
 
-                    getStatusforTelephonicOrder=1;
+                    getStatusforTelephonicOrder = 1;
                 }
 
-                IM_PutSalesOrderMaster.SalesData salesData=new IM_PutSalesOrderMaster().new SalesData(visitiD,"","","","","","",""," ",loggedInUserID,getDateTime(),loggedInUserID,"1",getStatusforTelephonicOrder);
-                IM_PutSalesOrderMaster im_putSalesOrderMaster=new IM_PutSalesOrderMaster(employee_authKey,salesData);
-                Call<PutSalesOrderMaster> call=methods.putSalesOrdermaster(im_putSalesOrderMaster);
+                IM_PutSalesOrderMaster.SalesData salesData = new IM_PutSalesOrderMaster().new SalesData(visitiD, "", "", "", "", "", "", "", " ", loggedInUserID, getDateTime(), loggedInUserID, "1", getStatusforTelephonicOrder);
+                IM_PutSalesOrderMaster im_putSalesOrderMaster = new IM_PutSalesOrderMaster(employee_authKey, salesData);
+                Call<PutSalesOrderMaster> call = methods.putSalesOrdermaster(im_putSalesOrderMaster);
 
                 Log.i("putsalesordrmaster_ip", new Gson().toJson(im_putSalesOrderMaster));
 
@@ -562,25 +728,29 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
                         int statusCode = response.code();
                         Log.d("Response", "" + statusCode);
                         Log.d("respones", "" + response);
-                        Log.d("put_sales_master_op",new Gson().toJson(response));
-                        if(response.isSuccessful()){
-                            PutSalesOrderMaster putSalesOrderMaster=response.body();
+                        Log.d("put_sales_master_op", new Gson().toJson(response));
+                        if (response.isSuccessful())
+                        {
+                            PutSalesOrderMaster putSalesOrderMaster = response.body();
 
-                            Log.i("putsalesordermaster_op",new Gson().toJson(putSalesOrderMaster));
+                            Log.i("putsalesordermaster_op", new Gson().toJson(putSalesOrderMaster));
 
-                            if(putSalesOrderMaster.getApiStatus()==1){
+                            if (putSalesOrderMaster.getApiStatus() == 1)
+                            {
                                 Utils.dismissProgressDialog(progressDialog);
 
 
                                 String orderid = putSalesOrderMaster.getSalesOrderId();
-                                insertIntoSalesOrderTable(visitiD,orderid,true);
+                                insertIntoSalesOrderTable(visitiD, "VISIT" + getIST() + "_" + getRandomNumber(), orderid, "ORDER_" + getIST() + "_" + getRandomNumber(), true);
                                 launch_corresponding_tab(selectedOrderType);
 
                             }
-                        }else {
-                            Log.d("put_sales_ordermaster",new Gson().toJson(response.errorBody()));
+                        }
+                        else
+                        {
+                            Log.d("put_sales_ordermaster", new Gson().toJson(response.errorBody()));
                             Utils.dismissProgressDialog(progressDialog);
-                            Utils.showToast(SelectSalesOrderTypeActivity.this,"salesorder is not created successfully.");
+                            Utils.showToast(SelectSalesOrderTypeActivity.this, "salesorder is not created successfully.");
                         }
 
 
@@ -590,7 +760,7 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
                     public void onFailure(Call<PutSalesOrderMaster> call, Throwable t)
                     {
                         Utils.dismissProgressDialog(progressDialog);
-                        Utils.showToast(SelectSalesOrderTypeActivity.this,NO_INTERNET_CONNECTION);
+                        Utils.showToast(SelectSalesOrderTypeActivity.this, NO_INTERNET_CONNECTION);
                     }
                 });
 
@@ -600,45 +770,43 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
             public void onFailure(Call<PutRetailerInfo_Model> call, Throwable t)
             {
                 Utils.dismissProgressDialog(progressDialog);
-                Utils.showToast(SelectSalesOrderTypeActivity.this,NO_INTERNET_CONNECTION);
+                Utils.showToast(SelectSalesOrderTypeActivity.this, NO_INTERNET_CONNECTION);
             }
         });
 
 
-
     }
 
-    void insertIntoRetailerVisitTable(String visitID, String retailerFeedback,boolean isonline)
+    //inserting into retailer visits table
+
+    void insertIntoRetailerVisitTable(String visitID, String mobile_visit_id, String retailerFeedback, boolean isonline)
     {
         ContentValues retailerVisitValues = new ContentValues();
-        //String visitID = "VISIT_"+getIST()+"_"+getRandomNumber();
         retailerVisitValues.put("visit_id", visitID);
+        retailerVisitValues.put("mobile_visit_id", mobile_visit_id);
         retailerVisitValues.put("emp_id", loggedInUserID);
         retailerVisitValues.put("retailer_id", retailerID);
+        retailerVisitValues.put("mobile_retailer_id", mobileRetailerID);
         retailerVisitValues.put("visit_date", getDateTime());
         retailerVisitValues.put("has_order", getOrderFlag());
         retailerVisitValues.put("feedback", retailerFeedback);
         retailerVisitValues.put("latitude", lat);
         retailerVisitValues.put("longitude", lng);
-        if(isonline){
-            retailerVisitValues.put("upload_status", "1");
-        }else {
+        retailerVisitValues.put("upload_status", "0");
 
-            retailerVisitValues.put("upload_status", "0");
-        }
         sqLiteDatabase.insert(TBL_RETAILER_VISIT, null, retailerVisitValues);
     }
 
-    void insertIntoSalesOrderTable(String visitID,String orderid,boolean isonline)
+    //insert into sales order table
+    void insertIntoSalesOrderTable(String visitID, String mobile_visit_id, String orderid, String mobile_order_id, boolean isonline)
     {
-       /* if(!isonline){
-
-            orderid = "ORDER_" + getIST() + "_" + getRandomNumber();
-        }*/
         ContentValues salesOrderValues = new ContentValues();
         salesOrderValues.put("order_id", orderid);
+        salesOrderValues.put("mobile_order_id", mobile_order_id);
         salesOrderValues.put("visit_id", visitID);
+        salesOrderValues.put("mobile_visit_id", mobile_visit_id);
         salesOrderValues.put("retailer_id", retailerID);
+        salesOrderValues.put("mobile_retailer_id", mobileRetailerID);
         salesOrderValues.put("emp_id", new MySharedPrefrencesData().getUser_Id(SelectSalesOrderTypeActivity.this));
         salesOrderValues.put("order_date", getDateTime());
         salesOrderValues.put("created_date", getTodayDate());
@@ -650,10 +818,11 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         salesOrderValues.put("is_cancelled", "0");
         salesOrderValues.put("upload_status", "0");
 
+
         //we are adding new SKUs against active sales order
         //so if there is no order, we shouldn't make that order as active order
         //if we do, new SKUs get added against the order_id where there is no sales order
-        if(getOrderFlag().equals("1"))
+        if (getOrderFlag().equals("1"))
         {
             salesOrderValues.put("is_active", "1");
         }
@@ -667,11 +836,11 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
 
     private String getOrderFlag()
     {
-        if(selectedOrderType == ORDER_TYPE_NO_ORDER)
+        if (selectedOrderType == ORDER_TYPE_NO_ORDER)
         {
             return "0";
         }
-        else if(selectedOrderType == ORDER_TYPE_NEW_ORDER || selectedOrderType == ORDER_TYPE_NEW_REGULAR_ORDER)
+        else if (selectedOrderType == ORDER_TYPE_NEW_ORDER || selectedOrderType == ORDER_TYPE_NEW_REGULAR_ORDER)
         {
             return "1";
         }
@@ -681,113 +850,113 @@ public class SelectSalesOrderTypeActivity extends AppCompatActivity implements G
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
-    {
-        switch(requestCode)
-        {
-            case REQUEST_CODE_ACCESS_FINE_LOCATION:
-            {
-                // If request is cancelled, the result arrays are empty.
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
-                    if(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                    {
-                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
-                    }
-
-                    // permission was granted, yay! Do the task you need to do.
-                    //LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
-                }
-                else
-                {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
-    }
-
-    private void startProgressDialog()
-    {
-        progressDialog = new ProgressDialog(SelectSalesOrderTypeActivity.this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setTitle("Capturing GPS Co-Ordinates");
-        progressDialog.setMessage("Please Wait....");
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(true);
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setProgressNumberFormat(null);
-        progressDialog.setProgressPercentFormat(null);
-        progressDialog.show();
-    }
-
-    private void dismissProgressDialog()
-    {
-        if(progressDialog != null)
-        {
-            progressDialog.dismiss();
-        }
-    }
-
-    private void buildGoogleApiClient()
-    {
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-    }
 
     @Override
     protected void onStart()
     {
-        connectGoogleApiClient();
+        //connectGoogleApiClient();
         super.onStart();
     }
 
     @Override
     protected void onStop()
     {
-        disConnectGoogleApiClient();
+        // disConnectGoogleApiClient();
         super.onStop();
     }
 
-    @Override
-    public void onConnected(Bundle bundle)
-    {
-        locationRequest = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(1000);
-        // LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, locationListener);
-    }
+//for location track
 
-    @Override
-    public void onConnectionSuspended(int i)
+    private ArrayList findUnAskedPermissions(ArrayList<String> wanted)
     {
-        connectGoogleApiClient();
-    }
+        ArrayList result = new ArrayList();
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
-    {
-        connectGoogleApiClient();
-    }
-
-    private void connectGoogleApiClient()
-    {
-        if(!googleApiClient.isConnected() || !googleApiClient.isConnecting())
+        for (String perm : wanted)
         {
-            googleApiClient.connect();
+            if (!hasPermission(perm))
+            {
+                result.add(perm);
+            }
         }
+
+        return result;
     }
 
-    private void disConnectGoogleApiClient()
+    private boolean hasPermission(String permission)
     {
-        if(googleApiClient.isConnected() || googleApiClient.isConnecting())
+        if (canMakeSmores())
         {
-            googleApiClient.disconnect();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                return (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
+            }
         }
+        return true;
     }
+
+    private boolean canMakeSmores()
+    {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+    {
+
+        switch (requestCode)
+        {
+
+            case ALL_PERMISSIONS_RESULT:
+                for (String perms : permissionsToRequest)
+                {
+                    if (!hasPermission(perms))
+                    {
+                        permissionsRejected.add(perms);
+                    }
+                }
+
+                if (permissionsRejected.size() > 0)
+                {
+
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    {
+                        if (shouldShowRequestPermissionRationale(permissionsRejected.get(0)))
+                        {
+                            showMessageOKCancel("These permissions are mandatory for the application. Please allow access.",
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which)
+                                        {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                                            {
+                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT);
+                                            }
+                                        }
+                                    });
+                            return;
+                        }
+                    }
+
+                }
+
+                break;
+        }
+
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener)
+    {
+        new AlertDialog.Builder(SelectSalesOrderTypeActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+
 }

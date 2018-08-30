@@ -12,6 +12,7 @@ import java.util.List;
 
 import in.etaminepgg.sfa.Models.MySalesHistory;
 import in.etaminepgg.sfa.R;
+import in.etaminepgg.sfa.Utilities.DividerItemDecoration;
 
 import static in.etaminepgg.sfa.Utilities.DbUtils.getRetailerNameAccordingToRetailerId;
 
@@ -80,6 +81,9 @@ public class MySalesHistoryAdapter extends RecyclerView.Adapter<MySalesHistoryAd
             tv_sku_overall_disc = (TextView) itemView.findViewById(R.id.tv_sku_overall_disc);
             rv_child_for_skuitem=(RecyclerView)itemView.findViewById(R.id.rv_child_for_skuitem);
             rv_child_for_skuitem.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
+           // rv_child_for_skuitem.addItemDecoration(new DividerItemDecoration(itemView.getContext(), DividerItemDecoration.VERTICAL));
+            rv_child_for_skuitem.addItemDecoration(new DividerItemDecoration(itemView.getContext(), DividerItemDecoration.VERTICAL_LIST));
+
 
         }
     }

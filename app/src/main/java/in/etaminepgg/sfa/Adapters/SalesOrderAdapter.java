@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.LoginActivity;
+import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_PutSalesorderDetails;
 import in.etaminepgg.sfa.Models.PutSalesOrderDetails;
 import in.etaminepgg.sfa.Models.SalesOrderSku;
@@ -73,7 +74,10 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
     private CheckBox setOrderAsRegularOrder_CheckBox;
     private List<SalesOrderSku> skuList;
     private Button submitSalesOrder_Button;
-    private PrefixEditText order_overalldiscount_value;
+    private EditText order_overalldiscount_value;
+
+     String activeOrderID;
+     String mobileActiveOrderID;
 
 
     public SalesOrderAdapter(List<SalesOrderSku> skuList, LinearLayout salesOrder_LinearLayout_outer, CheckBox setOrderAsRegularOrder_CheckBox)
@@ -89,9 +93,13 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
         this.orderSummary_TextView = ((TextView) salesOrder_LinearLayout.findViewById(R.id.orderSummary_TextView));
         this.tv_grandtoalitems = ((TextView) salesOrder_LinearLayout.findViewById(R.id.tv_grandtoalitems));
         this.tv_grandtotal = ((TextView) salesOrder_LinearLayout.findViewById(R.id.tv_grandtotal));
-        this.order_overalldiscount_value = ((PrefixEditText) salesOrder_LinearLayout.findViewById(R.id.order_overalldiscount_value));
+        this.order_overalldiscount_value = (EditText) salesOrder_LinearLayout.findViewById(R.id.order_overalldiscount_value);
         this.submitSalesOrder_Button = ((Button) salesOrder_LinearLayout.findViewById(R.id.submitSalesOrder_Button));
         this.setOrderAsRegularOrder_CheckBox = setOrderAsRegularOrder_CheckBox;
+
+        activeOrderID=DbUtils.getActiveOrderID(SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
+        mobileActiveOrderID = DbUtils.getActiveMobileOrderID(SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
+
 
     }
 
@@ -216,8 +224,13 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             this.deleteSKU_ImageButton = (ImageView) itemView.findViewById(R.id.deleteSKU_ImageButton);
 
 
+
+
             SalesOrderAdapter.this.order_overalldiscount_value.addTextChangedListener(new TextWatcher()
             {
+
+
+
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
                 {
@@ -229,13 +242,13 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                 {
                     String overalldiscount = SalesOrderAdapter.this.order_overalldiscount_value.getText().toString();
 
-                    String activeOrderID = DbUtils.getActiveOrderID();
+
 
                     //Set Length filter. Restricting to 10 characters only
-                    order_overalldiscount_value.setFilters(new InputFilter[]{new InputFilter.LengthFilter(String.valueOf(DbUtils.getOrderTotal(activeOrderID)).length() + 1)});
+                    order_overalldiscount_value.setFilters(new InputFilter[]{new InputFilter.LengthFilter(String.valueOf(DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID)).length() + 1)});
 
 
-                    if (!overalldiscount.isEmpty() && (DbUtils.getOrderTotal(activeOrderID) > Float.parseFloat(overalldiscount)))
+                    if (!overalldiscount.isEmpty() && (DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID) > Float.parseFloat(overalldiscount)))
                     {
 
 
@@ -243,7 +256,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                     else
                     {
 
-                        Utils.showToast(itemView.getContext(), "Discount can n't be greater or equal to total.");
+                        //Utils.showToast(itemView.getContext(), "Discount can n't be greater or equal to total.");
                     }
 
                 }
@@ -256,12 +269,12 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
 
                     // SalesOrderAdapter.this.order_overalldiscount_value.setText(editable.toString());
                     String overalldiscount = SalesOrderAdapter.this.order_overalldiscount_value.getText().toString();
-                    String activeOrderID = DbUtils.getActiveOrderID();
 
-                    if (!editable.toString().isEmpty() && (DbUtils.getOrderTotal(activeOrderID) > Float.parseFloat(overalldiscount)))
+
+                    if (!editable.toString().isEmpty() && (DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID) > Float.parseFloat(overalldiscount)))
                     {
 
-                        SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + (DbUtils.getOrderTotal(activeOrderID) - Float.parseFloat(overalldiscount)));
+                        SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + (DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID) - Float.parseFloat(overalldiscount)));
 
                     }
                     else
@@ -290,10 +303,10 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                         SalesOrderAdapter.this.notifyItemRemoved(position);
                         SalesOrderAdapter.this.notifyItemRangeChanged(position, SalesOrderAdapter.this.skuList.size());
 
-                        String activeOrderID = DbUtils.getActiveOrderID();
+                        String activeOrderID = DbUtils.getActiveOrderID(SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
                         //SalesOrderAdapter.this.orderSummary_TextView.setText(DbUtils.getItemCount(activeOrderID) + " items \nTotal:  Rs. " + DbUtils.getOrderTotal(activeOrderID)+"\nOrder for "+DbUtils.getActiveRetailer(activeOrderID));
-                        SalesOrderAdapter.this.orderSummary_TextView.setText("Rs. " + DbUtils.getOrderTotal(activeOrderID));
-                        SalesOrderAdapter.this.tv_grandtoalitems.setText("Grand Total ( " + DbUtils.getItemCount(activeOrderID) + " items )");
+                        SalesOrderAdapter.this.orderSummary_TextView.setText("Rs. " + DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID));
+                        SalesOrderAdapter.this.tv_grandtoalitems.setText("Grand Total ( " + skuList.size() + " items )");
 
 
                         if (SalesOrderAdapter.this.skuList.size() <= 0)
@@ -306,8 +319,15 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
 
                         String overalldiscount = SalesOrderAdapter.this.order_overalldiscount_value.getText().toString();
 
+                        float grand_total=(DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID) - Float.parseFloat(overalldiscount));
 
-                        SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + (DbUtils.getOrderTotal(activeOrderID) - Float.parseFloat(overalldiscount)));
+
+                        SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + grand_total);
+
+                        if(grand_total<0){
+
+                            Utils.showToast(itemView.getContext(), "Discount can n't be greater or equal to total.");
+                        }
                         return;
                     }
 
@@ -318,33 +338,70 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             {
                 public void onClick(View v)
                 {
+
+
+
+                    String orderUploadstatus=DbUtils.getActiveOrderUploadStatus();
+
+
                     String retailerID = DbUtils.getRetailerID();
 
-                    if (Utils.isNetworkConnected(context))
+                    if (!SalesOrderAdapter.this.setOrderAsRegularOrder_CheckBox.isChecked())
                     {
-                        if (!SalesOrderAdapter.this.setOrderAsRegularOrder_CheckBox.isChecked())
-                        {
-                            Utils.startProgressDialog(context, progressDialog);
-                            SkuInfoViewHolder.this.placeTheOrder();
+
+                        offlineorderUpload(itemView);
+                    }
+                    else if (retailerID.equals(ConstantsA.NONE))
+                    {
+                        Utils.showErrorDialog(LoginActivity.baseContext, "Order Failed. No Active Order");
+                    }
+                    else
+                    {
+
+                        SkuInfoViewHolder.this.eraseCurrentRegularOrderFor(SkuListByGenreActivity.mobile_retailer_id_from_SOT);
+                        SkuInfoViewHolder.this.setRegularOrderFor(SkuListByGenreActivity.mobile_retailer_id_from_SOT);
+
+
+                        offlineorderUpload(itemView);
+                    }
+
+                  /*  if (Utils.isNetworkConnected(context))
+                    {
+
+                        if(orderUploadstatus.equalsIgnoreCase("1")){
+
+                            if (!SalesOrderAdapter.this.setOrderAsRegularOrder_CheckBox.isChecked())
+                            {
+                                Utils.startProgressDialog(context, progressDialog);
+                                SkuInfoViewHolder.this.placeTheOrder();
+                            }
+                            else if (retailerID.equals(ConstantsA.NONE))
+                            {
+                                Utils.showErrorDialog(LoginActivity.baseContext, "Order Failed. No Active Order");
+                            }
+                            else
+                            {
+                                Utils.startProgressDialog(context, progressDialog);
+                                SkuInfoViewHolder.this.eraseCurrentRegularOrderFor(retailerID);
+                                SkuInfoViewHolder.this.setRegularOrderFor(retailerID);
+                                SkuInfoViewHolder.this.placeTheOrder();
+                            }
+                        }else {
+
+
+                            offlineorderUpload(itemView);
+
+
                         }
-                        else if (retailerID.equals(ConstantsA.NONE))
-                        {
-                            Utils.showErrorDialog(LoginActivity.baseContext, "Order Failed. No Active Order");
-                        }
-                        else
-                        {
-                            Utils.startProgressDialog(context, progressDialog);
-                            SkuInfoViewHolder.this.eraseCurrentRegularOrderFor(retailerID);
-                            SkuInfoViewHolder.this.setRegularOrderFor(retailerID);
-                            SkuInfoViewHolder.this.placeTheOrder();
-                        }
+
 
                     }
                     else
                     {
 
-                        Utils.showErrorDialog(context, NO_INTERNET_CONNECTION);
-                    }
+                        offlineorderUpload(itemView);
+
+                    }*/
 
                 }
             });
@@ -441,27 +498,6 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
 
                     }
 
-                    /*String skuID = itemView.getTag(R.string.tag_sku_id).toString();
-                    String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
-                    String skuQty = editable.toString().trim();
-                    if (!skuQty.isEmpty())
-                    {
-                        float sku_final_price = (Float.parseFloat(skuPrice) * Float.parseFloat(skuQty)) - Float.parseFloat(skuList.get(getLayoutPosition()).getSku_discount());
-                        tv_skuamount_d.setText(ConstantsA.RS + sku_final_price);
-                        SkuInfoViewHolder.this.updateSkuQtyInSalesOrder(skuID, skuPrice, skuQty, skuList.get(getLayoutPosition()).getSku_discount());
-                        ((SalesOrderSku) SalesOrderAdapter.this.skuList.get(SkuInfoViewHolder.this.getLayoutPosition())).setSkuQty(skuQty);
-                        ((SalesOrderSku) SalesOrderAdapter.this.skuList.get(SkuInfoViewHolder.this.getLayoutPosition())).setSku_price_before_discount(String.valueOf(Float.parseFloat(skuPrice) * Float.parseFloat(skuQty)));
-                        ((SalesOrderSku) SalesOrderAdapter.this.skuList.get(SkuInfoViewHolder.this.getLayoutPosition())).setSku_final_price(String.valueOf(sku_final_price));
-                        String activeOrderID = DbUtils.getActiveOrderID();
-                        // SalesOrderAdapter.this.orderSummary_TextView.setText(DbUtils.getItemCount(activeOrderID) + " items \n\nTotal:  Rs. " + DbUtils.getOrderTotal(activeOrderID)+"\n\nOrder for "+DbUtils.getActiveRetailer(activeOrderID));
-
-                        SalesOrderAdapter.this.orderSummary_TextView.setText("Rs. " + DbUtils.getOrderTotal(activeOrderID));
-
-                        String overalldiscount = SalesOrderAdapter.this.order_overalldiscount_value.getText().toString();
-
-
-                        SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + (DbUtils.getOrderTotal(activeOrderID) - Float.parseFloat(overalldiscount)));
-                    }*/
                 }
             });
 
@@ -499,26 +535,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                         }
                     }
 
-                    /*String entered_discount = et_skudiscount_d.getText().toString();
 
-                    //Set Length filter. Restricting to 10 characters only
-                    et_skudiscount_d.setFilters(new InputFilter[]{new InputFilter.LengthFilter(skuList.get(getLayoutPosition()).getSku_final_price().length() + 1)});
-
-
-                    if (!entered_discount.isEmpty())
-                    {
-
-
-                        if (Float.parseFloat(entered_discount) >= Float.parseFloat(skuList.get(getLayoutPosition()).getSku_price_before_discount()))
-                        {
-
-                            et_skudiscount_d.setError("Discount can n't be greater or equal to sku total price.");
-                        }
-                        else
-                        {
-                            et_skudiscount_d.setError(null);
-                        }
-                    }*/
 
                 }
 
@@ -546,40 +563,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
 
                     }
 
-                   /* String skuID = itemView.getTag(R.string.tag_sku_id).toString();
-                    String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
-                    String skuQty = skuList.get(getLayoutPosition()).getSkuQty();
 
-                    String discount_amount = editable.toString();
-                    if (!discount_amount.isEmpty())
-                    {
-
-                        if (Float.parseFloat(editable.toString()) < Float.parseFloat(skuList.get(getLayoutPosition()).getSku_price_before_discount()))
-                        {
-
-
-                            String skuprice_before_discount = skuList.get(getLayoutPosition()).getSku_price_before_discount();
-                            float sku_final_price = Float.parseFloat(skuprice_before_discount) - Float.parseFloat(discount_amount);
-                            ((SalesOrderSku) SalesOrderAdapter.this.skuList.get(SkuInfoViewHolder.this.getLayoutPosition())).setSku_final_price(String.valueOf(sku_final_price));
-                            ((SalesOrderSku) SalesOrderAdapter.this.skuList.get(SkuInfoViewHolder.this.getLayoutPosition())).setSku_discount(String.valueOf(discount_amount));
-                            tv_skuamount_d.setText(ConstantsA.RS + sku_final_price);
-
-                            SkuInfoViewHolder.this.updateSkuQtyInSalesOrder(skuID, skuPrice, skuQty, discount_amount);
-
-                            String activeOrderID = DbUtils.getActiveOrderID();
-                            // SalesOrderAdapter.this.orderSummary_TextView.setText(DbUtils.getItemCount(activeOrderID) + " items \n\nTotal:  Rs. " + DbUtils.getOrderTotal(activeOrderID)+"\n\nOrder for "+DbUtils.getActiveRetailer(activeOrderID));
-
-                            SalesOrderAdapter.this.orderSummary_TextView.setText("Rs. " + DbUtils.getOrderTotal(activeOrderID));
-
-                            String overalldiscount = SalesOrderAdapter.this.order_overalldiscount_value.getText().toString();
-
-
-                            SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + (DbUtils.getOrderTotal(activeOrderID) - Float.parseFloat(overalldiscount)));
-                        }
-
-
-                    }
-*/
 
                 }
             });
@@ -603,17 +587,6 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                 {
 
                     skuFreeQty = editable.toString().trim();
-                    /*String skuID = itemView.getTag(R.string.tag_sku_id).toString();
-
-                    String skufreeQty = editable.toString().trim();
-                    if (!skufreeQty.isEmpty())
-                    {
-
-                        SkuInfoViewHolder.this.updateSkuFreeQtyInSalesOrder(skuID, skufreeQty);
-                        ((SalesOrderSku) SalesOrderAdapter.this.skuList.get(SkuInfoViewHolder.this.getLayoutPosition())).setSku_free_qty(skufreeQty);
-
-
-                    }*/
 
 
                 }
@@ -656,17 +629,25 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                         skuList.get(getLayoutPosition()).setSku_price_before_discount(skuAmount_beforeDiscount);
                         skuList.get(getLayoutPosition()).setSku_final_price(skuAmount);
 
-                        String activeOrderID = DbUtils.getActiveOrderID();
+                        String activeOrderID = DbUtils.getActiveOrderID(SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
+                        String mobileActiveOrderID = DbUtils.getActiveMobileOrderID(SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
 
-                        float totalvalue = DbUtils.getOrderTotal(activeOrderID);
+                        float totalvalue = DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID);
 
 
                         SalesOrderAdapter.this.orderSummary_TextView.setText("Rs. " + totalvalue);
 
                         String overalldiscount = SalesOrderAdapter.this.order_overalldiscount_value.getText().toString();
 
+                        float grand_total=(totalvalue - Float.parseFloat(overalldiscount));
 
-                        SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + (totalvalue - Float.parseFloat(overalldiscount)));
+
+                        SalesOrderAdapter.this.tv_grandtotal.setText(ConstantsA.RS + " " + grand_total);
+
+                        if(grand_total<0){
+
+                            Utils.showToast(itemView.getContext(), "Discount can n't be greater or equal to total.");
+                        }
 
                         notifyDataSetChanged();
 
@@ -686,7 +667,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
             SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-            String activeOrderID = DbUtils.getActiveOrderID();
+            String activeOrderID = DbUtils.getActiveOrderID(SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
             String selection = "order_id = ? AND sku_id = ?";
             String[] selectionArgs = new String[]{activeOrderID, skuID};
 
@@ -702,7 +683,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
             SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
 
-            String activeOrderID = DbUtils.getActiveOrderID();
+            String activeOrderID = DbUtils.getActiveOrderID(SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
             String selection = "order_id = ? AND sku_id = ?";
             String[] selectionArgs = new String[]{activeOrderID, skuID};
 
@@ -746,7 +727,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(dbFileFullPath));
             ContentValues salesOrderValues = new ContentValues();
             salesOrderValues.put("is_regular", "0");
-            sqLiteDatabase.update(Constants.TBL_SALES_ORDER, salesOrderValues, "retailer_id = ? AND is_regular = ? AND emp_id = ?", new String[]{retailerID, "1", new MySharedPrefrencesData().getUser_Id(context)});
+            sqLiteDatabase.update(Constants.TBL_SALES_ORDER, salesOrderValues, "mobile_retailer_id = ? AND is_regular = ? AND emp_id = ?", new String[]{retailerID, "1", new MySharedPrefrencesData().getUser_Id(context)});
         }
 
         private void setRegularOrderFor(String retailerID)
@@ -754,7 +735,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(dbFileFullPath));
             ContentValues salesOrderValues = new ContentValues();
             salesOrderValues.put("is_regular", "1");
-            sqLiteDatabase.update(Constants.TBL_SALES_ORDER, salesOrderValues, "retailer_id = ? AND is_active = ? AND emp_id = ?", new String[]{retailerID, "1", new MySharedPrefrencesData().getUser_Id(context)});
+            sqLiteDatabase.update(Constants.TBL_SALES_ORDER, salesOrderValues, "mobile_retailer_id = ? AND is_active = ? AND emp_id = ?", new String[]{retailerID, "1", new MySharedPrefrencesData().getUser_Id(context)});
         }
 
         private void placeTheOrder()
@@ -762,8 +743,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(dbFileFullPath));
             ContentValues salesOrderValues = new ContentValues();
             salesOrderValues.put("is_placed", "1");
-           /* salesOrderValues.put("total_order_value", "1");
-            salesOrderValues.put("total_discount", "1");*/
+
 
             String active_orderId = getActiveOrderIdIfHasSalesOrderDetailId();
 
@@ -775,9 +755,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                 String overalldiscount = SalesOrderAdapter.this.order_overalldiscount_value.getText().toString();
 
 
-                String activeOrderID = DbUtils.getActiveOrderID();
-
-                float totalvalue = DbUtils.getOrderTotal(activeOrderID);
+                float totalvalue = DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID);
 
                 if (!overalldiscount.isEmpty())
                 {
@@ -786,7 +764,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                     if (totalvalue > Float.parseFloat(overalldiscount))
                     {
 
-                        float grand_total = (DbUtils.getOrderTotal(activeOrderID) - Float.parseFloat(overalldiscount));
+                        float grand_total = (DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID) - Float.parseFloat(overalldiscount));
                         network_call_for_PutSalesOrderdetails(activeOrderID, String.valueOf(totalvalue), overalldiscount, String.valueOf(grand_total));
                     }
                     else
@@ -930,6 +908,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
 
                             salesOrderValues.put("total_order_value", grand_total);
                             salesOrderValues.put("total_discount", overalldiscount);
+                            salesOrderValues.put("upload_status", "1");
                             sqLiteDatabase1.update(TBL_SALES_ORDER, salesOrderValues, "order_id = ?", new String[]{activeOrderID});
 
 
@@ -949,7 +928,7 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
                         notifyDataSetChanged();
                         salesOrder_LinearLayout.setVisibility(View.GONE);
 
-                        makeCurrentActiveOrderInactive();
+                        //makeCurrentActiveOrderInactive();
 
                         // makePlacedOrderInactive(sqLiteDatabase1);
 
@@ -981,6 +960,59 @@ public class SalesOrderAdapter extends Adapter<SalesOrderAdapter.SkuInfoViewHold
             ContentValues salesOrderValues2 = new ContentValues();
             salesOrderValues2.put("is_active", "0");
             sqLiteDatabase.update(Constants.TBL_SALES_ORDER, salesOrderValues2, "is_active = ?", new String[]{"1"});
+        }
+    }
+
+    private void offlineorderUpload(View itemView)
+    {
+
+        String overalldiscount = SalesOrderAdapter.this.order_overalldiscount_value.getText().toString();
+
+
+        float totalvalue = DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID);
+
+        if (!overalldiscount.isEmpty())
+        {
+
+
+            if (totalvalue > Float.parseFloat(overalldiscount))
+            {
+
+                float grand_total = (DbUtils.getOrderTotal(activeOrderID,mobileActiveOrderID) - Float.parseFloat(overalldiscount));
+
+
+                SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(MyDb.openDatabase(dbFileFullPath));
+                ContentValues salesOrderValues = new ContentValues();
+                salesOrderValues.put("is_placed", "1");
+                salesOrderValues.put("total_order_value", grand_total);
+                salesOrderValues.put("total_discount", overalldiscount);
+
+
+                int noOfRowsUpdated = sqLiteDatabase.update(Constants.TBL_SALES_ORDER, salesOrderValues, "is_active = ? AND emp_id =? AND mobile_order_id = ?", new String[]{"1", new MySharedPrefrencesData().getUser_Id(context),mobileActiveOrderID});
+
+
+                makeCurrentActiveOrderInactive(mobileActiveOrderID);
+
+                skuList = new ArrayList<>();
+
+                notifyDataSetChanged();
+
+                salesOrder_LinearLayout.setVisibility(View.GONE);
+                ((TextView)salesOrder_LinearLayout_outer.findViewById(R.id.emptyAdapter_TextView)).setVisibility(View.VISIBLE);
+
+                Utils.showSuccessDialogForUpload(context, "Sales order information saved, Do you want to Upload ?");
+
+            }
+            else
+            {
+
+                Utils.showToast(itemView.getContext(), "Overall discount can n't be greater or equal to total.");
+            }
+        }
+        else
+        {
+
+            Utils.showToast(itemView.getContext(), "Please enter overall discount.");
         }
     }
 }

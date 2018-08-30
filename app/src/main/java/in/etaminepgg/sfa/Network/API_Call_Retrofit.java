@@ -37,7 +37,7 @@ public class API_Call_Retrofit
 
 
         OkHttpClient client = builder
-                .readTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(120, TimeUnit.SECONDS)
                 .connectTimeout(120, TimeUnit.SECONDS)
                 .build();
 

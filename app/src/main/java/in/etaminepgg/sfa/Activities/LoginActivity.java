@@ -1,14 +1,18 @@
 package in.etaminepgg.sfa.Activities;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,12 +24,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 import in.etaminepgg.sfa.BuildConfig;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_Config;
@@ -42,6 +53,7 @@ import in.etaminepgg.sfa.Models.ValidAuthModel;
 import in.etaminepgg.sfa.Network.API_Call_Retrofit;
 import in.etaminepgg.sfa.Network.Apimethods;
 import in.etaminepgg.sfa.R;
+import in.etaminepgg.sfa.Utilities.Constants;
 import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
@@ -80,6 +92,11 @@ import static in.etaminepgg.sfa.Utilities.Utils.loggedInUserName;
 
 public class LoginActivity extends AppCompatActivity
 {
+
+    public static final String BACKUP_DBNAME = "sfaDb.ma7";
+    public static final String BACKUP_DBLOCATION = "/data/in.etaminepgg.sfa/databases/";
+
+
     public static final String uploadToURL = "http://etaminepgg" +
             ".com/sfa/fromMobile_gfjsdfkhweriusfgkjsdhsakjsdfhgsfdkjsflksfd324435.php";
     public static final String downloadFromURL = "http://etaminepgg" +
@@ -87,11 +104,15 @@ public class LoginActivity extends AppCompatActivity
     public static final String lastModifiedDbDateURL = "http://etaminepgg" +
             ".in/aaaaabbjeroidgkdflkfdrhfkjgrdflkjdfgfdjg/incometax/checkDataDt.php";
     public static String DbFileName = "sfaDb.ma7";
+
+
     //appSpecificDirectoryPath, dbFileFullPath
     public static Context baseContext;
     public static String KEY_USERNAME = "username";
     public static String KEY_PASSWORD = "password";
     public static boolean is_config_inserted_to_db = true;
+
+
     Button login_Button;
     EditText username_EditText, password_EditText;
     int valueFromOpenDatabase;
@@ -105,11 +126,13 @@ public class LoginActivity extends AppCompatActivity
     boolean configflag = false;
     boolean authflag = false;
 
-    int a=0;
-    int b=0;
+    int a = 0;
+    int b = 0;
+
+    String lastdeleteddatadate = "";
 
 
-    ProgressDialog progressDialog ;
+    ProgressDialog progressDialog;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -142,36 +165,55 @@ public class LoginActivity extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        // this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login);
 
         progressDialog = new ProgressDialog(LoginActivity.this);
 
         baseContext = getBaseContext();
         mySharedPrefrencesData = new MySharedPrefrencesData();
-        //appSpecificDirectoryPath = baseContext.getExternalFilesDir(null);
-        // appSpecificDirectoryPath = Environment.getExternalStorageDirectory().toString();
+
 
         appSpecificDirectoryPath = getApplicationContext().getExternalFilesDir(null)
                 .getAbsolutePath();
         dbFileFullPath = appSpecificDirectoryPath + File.separator + DbFileName;
 
-        downloadDatabaseIfNotExists();
-
-       // Utils.makeThreadSleepFor(5000);
-        //imei = Utils.getDeviceId(LoginActivity.this);
 
         findViewsByIDs();
         setListenersToViews();
 
-        try
+        SharedPreferences settings = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, 0);
+        //Get "hasLoggedIn" value. If the value doesn't exist yet false is returned
+        boolean isInstalled = settings.getBoolean("isInstalled", false);
+
+
+        if (!isInstalled)
         {
-            AssetManager assetManager = getAssets();
-            Utils.copyFile(assetManager, appSpecificDirectoryPath, JINGLE_FILE_NAME);
+            try
+            {
+                AssetManager assetManager = getAssets();
+                Utils.copyFile(assetManager, appSpecificDirectoryPath, JINGLE_FILE_NAME);
+                Utils.copyFile(assetManager, appSpecificDirectoryPath, DbFileName);
+
+                //String sAssets = "file:///android_asset/" + "sfaDb.ma7";
+
+
+                mySharedPrefrencesData.setSkulistUpdateDate(getBaseContext(), getTodayDate());
+
+                SharedPreferences.Editor editor = settings.edit();
+
+                //Set "hasLoggedIn" to true
+                editor.putBoolean("isInstalled", true);
+                // Commit the edits!
+                editor.commit();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+
 
         if (ActivityCompat.checkSelfPermission(LoginActivity.this, Manifest.permission
                 .READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
@@ -182,9 +224,10 @@ public class LoginActivity extends AppCompatActivity
 
             sharedPreferences = getSharedPreferences(MySharedPrefrencesData.PREFS_NAME, Context.MODE_PRIVATE);
 
-            boolean isLaunch=sharedPreferences.getBoolean("hasLoggedIn",false);
+            boolean isLaunch = sharedPreferences.getBoolean("hasLoggedIn", false);
 
-            if(isLaunch){
+            if (isLaunch)
+            {
 
                 launchDashboardIfLoggedIn();
             }
@@ -200,7 +243,7 @@ public class LoginActivity extends AppCompatActivity
     @Override
     protected void onDestroy()
     {
-        sqLiteDatabase.releaseReference();
+        //sqLiteDatabase.releaseReference();
         super.onDestroy();
     }
 
@@ -222,39 +265,15 @@ public class LoginActivity extends AppCompatActivity
                 usernameEntered = username_EditText.getText().toString().trim();
                 passwordEntered = password_EditText.getText().toString().trim();
 
-                b=0;
+                b = 0;
 
                 callWebApi();
 
-         /*       if (isValidUser(usernameEntered, passwordEntered)) {
-                    sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
-                    sharedPreferencesEditor = sharedPreferences.edit();
-                    sharedPreferencesEditor.putString(KEY_USERNAME, usernameEntered);
-                    sharedPreferencesEditor.putString(KEY_PASSWORD, passwordEntered);
-                    sharedPreferencesEditor.commit();
-
-                    loggedInUserName = usernameEntered;
-                    loggedInUserID = getEmployeeIdFor(loggedInUserName);
-
-                    Log.e("usernameEntered", usernameEntered);
-                    Log.e("passwordEntered", passwordEntered);
-
-                    Log.e("loggedInUserName", loggedInUserName);
-                    Log.e("loggedInUserID", loggedInUserID);
-
-                   *//* Utils.launchActivity(getBaseContext(), DashboardActivity.class);
-                    finish();*//*
-
-                    //networkcall_for_authtoken(getDeviceId(LoginActivity.this),usernameEntered,
-                    // passwordEntered);
-
-                    callWebApi();
-                } else {
-                    Utils.showPopUp(getBaseContext(), "Please Enter Valid Username, Password");
-                }*/
             }
         });
     }
+
+    //call api for auth token
 
     private void callWebApi()
     {
@@ -277,24 +296,16 @@ public class LoginActivity extends AppCompatActivity
 
     }
 
+    //launch dashboard if logged in
     private void launchDashboardIfLoggedIn()
     {
-        downloadDatabaseIfNotExists();
-       // Utils.makeThreadSleepFor(5000);
 
-       /* sharedPreferences = getSharedPreferences(MY_PREF, Context.MODE_PRIVATE);
-        String spDefaultValue = "spDefaultValue"; //sp = shared preferences
-
-        String usernameInSharedPreferences = sharedPreferences.getString(KEY_USERNAME,
-                spDefaultValue);
-        String passwordInSharedPreferences = sharedPreferences.getString(KEY_PASSWORD,
-                spDefaultValue);*/
 
         String usernameInSharedPreferences = new MySharedPrefrencesData().getUsername(LoginActivity.this);
         String passwordInSharedPreferences = new MySharedPrefrencesData().getUser_pwd(LoginActivity.this);
 
         loggedInUserName = usernameInSharedPreferences;
-        //loggedInUserID = getEmployeeIdFor(loggedInUserName);
+
         loggedInUserID = new MySharedPrefrencesData().getUser_Id(LoginActivity.this);
 
         Log.e("usernameInSharedPref", usernameInSharedPreferences);
@@ -329,6 +340,8 @@ public class LoginActivity extends AppCompatActivity
 
     }
 
+
+    //api call for log out
     private void callLogoutApi(String employee_authKey)
     {
 
@@ -338,7 +351,7 @@ public class LoginActivity extends AppCompatActivity
 
         final Apimethods methods = API_Call_Retrofit.getretrofit(this).create(Apimethods.class);
 
-        IM_IsValidAuthKey IM_isValidAuthKey = new IM_IsValidAuthKey(mySharedPrefrencesData.getEmployee_AuthKey(LoginActivity.this),"1");
+        IM_IsValidAuthKey IM_isValidAuthKey = new IM_IsValidAuthKey(mySharedPrefrencesData.getEmployee_AuthKey(LoginActivity.this), "1");
 
 
         Call<ValidAuthModel> call = methods.setLogout(IM_isValidAuthKey);
@@ -372,6 +385,8 @@ public class LoginActivity extends AppCompatActivity
         });
     }
 
+
+    //auto logout after mid night
     private boolean autoLogout()
     {
 
@@ -412,6 +427,7 @@ public class LoginActivity extends AppCompatActivity
 
     }
 
+    //for launch dashboard for same user validation
     private boolean isValidUser(String userName, String password)
     {
         valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
@@ -427,6 +443,8 @@ public class LoginActivity extends AppCompatActivity
         return isUserFound;
     }
 
+
+    //get employee id
     private String getEmployeeIdFor(String salesPersonUsername)
     {
         String salesPersonEmpID = "getEmployeeIdFor()";
@@ -442,6 +460,8 @@ public class LoginActivity extends AppCompatActivity
         return salesPersonEmpID;
     }
 
+
+    //api call auth user
     private void networkcall_for_authtoken()
     {
 
@@ -450,7 +470,7 @@ public class LoginActivity extends AppCompatActivity
 
         Utils.startProgressDialog(LoginActivity.this, progressDialog);
 
-        IM_Login IMLogin = new IM_Login(imei, usernameEntered, passwordEntered,"1");
+        IM_Login IMLogin = new IM_Login(imei, usernameEntered, passwordEntered, "1");
 
         Log.i("authuser_input", new Gson().toJson(IMLogin));
 
@@ -485,8 +505,8 @@ public class LoginActivity extends AppCompatActivity
 
 
                         DbUtils.clear_table(TBL_EMPLOYEE);
-                        DbUtils.clear_table(TBL_LOCATION_HIERARCHY);
-                        DbUtils.clear_table(TBL_RETAILER);
+                        // DbUtils.clear_table(TBL_LOCATION_HIERARCHY);
+                        //   DbUtils.clear_table(TBL_RETAILER);
 
 
                         loggedInUserName = usernameEntered;
@@ -539,7 +559,12 @@ public class LoginActivity extends AppCompatActivity
                         editor.commit();
 
                         authflag = true;
-                        networkcall_for_retailerlist(authUser_model.getAuthToken());
+                        // networkcall_for_retailerlist(authUser_model.getAuthToken());
+
+
+                        //for prepopulated database
+
+                        networkcall_for_getUserDetails(authUser_model.getAuthToken());
                     }
 
 
@@ -554,7 +579,7 @@ public class LoginActivity extends AppCompatActivity
             private void networkcall_for_retailerlist(final String authToken)
             {
 
-                IM_IsValidAuthKey im_isValidAuthKey = new IM_IsValidAuthKey(authToken,"1");
+                IM_IsValidAuthKey im_isValidAuthKey = new IM_IsValidAuthKey(authToken, "1");
 
                 Call<RetailerList_Model> call = methods.getRetailerList(im_isValidAuthKey);
 
@@ -585,7 +610,7 @@ public class LoginActivity extends AppCompatActivity
                             if (retailerList_model.getApiStatus() == 1)
                             {
 
-                                a=retailerList_model.getRetailerData().size();
+                                a = retailerList_model.getRetailerData().size();
 
                                 for (RetailerList_Model.RetailerDatum retailerDatum :
                                         retailerList_model.getRetailerData())
@@ -635,29 +660,29 @@ public class LoginActivity extends AppCompatActivity
                                     if (retailerInfo_model.getApiStatus() == 1)
                                     {
 
-                                        RetailerInfo_Model.RetailerData retailerData = retailerInfo_model.getRetailerData();
+                                        ArrayList<RetailerInfo_Model.RetailerData> retailerData = retailerInfo_model.getRetailerData();
 
-                                        if (!DbUtils.isRetailerPresentInDb(retailerData.getCustomerCode()))
+                                        if (!DbUtils.isRetailerPresentInDb(retailerData.get(0).getCustomerCode()))
                                         {
                                             ContentValues retailerValues = new ContentValues();
                                             retailerValues.put("retailer_id", retailerData
-                                                    .getCustomerCode());
+                                                    .get(0).getCustomerCode());
                                             retailerValues.put("emp_id", getEmployeeIdFor
                                                     (usernameEntered));
                                             retailerValues.put("retailer_name", retailerData
-                                                    .getCustomerCompanyname());
+                                                    .get(0).getCustomerCompanyname());
                                             retailerValues.put("shop_name", retailerData
-                                                    .getCustomerContactName());
+                                                    .get(0).getCustomerContactName());
                                             retailerValues.put("shop_address", retailerData
-                                                    .getCustomerAddress1());
+                                                    .get(0).getCustomerAddress1());
                                             retailerValues.put("pincode", retailerData
-                                                    .getCustomerPincode());
+                                                    .get(0).getCustomerPincode());
                                             retailerValues.put("mobile_no", retailerData
-                                                    .getContactCell());
-                                            retailerValues.put("email", retailerData.getContactEmail());
-                                            retailerValues.put("area_id", retailerData.getLocationId());
+                                                    .get(0).getContactCell());
+                                            retailerValues.put("email", retailerData.get(0).getContactEmail());
+                                            retailerValues.put("area_id", retailerData.get(0).getLocationId());
 
-                                            String latlong = retailerData.getCustomerGeopos();
+                                            String latlong = retailerData.get(0).getCustomerGeopos();
 
                                             if (latlong != null && latlong.length() > 0)
                                             {
@@ -672,28 +697,31 @@ public class LoginActivity extends AppCompatActivity
                                                 retailerValues.put("longitude", NOT_PRESENT);
                                             }
 
-                                            if(retailerData.getCustomerPicture() != null && retailerData.getCustomerPicture().length() > 1){
+                                            if (retailerData.get(0).getCustomerPicture() != null && retailerData.get(0).getCustomerPicture().length() > 1)
+                                            {
 
 
-                                                retailerValues.put("img_source", retailerData.getCustomerPicture());
-                                            }else {
+                                                retailerValues.put("img_source", retailerData.get(0).getCustomerPicture());
+                                            }
+                                            else
+                                            {
 
                                                 retailerValues.put("img_source", NOT_PRESENT);
                                             }
 
                                             retailerValues.put("created_date", retailerData
-                                                    .getCreatedDate());
+                                                    .get(0).getCreatedDate());
                                             retailerValues.put("modified_date", retailerData
-                                                    .getModifiedDate());
+                                                    .get(0).getModifiedDate());
                                             retailerValues.put("landmark", retailerData
-                                                    .getCustomerCompanyname());
+                                                    .get(0).getCustomerCompanyname());
                                             retailerValues.put("area", retailerData
-                                                    .getCustomerAddress1());
+                                                    .get(0).getCustomerAddress1());
                                             retailerValues.put("taluk", retailerData
-                                                    .getCustomerAddress1());
+                                                    .get(0).getCustomerAddress1());
                                             retailerValues.put("district", retailerData
-                                                    .getCustomerCity());
-                                            retailerValues.put("state", retailerData.getCustomerState
+                                                    .get(0).getCustomerCity());
+                                            retailerValues.put("state", retailerData.get(0).getCustomerState
                                                     ());
                                             retailerValues.put("upload_status", 1);
 
@@ -702,7 +730,8 @@ public class LoginActivity extends AppCompatActivity
 
                                             b++;
 
-                                            if(a==b){
+                                            if (a == b)
+                                            {
 
 
                                                 if (is_config_inserted_to_db)
@@ -758,6 +787,63 @@ public class LoginActivity extends AppCompatActivity
                 });
             }
 
+
+            private void networkcall_for_getUserDetails(String employee_authKey)
+            {
+                Apimethods methods = API_Call_Retrofit.getretrofit(LoginActivity.this).create(Apimethods.class);
+
+                IM_IsValidAuthKey authkey = new IM_IsValidAuthKey(employee_authKey, "1");
+
+                Call<AuthUserDetails> call = methods.getUserDetails(authkey);
+
+                Log.i("getuserdetails_ip", new Gson().toJson(authkey));
+
+                Log.d("url", "url=" + call.request().url().toString());
+
+                call.enqueue(new Callback<AuthUserDetails>()
+                {
+                    @Override
+                    public void onResponse(Call<AuthUserDetails> call, Response<AuthUserDetails> response)
+                    {
+                        if (response.isSuccessful())
+                        {
+
+                            AuthUserDetails authUserDetails = response.body();
+
+                            Log.i("getuserdetails_op", new Gson().toJson(authUserDetails));
+
+                            mySharedPrefrencesData.set_User_mobile(LoginActivity.this, authUserDetails.getData().getMobile());
+                            mySharedPrefrencesData.setUsername(LoginActivity.this, authUserDetails.getData().getUsername());
+                            mySharedPrefrencesData.setUser_pwd(LoginActivity.this, passwordEntered);
+                            mySharedPrefrencesData.setEmail(LoginActivity.this, authUserDetails.getData().getEmail());
+                            mySharedPrefrencesData.setUser_LocationId(LoginActivity.this, authUserDetails.getData().getLocationId());
+                            mySharedPrefrencesData.set_User_CompanyId(LoginActivity.this, authUserDetails.getData().getCompanyId());
+                            mySharedPrefrencesData.setRetailerVisit_LocationId(LoginActivity.this, authUserDetails.getData().getNo_mandatory_visit());
+
+                            configflag = true;
+
+                            dismissProgressDialog(progressDialog);
+
+                            launchDashBoardActivity(configflag, authflag);
+                        }
+                        else
+                        {
+
+                            dismissProgressDialog(progressDialog);
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<AuthUserDetails> call, Throwable t)
+                    {
+                        dismissProgressDialog(progressDialog);
+                        Utils.showToast(LoginActivity.this, ConstantsA.NO_INTERNET_CONNECTION);
+                    }
+                });
+
+            }
+
             @Override
             public void onFailure(Call<AuthUser_Model> call, Throwable t)
             {
@@ -769,9 +855,11 @@ public class LoginActivity extends AppCompatActivity
 
     }
 
+
+    //api call config
     private void network_call_for_basicconfig()
     {
-         String mobile_app_version= BuildConfig.VERSION_NAME;
+        String mobile_app_version = BuildConfig.VERSION_NAME;
         //String mobile_app_version = "0.0.1";
 
         Apimethods methods = API_Call_Retrofit.getretrofit(this).create(Apimethods.class);
@@ -837,7 +925,7 @@ public class LoginActivity extends AppCompatActivity
             {
                 Apimethods methods = API_Call_Retrofit.getretrofit(LoginActivity.this).create(Apimethods.class);
 
-                IM_IsValidAuthKey authkey = new IM_IsValidAuthKey(employee_authKey,"1");
+                IM_IsValidAuthKey authkey = new IM_IsValidAuthKey(employee_authKey, "1");
 
                 Call<Location_Model> call = methods.getLocationinfo(authkey);
 
@@ -890,7 +978,7 @@ public class LoginActivity extends AppCompatActivity
                     {
                         Apimethods methods = API_Call_Retrofit.getretrofit(LoginActivity.this).create(Apimethods.class);
 
-                        IM_IsValidAuthKey authkey = new IM_IsValidAuthKey(employee_authKey,"1");
+                        IM_IsValidAuthKey authkey = new IM_IsValidAuthKey(employee_authKey, "1");
 
                         Call<AuthUserDetails> call = methods.getUserDetails(authkey);
 
@@ -956,17 +1044,285 @@ public class LoginActivity extends AppCompatActivity
 
     }
 
+
+    //launch dashboard
     private void launchDashBoardActivity(boolean configflag, boolean authflag)
     {
         dismissProgressDialog(progressDialog);
 
         if (configflag == true && authflag == true)
         {
-            Utils.launchActivity(LoginActivity.this, DashboardActivity.class);
-            finish();
+            int noorders = DbUtils.getNoOfSalesOrdersForAccToEmp(mySharedPrefrencesData.getUser_Id(getBaseContext()));
+
+            int loopcontrol = 0;
+
+            int maxDays = DbUtils.getMaxRetentionDays();
+            int minDays = DbUtils.getMinRetentionDays();
+            final int maxRecords = DbUtils.getMaxRetentionRecords();
+
+            int valueFromOpenDatabase = MyDb.openDatabase(dbFileFullPath);
+            SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
+
+
+            //data retention policy
+
+            //show pop up for delete orders if it exceeds record count according to config table
+
+            //delete data from order,order details and visit table
+
+            while (DbUtils.getNoOfSalesOrdersForAccToEmp(mySharedPrefrencesData.getUser_Id(getBaseContext())) > maxRecords)
+            {
+
+                Utils.showToast(getBaseContext(), noorders + "");
+
+
+                //Cursor cursor = sqLiteDatabase.rawQuery("SELECT order_id FROM " + Constants.TBL_SALES_ORDER + " WHERE emp_id = ? AND is_placed = ? AND order_date like ? ", new String[]{salesPersonId, "1", Utils.getTodayDate() + "%"});
+                Cursor cursor = sqLiteDatabase.rawQuery("SELECT DATE(order_date),COUNT(order_id) FROM " + Constants.TBL_SALES_ORDER + " WHERE emp_id = ? AND is_placed = ? AND upload_status =  ? GROUP BY DATE(order_date) ORDER BY order_date DESC ", new String[]{mySharedPrefrencesData.getUser_Id(getBaseContext()), "1", "1"});
+
+
+                JSONArray resultSet = new JSONArray();
+                JSONObject returnObj = new JSONObject();
+
+                while (cursor.moveToNext())
+                {
+
+                    int totalColumn = cursor.getColumnCount();
+                    JSONObject rowObject = new JSONObject();
+
+                    //printing raw database object
+
+                    for (int i = 0; i < totalColumn; i++)
+                    {
+                        if (cursor.getColumnName(i) != null)
+                        {
+
+                            try
+                            {
+
+                                if (cursor.getString(i) != null)
+                                {
+                                    Log.d("TAG_NAME", cursor.getString(i));
+                                    rowObject.put(cursor.getColumnName(i), cursor.getString(i));
+                                }
+                                else
+                                {
+                                    rowObject.put(cursor.getColumnName(i), "");
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Log.d("TAG_NAME", e.getMessage());
+                            }
+                        }
+
+
+                    }
+
+                    resultSet.put(rowObject);
+                }
+
+
+                // delete data
+                if (loopcontrol == 0)
+                {
+
+
+                    //data retention for max days
+                    if (cursor.getCount() > maxDays)
+                    {
+                        cursor.moveToPosition(maxDays - 1);
+                        String datestr = cursor.getString(cursor.getColumnIndex("DATE(order_date)"));
+
+
+                        lastdeleteddatadate = datestr;
+                        //delete visit,SO,SOD with date older to datestr with uploadstatus 1
+
+
+                        //String SQL_DELETE_SOD = "DELETE FROM " + TBL_SALES_ORDER_DETAILS + " WHERE " + "upload_status = ? AND emp_id = ? AND DATE(visit_date)< = " + datestr;
+
+                        sqLiteDatabase.delete(TBL_RETAILER_VISIT, "upload_status = ? AND emp_id = ? AND DATE(visit_date)< ?", new String[]{"1", mySharedPrefrencesData.getUser_Id(getBaseContext()), datestr});
+                        sqLiteDatabase.delete(TBL_SALES_ORDER_DETAILS, "upload_status = ? AND emp_id = ? AND DATE(order_date)< ?", new String[]{"1", mySharedPrefrencesData.getUser_Id(getBaseContext()), datestr});
+                        sqLiteDatabase.delete(TBL_SALES_ORDER, "upload_status = ? AND emp_id = ? AND DATE(order_date)< ?", new String[]{"1", mySharedPrefrencesData.getUser_Id(getBaseContext()), datestr});
+
+                        Utils.showToast(getBaseContext(), cursor.getCount() + "_" + datestr + "");
+
+                    }
+                }
+                else if (loopcontrol == 1)
+                {
+                    //data retention for min days
+
+                    if (cursor.getCount() > minDays)
+                    {
+                        cursor.moveToPosition(minDays - 1);
+                        String datestr = cursor.getString(cursor.getColumnIndex("DATE(order_date)"));
+                        lastdeleteddatadate = datestr;
+                        //delete visit,SO,SOD with date older to datestr with uploadstatus 1
+
+
+                        //String SQL_DELETE_SOD = "DELETE FROM " + TBL_SALES_ORDER_DETAILS + " WHERE " + "upload_status = ? AND emp_id = ? AND DATE(visit_date)< = " + datestr;
+
+                        sqLiteDatabase.delete(TBL_RETAILER_VISIT, "upload_status = ? AND emp_id = ? AND DATE(visit_date)< ?", new String[]{"1", mySharedPrefrencesData.getUser_Id(getBaseContext()), datestr});
+                        sqLiteDatabase.delete(TBL_SALES_ORDER_DETAILS, "upload_status = ? AND emp_id = ? AND DATE(order_date)< ?", new String[]{"1", mySharedPrefrencesData.getUser_Id(getBaseContext()), datestr});
+                        sqLiteDatabase.delete(TBL_SALES_ORDER, "upload_status = ? AND emp_id = ? AND DATE(order_date)< ?", new String[]{"1", mySharedPrefrencesData.getUser_Id(getBaseContext()), datestr});
+
+                        Utils.showToast(getBaseContext(), cursor.getCount() + "_" + datestr + "");
+
+                    }
+
+                }
+                else if (loopcontrol == 3)
+                {
+                    //exit from loop
+                    break;
+                }
+
+                loopcontrol++;
+                Log.d("TAG_NAME", resultSet.toString());
+
+
+                cursor.close();
+
+            }
+            sqLiteDatabase.close();
+
+            //after deletion show pop up with message having last date
+
+            if (lastdeleteddatadate.contains("-"))
+            {
+                //show delete order info popup
+
+                final Dialog dialog = new Dialog(LoginActivity.this, android.R.style.Theme_Black_NoTitleBar);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.setContentView(R.layout.custom_dialog);
+
+                TextView icon_TextView = (TextView) dialog.findViewById(R.id.icon_TextView);
+                TextView title_TextView = (TextView) dialog.findViewById(R.id.title_TextView);
+                TextView msg_TextView = (TextView) dialog.findViewById(R.id.msg_TextView);
+                Button dismiss_Button = (Button) dialog.findViewById(R.id.dismiss_Button);
+
+                icon_TextView.setBackground(LoginActivity.this.getResources().getDrawable(R.drawable.ic_check_circle));
+
+                title_TextView.setText("Success!");
+
+                try
+                {
+                    DateFormat inFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                    Date date = inFormat.parse(lastdeleteddatadate);
+
+                    DateFormat outFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+                    String myDate = outFormat.format(date);
+
+
+                    msg_TextView.setText("all uploaded Sales Order data older than " + myDate + " have been deleted");
+                }
+                catch (ParseException e)
+                {
+                    e.printStackTrace();
+                }
+
+
+                dismiss_Button.setBackgroundColor(LoginActivity.this.getResources().getColor(R.color.successColor));
+
+                dismiss_Button.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        dialog.dismiss();
+
+                        //check for unuploaded data
+                        showwarningPopup(LoginActivity.this, maxRecords);
+                    }
+                });
+
+                dialog.show();
+
+
+            }
+            else
+            {
+
+
+                //check for unuploaded data
+                showwarningPopup(LoginActivity.this, maxRecords);
+
+            }
+
+            // Utils.launchActivity(LoginActivity.this, DashboardActivity.class);
+            //finish();
         }
 
     }
+
+    //display popup for unuploaded data if exceed record count as per config table from local database
+    private void showwarningPopup(final Context context, int maxRecords)
+    {
+
+        if (DbUtils.getNoOfSalesOrdersForAccToEmpUnUploaded(mySharedPrefrencesData.getUser_Id(LoginActivity.this)) > maxRecords)
+        {
+
+            final Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.setContentView(R.layout.custom_popup_upload);
+
+            TextView icon_TextView = (TextView) dialog.findViewById(R.id.icon_TextView);
+            TextView title_TextView = (TextView) dialog.findViewById(R.id.title_TextView);
+            TextView msg_TextView = (TextView) dialog.findViewById(R.id.msg_TextView);
+            Button dismiss_Button = (Button) dialog.findViewById(R.id.dismiss_Button);
+            Button upload_Button = (Button) dialog.findViewById(R.id.btn_upload);
+
+            icon_TextView.setBackground(context.getResources().getDrawable(R.drawable.ic_check_circle));
+
+            title_TextView.setText("Success!");
+
+            msg_TextView.setText("Un-uploaded data limit exceeded. Please upload the Sales Orders immediately.");
+
+            dismiss_Button.setBackgroundColor(context.getResources().getColor(R.color.successColor));
+
+            dismiss_Button.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    dialog.dismiss();
+                    Utils.launchActivity(LoginActivity.this, DashboardActivity.class);
+
+                    finish();
+                }
+            });
+
+            upload_Button.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    dialog.dismiss();
+
+                    Intent intent = new Intent(LoginActivity.this, UploadActivity.class);
+                    intent.putExtra("flag", "LoginActivity");
+                    startActivity(intent);
+                    finish();
+
+                }
+            });
+
+            dialog.show();
+
+
+        }
+        else
+        {
+
+            Utils.launchActivity(LoginActivity.this, DashboardActivity.class);
+            finish();
+
+        }
+    }
+
+    //for data base creation
 
     private void downloadDatabaseIfNotExists()
     {
@@ -1026,6 +1382,7 @@ public class LoginActivity extends AppCompatActivity
 
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_RETAILER + " ("
                 + "retailer_id varchar(50), "
+                + "mobile_retailer_id varchar(50), "
                 + "emp_id varchar(50), " //emp_id is sales person's id
                 + "retailer_name varchar(50), "
                 + "shop_name varchar(50), "
@@ -1037,6 +1394,9 @@ public class LoginActivity extends AppCompatActivity
                 + "latitude varchar(50), "
                 + "longitude varchar(50), "
                 + "img_source varchar(50), "
+                + "ocr_front_text varchar(50), "
+                + "ocr_back_text varchar(50), "
+                + "ocr_photolist varchar(50), "
                 + "created_date varchar(50), "
                 + "modified_date varchar(50), "
                 + "created_by varchar(50), "
@@ -1069,11 +1429,12 @@ public class LoginActivity extends AppCompatActivity
                 + "upload_status varchar(1) );");
 
 
-
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_RETAILER_VISIT + " ("
                 + "visit_id varchar(50), "
+                + "mobile_visit_id varchar(50), "
                 + "emp_id varchar(50), "
                 + "retailer_id varchar(50), "
+                + "mobile_retailer_id varchar(50), "
                 + "visit_date varchar(50), "
                 + "has_order varchar(1), "
                 + "feedback varchar(50), "
@@ -1104,8 +1465,11 @@ public class LoginActivity extends AppCompatActivity
 
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SALES_ORDER + " ("
                 + "order_id varchar(50), "
+                + "mobile_order_id varchar(50), "
                 + "visit_id varchar(50), "
+                + "mobile_visit_id varchar(50), "
                 + "retailer_id varchar(50), "
+                + "mobile_retailer_id varchar(50), "
                 + "emp_id varchar(50), "
                 + "order_date varchar(50), "
                 + "total_order_value varchar(50), "
@@ -1122,6 +1486,7 @@ public class LoginActivity extends AppCompatActivity
                 + "order_detail_id  INTEGER PRIMARY KEY, "
                 + "server_order_detail_id  INTEGER , "
                 + "order_id varchar(50), "
+                + "mobile_order_id varchar(50), "
                 + "sku_id varchar(50), "
                 + "sku_name varchar(50), "
                 + "sku_price varchar(50), "
@@ -1145,7 +1510,6 @@ public class LoginActivity extends AppCompatActivity
                 + "created_by varchar(50), "
                 + "modified_by varchar(50), "
                 + "upload_status varchar(1) );");
-
 
 
         sqLiteDatabase.execSQL("CREATE TABLE " + TBL_SCHEME + " ("
@@ -1463,7 +1827,7 @@ public class LoginActivity extends AppCompatActivity
 
     private class setUpDatabaseAsyncTask extends AsyncTask<Void, Void, String>
     {
-        private ProgressDialog progressDialog ;
+        private ProgressDialog progressDialog;
 
         public setUpDatabaseAsyncTask(LoginActivity loginActivity)
         {
@@ -1489,12 +1853,17 @@ public class LoginActivity extends AppCompatActivity
         protected String doInBackground(Void... params)
         {
 
-            try {
+            try
+            {
                 Thread.sleep(5000);
                 createTables();
 
                 insertDummyData();
-            } catch (InterruptedException e) {
+
+
+            }
+            catch (InterruptedException e)
+            {
                 e.printStackTrace();
             }
             /*try
@@ -1518,4 +1887,6 @@ public class LoginActivity extends AppCompatActivity
             progressDialog.dismiss();
         }
     }
+
+
 }

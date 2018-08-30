@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import in.etaminepgg.sfa.Activities.SkuDetailsActivity;
+import in.etaminepgg.sfa.Activities.SkuListByGenreActivity;
 import in.etaminepgg.sfa.Models.Sku;
 import in.etaminepgg.sfa.R;
 import in.etaminepgg.sfa.Utilities.MyDb;
@@ -175,7 +176,7 @@ public class FrequentlyOrderedSKUsAdapter extends RecyclerView.Adapter<Frequentl
                     String skuPrice = itemView.getTag(R.string.tag_sku_price).toString();
                     String skuName = itemView.getTag(R.string.tag_sku_name).toString();
                     // new DbUtils().addToSalesOrderOrPickRetailer(skuID, skuName, skuPrice, itemView.getContext());
-                    new Utils().pickAttributeValuesOrSelectRetailer(skuID, skuName, skuPrice, itemView.getContext());
+                    new Utils().pickAttributeValuesOrSelectRetailer(skuID, skuName, skuPrice, itemView.getContext(), SkuListByGenreActivity.retailer_id_from_SOT,SkuListByGenreActivity.mobile_retailer_id_from_SOT,SkuListByGenreActivity.isNewRegular_from_SOT);
                 }
             });
 

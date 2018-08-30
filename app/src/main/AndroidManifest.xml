@@ -58,6 +58,7 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name=".Activities.SkuVideoActivity"
+            android:screenOrientation="portrait"
             android:label="Videos"
             android:theme="@style/AppTheme"/>
 
@@ -101,7 +102,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.ProfileActivity">
+        <activity android:name=".Activities.ProfileActivity"
+                  android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".Activities.HelpActivity"
@@ -111,7 +113,24 @@
             android:name=".Activities.SlideActivity"
             android:screenOrientation="portrait">
         </activity>
+        <activity android:name=".Activities.DemoDatabaseActivity"
+                  android:screenOrientation="portrait">
+        </activity>
+        <activity android:name=".Activities.UploadActivity"
+                  android:screenOrientation="portrait">
+        </activity>
 
+        <service
+            android:name=".Services.UploadAllService"
+            android:exported="false">
+        </service>
+
+        <activity android:name=".Activities.RetailerModuleActivity"
+                  android:screenOrientation="portrait">
+        </activity>
+        <activity android:name=".Activities.ViewRetailerListActivity"
+                  android:screenOrientation="portrait">
+        </activity>
     </application>
 
 </manifest>

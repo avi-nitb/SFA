@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/dim_10">
 
     <TextView
         android:gravity="center_vertical"
@@ -80,40 +81,25 @@
 
     </LinearLayout>
 
- <!--   <TextView
-        android:layout_weight="1.2"
-        android:gravity="center_vertical"
-        android:drawableLeft="@drawable/bullet"
-        android:fontFamily="@font/lato_bold"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size_small"
-        android:id="@+id/sku_order_item_name"
-        android:layout_width="0dp"
-        android:layout_marginTop="2dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="x"/>
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/dim_6"
+        android:weightSum="2">
 
-    <TextView
-        android:layout_weight=".8"
-        android:gravity="center_vertical"
-        android:fontFamily="@font/lato_regular"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size_small"
-        android:id="@+id/sku_order_item_qty"
-        android:layout_width="0dp"
-        android:layout_marginTop="2dp"
-        android:layout_height="wrap_content"
-        android:text="y"/>
+        <TextView
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:fontFamily="@font/lato_regular"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_size_small"
+            android:id="@+id/sku_order_item_perPrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="X"/>
 
-    <TextView
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:fontFamily="@font/lato_regular"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_size_small"
-        android:id="@+id/sku_order_item_price"
-        android:layout_width="0dp"
-        android:layout_marginTop="2dp"
-        android:layout_height="wrap_content"
-        android:text="z"/>-->
+
+    </LinearLayout>
+
 </LinearLayout>

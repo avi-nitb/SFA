@@ -90,9 +90,17 @@ public class GetSkuCategorySubCategorylist
             @SerializedName("sub_category_id")
             @Expose
             private String subCategoryId;
+
+
+            @SerializedName("category_id")
+            @Expose
+            private String categoryId;
+
+
             @SerializedName("sub_category_name")
             @Expose
             private String subCategoryName;
+
             @SerializedName("sub_category_description")
             @Expose
             private String subCategoryDescription;
@@ -121,6 +129,15 @@ public class GetSkuCategorySubCategorylist
                 this.subCategoryDescription = subCategoryDescription;
             }
 
+            public String getCategoryId()
+            {
+                return categoryId;
+            }
+
+            public void setCategoryId(String categoryId)
+            {
+                this.categoryId = categoryId;
+            }
         }
 
     }

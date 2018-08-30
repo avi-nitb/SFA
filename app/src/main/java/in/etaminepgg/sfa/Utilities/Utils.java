@@ -66,6 +66,7 @@ import java.util.Random;
 
 import in.etaminepgg.sfa.Activities.LoginActivity;
 import in.etaminepgg.sfa.Activities.PickRetailerActivity;
+import in.etaminepgg.sfa.Activities.UploadActivity;
 import in.etaminepgg.sfa.Models.QuantityDiscountModel;
 import in.etaminepgg.sfa.R;
 
@@ -75,6 +76,7 @@ import static in.etaminepgg.sfa.Utilities.Constants.TBL_SALES_ORDER_SKU_ATTRIBUT
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_ATTRIBUTE_MAPPING;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NONE;
+import static in.etaminepgg.sfa.Utilities.DbUtils.getActiveMobileOrderID;
 import static in.etaminepgg.sfa.Utilities.DbUtils.getActiveOrderID;
 import static in.etaminepgg.sfa.Utilities.DbUtils.getSkuQuantityDiscount;
 import static in.etaminepgg.sfa.Utilities.DbUtils.isSkuPresent;
@@ -185,6 +187,49 @@ public class Utils
             public void onClick(View v)
             {
                 dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    public static void showSuccessDialogForUpload(final Context context, String messageToShow)
+    {
+        final Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.setContentView(R.layout.custom_popup_upload);
+
+        TextView icon_TextView = (TextView) dialog.findViewById(R.id.icon_TextView);
+        TextView title_TextView = (TextView) dialog.findViewById(R.id.title_TextView);
+        TextView msg_TextView = (TextView) dialog.findViewById(R.id.msg_TextView);
+        Button dismiss_Button = (Button) dialog.findViewById(R.id.dismiss_Button);
+        Button upload_Button = (Button) dialog.findViewById(R.id.btn_upload);
+
+        icon_TextView.setBackground(context.getResources().getDrawable(R.drawable.ic_check_circle));
+
+        title_TextView.setText("Success!");
+
+        msg_TextView.setText(messageToShow);
+
+        dismiss_Button.setBackgroundColor(context.getResources().getColor(R.color.successColor));
+
+        dismiss_Button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                dialog.dismiss();
+            }
+        });
+
+        upload_Button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                dialog.dismiss();
+                context.startActivity(new Intent(context, UploadActivity.class));
+
             }
         });
 
@@ -522,7 +567,7 @@ public class Utils
         freeQty_edit.setBackgroundColor(context.getResources().getColor(R.color.lightgray));
         freeQty_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
         freeQty_edit.setPadding(10, 0, 0, 0);
-        freeQty_edit.setText("1");
+        freeQty_edit.setText("0");
         freeQty_edit.setId(R.string.tag_sky_freeQty_id);
         freeQty_edit.setTextSize(Dimension.SP, 13);
         freeQty_edit.setTextColor(Color.BLACK);
@@ -544,7 +589,7 @@ public class Utils
         discount_edit.setBackgroundColor(context.getResources().getColor(R.color.lightgray));
         discount_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
         discount_edit.setPadding(10, 0, 0, 0);
-        discount_edit.setText("1");
+        discount_edit.setText("0");
         discount_edit.setId(R.string.tag_sky_discount_id);
         discount_edit.setTextSize(Dimension.SP, 13);
         discount_edit.setTextColor(Color.BLACK);
@@ -554,49 +599,11 @@ public class Utils
         selectedSkuQuantityMap = new HashMap<>();
 
         selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_qty_id), qty_edit.getText().toString().trim());
-        selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_freeQty_id), qty_edit.getText().toString().trim());
-        selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_discount_id), qty_edit.getText().toString().trim());
+        selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_freeQty_id), freeQty_edit.getText().toString().trim());
+        selectedSkuQuantityMap.put(context.getResources().getString(R.string.tag_sky_discount_id), discount_edit.getText().toString().trim());
 
         //linearLayout.addView(qty_edit);
 
-
-
-       /* LinearLayout linearLayout_quantity = new LinearLayout(context);
-        linearLayout_quantity.setOrientation(LinearLayout.HORIZONTAL);
-        linearLayout_quantity.setLayoutParams(lp2);
-        linearLayout_quantity.setGravity(Gravity.CENTER);
-        linearLayout_quantity.setBackgroundColor(Color.CYAN);
-
-        ViewGroup.LayoutParams lp_wrapcontent = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        ImageView imageview_minus= new ImageView(context);
-        // Add image path from drawable folder.
-        imageview_minus.setImageResource(R.drawable.ic_remove_black_24dp);
-        imageview_minus.setLayoutParams(lp_wrapcontent);
-
-        LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(30, 0, 30, 0);
-
-        final TextView txt_qty = new TextView(context);
-        txt_qty.setLayoutParams(params);
-        txt_qty.setText("1");
-        txt_qty.setTextSize(Dimension.SP, 20);
-        txt_qty.setTextColor(Color.RED);
-        txt_qty.setGravity(Gravity.CENTER_VERTICAL);
-
-
-
-        ImageView imageview_add = new ImageView(context);
-        // Add image path from drawable folder.
-        imageview_add.setImageResource(R.drawable.ic_add_black_24dp);
-        imageview_add.setLayoutParams(lp_wrapcontent);
-
-
-        linearLayout_quantity.addView(imageview_minus);
-        linearLayout_quantity.addView(txt_qty);
-        linearLayout_quantity.addView(imageview_add);
-
-        linearLayout.addView(linearLayout_quantity);*/
 
         boolean is_Attribute = DbUtils.getConfigValue(Constants.SKU_ATTRIBUTE_REQUIRED);
 
@@ -789,23 +796,31 @@ public class Utils
 
     //don't make this method static. Will not work inside ViewHolders
     //Note: ViewHolders are inner classes of Adapters
-    public void pickAttributeValuesOrSelectRetailer(String skuID, String skuName, String skuPrice, Context context)
+    public void pickAttributeValuesOrSelectRetailer(String skuID, String skuName, String skuPrice, Context context, String retailerId, String mobileRetailerId, String isNewRegular)
     {
-        String salesOrderID = getActiveOrderID();
+        String salesOrderID = getActiveOrderID(retailerId, mobileRetailerId, isNewRegular);
+        String mobileSalesOrderID = getActiveMobileOrderID(retailerId, mobileRetailerId, isNewRegular);
 
         if (!salesOrderID.equals(NONE))
         {
             View alertDialogView = constructViewForAttributesDialog(skuID, context);
 
-            showSelectAttributesDialog(alertDialogView, salesOrderID, skuID, skuName, skuPrice, context);
+            showSelectAttributesDialog(alertDialogView, salesOrderID, mobileSalesOrderID, skuID, skuName, skuPrice, context);
         }
         else
         {
-            Utils.launchActivityWithExtra(context, PickRetailerActivity.class, Constants.SHOW_UPDATE_BUTTON, "NO");
+            final String intentExtraKey_TabToShow = context.getResources().getString(R.string.key_tab_to_show);
+            Intent intent = new Intent(context, PickRetailerActivity.class);
+            //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(Constants.SHOW_UPDATE_BUTTON, "NO");
+            intent.putExtra(intentExtraKey_TabToShow, ConstantsA.All_SKUs_TAB);
+            context.startActivity(intent);
+
+            // Utils.launchActivityWithExtra(context, PickRetailerActivity.class, Constants.SHOW_UPDATE_BUTTON, "NO");
         }
     }
 
-    void showSelectAttributesDialog(final View alertDialogView, final String salesOrderID, final String skuID, final String skuName, final String skuPrice, final Context context)
+    void showSelectAttributesDialog(final View alertDialogView, final String salesOrderID, final String mobileSalesOrderID, final String skuID, final String skuName, final String skuPrice, final Context context)
     {
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
         dialogBuilder.setView(alertDialogView);
@@ -843,7 +858,7 @@ public class Utils
                                 if (!selectedSkuQuantityMap.get(context.getResources().getString(R.string.tag_sky_discount_id)).isEmpty())
                                 {
 
-                                    insertSkuOrIncreaseQuantity(mAlertDialog, context, salesOrderID, skuID, skuName, skuPrice);
+                                    insertSkuOrIncreaseQuantity(mAlertDialog, context, salesOrderID, mobileSalesOrderID, skuID, skuName, skuPrice);
 
 
                                 }
@@ -949,7 +964,7 @@ public class Utils
         mAlertDialog.show();
     }
 
-    void insertSkuOrIncreaseQuantity(AlertDialog mAlertDialog, final Context context, String salesOrderID, String skuID, String skuName, String skuPrice)
+    void insertSkuOrIncreaseQuantity(AlertDialog mAlertDialog, final Context context, String salesOrderID, String mobileSalesOrderID, String skuID, String skuName, String skuPrice)
     {
 
         String finalqty = NONE;
@@ -969,9 +984,9 @@ public class Utils
 
 
         //if Sku doesn't exists in the sales order details table, insert new row for that Sku
-        if (!isSkuPresent(skuID, salesOrderID))
+        if (!isSkuPresent(skuID, salesOrderID, mobileSalesOrderID))
         {
-            long rowID=0;
+            long rowID = 0;
 
             int newSkuQuantity = Integer.parseInt(finalqty);
             int newSkuFreeQuantity = Integer.parseInt(finalFreeQty);
@@ -982,7 +997,7 @@ public class Utils
             if (newSkuDisc < skuPriceBeforeDiscount)
             {
 
-                rowID= DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, finalqty, finalFreeQty, finalDiscount);
+                rowID = DbUtils.insertIntoSalesOrderDetailsTable(context, salesOrderID, mobileSalesOrderID, skuID, skuName, skuPrice, finalqty, finalFreeQty, finalDiscount);
 
                 if (rowID != -1L)
                 {
@@ -1042,7 +1057,7 @@ public class Utils
             }
             else if (orderDetailIdWithSameAttributes == -1L)
             {
-                long rowID = DbUtils.insertIntoSalesOrderDetailsTable(salesOrderID, skuID, skuName, skuPrice, finalqty, finalFreeQty, finalDiscount);
+                long rowID = DbUtils.insertIntoSalesOrderDetailsTable(context, salesOrderID, mobileSalesOrderID, skuID, skuName, skuPrice, finalqty, finalFreeQty, finalDiscount);
 
                 if (rowID != -1L)
                 {

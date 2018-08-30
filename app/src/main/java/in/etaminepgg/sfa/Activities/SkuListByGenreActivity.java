@@ -13,18 +13,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -32,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import in.etaminepgg.sfa.Adapters.CustomListAdapter;
 import in.etaminepgg.sfa.Adapters.CustomSuggestionAdapter;
 import in.etaminepgg.sfa.Adapters.ExpandableListAdapter;
 import in.etaminepgg.sfa.Adapters.SkuGenreTabsAdapter;
@@ -46,19 +39,19 @@ import in.etaminepgg.sfa.Models.CategoryHeader;
 import in.etaminepgg.sfa.Models.SkuGroupHistory;
 import in.etaminepgg.sfa.Models.SubCategoryForCategoryHeader;
 import in.etaminepgg.sfa.R;
-import in.etaminepgg.sfa.Utilities.ClearableAutoCompleteTextView;
 import in.etaminepgg.sfa.Utilities.Constants;
-import in.etaminepgg.sfa.Utilities.ConstantsA;
 import in.etaminepgg.sfa.Utilities.DbUtils;
 import in.etaminepgg.sfa.Utilities.MyDb;
-import in.etaminepgg.sfa.Utilities.Utils;
 
-import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_CATEGORY;
 import static in.etaminepgg.sfa.Utilities.Constants.TBL_SKU_SUBCATEGORY;
 import static in.etaminepgg.sfa.Utilities.Constants.dbFileFullPath;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.All_SKUs_TAB;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.FREQUENT_SKUs_TAB;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_ACTIVEMOBILEORDERID_RETAILER;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_ISNEWORREGULAR;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_MOBILE_RETAILER_ID;
+import static in.etaminepgg.sfa.Utilities.ConstantsA.KEY_RETAILER_ID;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NEW_ORDER;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.NEW_SKUs_TAB;
 import static in.etaminepgg.sfa.Utilities.ConstantsA.PROMO_SKUs_TAB;
@@ -66,6 +59,10 @@ import static in.etaminepgg.sfa.Utilities.ConstantsA.REGULAR_ORDER;
 
 public class SkuListByGenreActivity extends AppCompatActivity
 {
+    public static String mobile_retailer_id_from_SOT;
+    public static String retailer_id_from_SOT;
+    public static String active_mobile_orderId_from_SOT;
+    public static String isNewRegular_from_SOT;
     private static ExpandableListAdapter adapter;
     TabLayout skuGenre_tabLayout;
     ViewPager skuList_ViewPager;
@@ -73,17 +70,15 @@ public class SkuListByGenreActivity extends AppCompatActivity
     Resources resources;
     Toolbar toolbar;
     ExpandableListView el_category;
-
     ImageView btn_category;
-
     AutoCompleteTextView act_searchsku;
-
 
     @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_sku_list_by_genre);
         resources = getResources();
 
@@ -114,9 +109,6 @@ public class SkuListByGenreActivity extends AppCompatActivity
 
         setAdapterForSearch();
 
-        /*ArrayAdapter<SkuGroupHistory> skuAdapter = new ArrayAdapter<SkuGroupHistory>(this, android.R.layout.simple_dropdown_item_1line, getCustomSkuList());
-        act_searchsku.setThreshold(1);
-        act_searchsku.setAdapter(skuAdapter);*/
 
         // Setting group indicator null for custom indicator
         el_category.setGroupIndicator(null);
@@ -126,48 +118,20 @@ public class SkuListByGenreActivity extends AppCompatActivity
 
         showRelevantTab(intentExtraValue);
 
-       // setFirstTab();
-
 
     }
 
 
-
-    public void setFirstTab()
+    //set adapter according search as using custom filter
+    public void setAdapterForSearch()
     {
 
-        String activeorderid = DbUtils.getActiveOrderID();
+        // ArrayAdapter<SkuGroupHistory> skuAdapter = new ArrayAdapter<SkuGroupHistory>(this, android.R.layout.simple_dropdown_item_1line, DbUtils.getCustomSkuList());
 
-        LinearLayout yourlinearlayout = (LinearLayout) LayoutInflater.from(SkuListByGenreActivity.this).inflate(R.layout.title_text, null);
-        TextView tab_text = (TextView) yourlinearlayout.findViewById(R.id.tabContent);
-        tab_text.setText("  " + "SALES ORDER");
+        ArrayList arrayList = new ArrayList<>();
 
-        if (activeorderid.equalsIgnoreCase(ConstantsA.NONE))
-        {
-
-
-            skuGenre_tabLayout.getTabAt(0).setText("SALES ORDER");
-
-
-        }
-        else
-        {
-
-            tab_text.setCompoundDrawablesWithIntrinsicBounds(R.drawable.bullet, 0, 0, 0);
-            skuGenre_tabLayout.getTabAt(0).setCustomView(tab_text);
-
-        }
-    }
-
-    public  void setAdapterForSearch()
-    {
-
-      // ArrayAdapter<SkuGroupHistory> skuAdapter = new ArrayAdapter<SkuGroupHistory>(this, android.R.layout.simple_dropdown_item_1line, DbUtils.getCustomSkuList());
-
-       ArrayList arrayList=new ArrayList<>();
-
-       arrayList=(ArrayList) DbUtils.getCustomSkuList();
-       CustomSuggestionAdapter skuAdapter =new CustomSuggestionAdapter(getApplicationContext(),arrayList);
+        arrayList = (ArrayList) DbUtils.getCustomSkuList();
+        CustomSuggestionAdapter skuAdapter = new CustomSuggestionAdapter(getApplicationContext(), arrayList);
         act_searchsku.setAdapter(skuAdapter);
         act_searchsku.setThreshold(1);
 
@@ -178,11 +142,9 @@ public class SkuListByGenreActivity extends AppCompatActivity
     public void onBackPressed()
     {
         categoryInactive();
-        Constants.search_skuId="";
+        Constants.search_skuId = "";
         super.onBackPressed();
     }
-
-
 
 
     private void categoryInactive()
@@ -204,7 +166,7 @@ public class SkuListByGenreActivity extends AppCompatActivity
         if (item.getItemId() == android.R.id.home)
         {
             categoryInactive();
-            Constants.search_skuId="";
+            Constants.search_skuId = "";
             finish();
         }
         return super.onOptionsItemSelected(item);
@@ -213,20 +175,7 @@ public class SkuListByGenreActivity extends AppCompatActivity
     private void setListenersToViews()
     {
 
-
-      /*  act_searchsku.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-
-
-            }
-        });
-*/
-
-
-
+        //for sku search on item click
         act_searchsku.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
@@ -234,12 +183,12 @@ public class SkuListByGenreActivity extends AppCompatActivity
             {
                 el_category.setVisibility(View.GONE);
 
-               // SkuGroupHistory sgh= (SkuGroupHistory) adapterView.getAdapter().getItem(i);
-                SkuGroupHistory sgh= (SkuGroupHistory) adapterView.getItemAtPosition(i);
+                // SkuGroupHistory sgh= (SkuGroupHistory) adapterView.getAdapter().getItem(i);
+                SkuGroupHistory sgh = (SkuGroupHistory) adapterView.getItemAtPosition(i);
 
-                Log.i("sku",new Gson().toJson(sgh));
+                Log.i("sku", new Gson().toJson(sgh));
 
-                Constants.search_skuId=sgh.sku_id;
+                Constants.search_skuId = sgh.sku_id;
 
 
                 Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.skuList_ViewPager + ":" + skuList_ViewPager.getCurrentItem());
@@ -266,7 +215,6 @@ public class SkuListByGenreActivity extends AppCompatActivity
                 }
             }
         });
-
 
 
         skuGenre_tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
@@ -375,10 +323,16 @@ public class SkuListByGenreActivity extends AppCompatActivity
             {
                 el_category.setVisibility(View.VISIBLE);
                 act_searchsku.setText("");
-                Constants.search_skuId="";
+                Constants.search_skuId = "";
             }
         });
     }
+
+    //get intent extra values and show correspondingly and get active retailer id,mobile retailer id and new or regular flag
+
+    //if regular checking order is there or not with regular flag in sales order table and if exists then displaying existing skus
+
+    //details in SALES ORDER fragment
 
     private String getIntentExtraValue()
     {
@@ -393,12 +347,23 @@ public class SkuListByGenreActivity extends AppCompatActivity
             if (intent.hasExtra(intentExtraKey_TabToShow))
             {
                 String tabToShow = intent.getStringExtra(intentExtraKey_TabToShow);
+
+                mobile_retailer_id_from_SOT = intent.getStringExtra(KEY_MOBILE_RETAILER_ID);
+                retailer_id_from_SOT = intent.getStringExtra(KEY_RETAILER_ID);
+                isNewRegular_from_SOT = intent.getStringExtra(KEY_ISNEWORREGULAR);
+
                 return tabToShow;
             }
             //when launching from SelectSalesOrderType Activity
             else if (intent.hasExtra(intentExtraKey_selectedOrderType))
             {
                 String selectedOrderType = intent.getStringExtra(intentExtraKey_selectedOrderType);
+
+                active_mobile_orderId_from_SOT = intent.getStringExtra(KEY_ACTIVEMOBILEORDERID_RETAILER);
+                mobile_retailer_id_from_SOT = intent.getStringExtra(KEY_MOBILE_RETAILER_ID);
+                retailer_id_from_SOT = intent.getStringExtra(KEY_RETAILER_ID);
+                isNewRegular_from_SOT = intent.getStringExtra(KEY_ISNEWORREGULAR);
+
                 return selectedOrderType;
             }
         }
@@ -406,6 +371,7 @@ public class SkuListByGenreActivity extends AppCompatActivity
         return "SkuListByGenreActivity_getIntentExtraValue()";
     }
 
+    //adding fragments for tabs
     private void addFragmentsToViewPager(SkuGenreTabsAdapter skuGenreTabsAdapter, String intentExtraValue)
     {
         String intentExtraKey = resources.getString(R.string.key_selected_order_type);
@@ -430,8 +396,11 @@ public class SkuListByGenreActivity extends AppCompatActivity
         }
     }
 
+
+    //show relevant tab
     private void showRelevantTab(String intentExtraValue)
     {
+
         switch (intentExtraValue)
         {
             case NEW_SKUs_TAB:
@@ -485,7 +454,6 @@ public class SkuListByGenreActivity extends AppCompatActivity
 
         }
     }
-
 
     // Setting headers and childs to expandable listview
     void setItems()
@@ -683,6 +651,7 @@ public class SkuListByGenreActivity extends AppCompatActivity
         });
     }
 
+    //update subcategory table
     private void updateSubcategoryTable(int groupPos, int childPos)
     {
 

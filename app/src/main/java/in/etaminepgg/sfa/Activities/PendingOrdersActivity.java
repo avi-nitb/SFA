@@ -30,6 +30,7 @@ public class PendingOrdersActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        // this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_pending_orders);
 
         pendingOrders_RecyclerView = (RecyclerView) findViewById(R.id.pendingOrders_RecyclerView);
@@ -46,7 +47,7 @@ public class PendingOrdersActivity extends AppCompatActivity
 
         List<PendingOrder> pendingOrderList = getPendingOrderList();
 
-        if(pendingOrderList.size() < 1)
+        if (pendingOrderList.size() < 1)
         {
             emptyAdapter_TextView.setVisibility(View.VISIBLE);
             pendingOrders_RecyclerView.setVisibility(View.GONE);
@@ -76,7 +77,7 @@ public class PendingOrdersActivity extends AppCompatActivity
         SQLiteDatabase sqLiteDatabase = MyDb.getDbHandle(valueFromOpenDatabase);
         Cursor cursor = sqLiteDatabase.rawQuery(SQL_SELECT_PENDING_SALES_ORDERS, selectionArgs_Dummy);
 
-        while(cursor.moveToNext())
+        while (cursor.moveToNext())
         {
             String orderID = cursor.getString(cursor.getColumnIndexOrThrow("order_id"));
             String retailerID = cursor.getString(cursor.getColumnIndexOrThrow("retailer_id"));

@@ -1,5 +1,7 @@
 package in.etaminepgg.sfa.Network;
 
+import com.google.gson.JsonObject;
+
 import in.etaminepgg.sfa.InputModel_For_Network.IM_CreateRetailer;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GenerateReportSummary;
 import in.etaminepgg.sfa.InputModel_For_Network.IM_GetSkuInfo;
@@ -24,6 +26,7 @@ import in.etaminepgg.sfa.Models.GetSkuInfo;
 import in.etaminepgg.sfa.Models.GetSkuListAfter;
 import in.etaminepgg.sfa.Models.GetSkuListAfterNew;
 import in.etaminepgg.sfa.Models.GetSkuThumbImage;
+import in.etaminepgg.sfa.Models.IncrementalDataModel;
 import in.etaminepgg.sfa.Models.IsSkuListUpdate;
 import in.etaminepgg.sfa.Models.Location_Model;
 import in.etaminepgg.sfa.Models.NoOrderReasonList;
@@ -49,10 +52,7 @@ public interface Apimethods
     Call<AuthUser_Model> getUserAuthKey(@Body IM_Login IMLogin);
 
 
-  /*  @FormUrlEncoded
-    @POST(ApiUrl.LOG_URL_AUTHUSER)
-    Call<AuthUser_Model> getUserAuthKey(@Field("IMEI") String IMEI,@Field("company_id") String company_id,@Field("password") String password,@Field("username") String username);
-*/
+
     @POST(ApiUrl.LOG_URL_LOGOUT)
     Call<ValidAuthModel> setLogout(@Body IM_IsValidAuthKey im_isValidAuthKey);
 
@@ -71,6 +71,9 @@ public interface Apimethods
 
     @POST(ApiUrl.LOG_URL_GETSKULISTAFTER)
     Call<GetSkuListAfterNew> getSkuListAfter(@Body IM_GetSkuListAfter IM_getSkuListAfter);
+
+    @POST(ApiUrl.LOG_URL_GETSKULISTAFTER)
+    Call<JsonObject> getSkuListAfterNew(@Body IM_GetSkuListAfter IM_getSkuListAfter);
 
     @POST(ApiUrl.LOG_URL_GETSKUINFO)
     Call<GetSkuInfo> getSkuInfo(@Body IM_GetSkuInfo im_getSkuInfo);
